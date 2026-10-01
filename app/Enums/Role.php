@@ -12,10 +12,10 @@ enum Role: string
     public function label(): string
     {
         return match ($this) {
-            self::PlatformAdmin => 'Platform admin',
-            self::HospitalAdmin => 'Hospital admin',
-            self::Doctor => 'Doctor',
-            self::Technician => 'Echo technician',
+            self::PlatformAdmin => __('Platform admin'),
+            self::HospitalAdmin => __('Hospital admin'),
+            self::Doctor => __('Doctor'),
+            self::Technician => __('Echo technician'),
         };
     }
 

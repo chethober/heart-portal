@@ -16,6 +16,8 @@ All notable changes to this project are documented here. The format follows
 - Authenticator-app two-factor login with recovery codes and admin reset.
 - Encryption at rest for national ID and phone number.
 - Public landing page and help center.
+- Interface translations for Persian, Arabic, Turkish, Spanish, French and German, with a
+  language switcher, browser-language detection and right-to-left layout for Persian and Arabic.
 
 ### Security
 - Report HTML built from free text is sanitized (fixes stored XSS present in the original app).

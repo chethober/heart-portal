@@ -31,6 +31,9 @@ doctors sign the report, and every step is audited.
 - **Security** — encrypted national ID and phone number, authenticator-app 2FA (enforceable),
   role-based permissions, private signature storage, append-only audit log protected by a
   database trigger.
+- **Multilingual interface** — English, Persian, Arabic, Turkish, Spanish, French and German,
+  with right-to-left layout for Persian and Arabic. The language follows the browser and can be
+  changed from any page. The echo form and printed report stay in their clinical language.
 
 ## Roles
 
@@ -89,9 +92,15 @@ demo accounts without an authenticator app.
 | `TWO_FACTOR_ENFORCED` | `true` | Require every user to enrol an authenticator app |
 | `TWO_FACTOR_ISSUER` | `APP_NAME` | Name shown in authenticator apps |
 | `ECHO_DISPLAY_TIMEZONE` | `Asia/Tehran` | Timezone for signing times and audit entries |
+| `APP_LOCALE` | `en` | Interface language when the browser asks for none we support |
 | `APP_SOURCE_URL` | this repository | "Source code" link in the footer (AGPL §13) — point it at your fork if you modify the code |
 
 Clinical fields are whitelisted in [`config/echo.php`](config/echo.php).
+
+To add a language, add it to `available_locales` in [`config/app.php`](config/app.php) (and to
+`rtl_locales` if it is right-to-left), then create `lang/<code>.json` plus the `auth`, `passwords`,
+`pagination` and `validation` files under `lang/<code>/`. `tests/Feature/LocalizationTest.php` fails
+until every interface string is translated.
 
 ## Architecture
 

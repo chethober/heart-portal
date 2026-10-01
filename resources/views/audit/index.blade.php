@@ -37,7 +37,7 @@
 
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50 text-left text-gray-600">
+                    <thead class="bg-gray-50 text-start text-gray-600">
                         <tr>
                             <th class="px-4 py-3">{{ __('Time') }}</th>
                             <th class="px-4 py-3">{{ __('User') }}</th>

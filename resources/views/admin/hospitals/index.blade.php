@@ -9,7 +9,7 @@
 
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50 text-left text-gray-600">
+                    <thead class="bg-gray-50 text-start text-gray-600">
                         <tr>
                             <th class="px-4 py-3">{{ __('Hospital') }}</th>
                             <th class="px-4 py-3">{{ __('City') }}</th>
@@ -26,8 +26,8 @@
                                 <td class="px-4 py-3">{{ $hospital->city }}</td>
                                 <td class="px-4 py-3">{{ $hospital->users_count }}</td>
                                 <td class="px-4 py-3">{{ $hospital->created_at->toDateString() }}</td>
-                                <td class="px-4 py-3">{{ ucfirst($hospital->status->value) }}</td>
-                                <td class="px-4 py-3 text-right">
+                                <td class="px-4 py-3">{{ $hospital->status->label() }}</td>
+                                <td class="px-4 py-3 text-end">
                                     <form method="POST" action="{{ route('admin.hospitals.status', $hospital) }}">
                                         @csrf
                                         @method('PATCH')

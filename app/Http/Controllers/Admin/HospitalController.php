@@ -40,6 +40,6 @@ class HospitalController extends Controller
         $hospital->save();
         Audit::record('hospital.status_changed', $hospital, $changes);
 
-        return back()->with('status', __(':name is now :status.', ['name' => $hospital->name, 'status' => $status->value]));
+        return back()->with('status', __(':name is now :status.', ['name' => $hospital->name, 'status' => $status->label()]));
     }
 }

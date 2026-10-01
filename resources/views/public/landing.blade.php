@@ -42,7 +42,7 @@
                     </div>
                     <div class="mt-5 flex items-end justify-between border-t pt-3 text-xs text-gray-500">
                         <span>{{ __('Auto-graded fields are marked and explained on hover') }}</span>
-                        <span class="text-right"><span class="block font-semibold text-gray-700">{{ __('Signed') }}</span>{{ __('Reporting cardiologist') }}</span>
+                        <span class="text-end"><span class="block font-semibold text-gray-700">{{ __('Signed') }}</span>{{ __('Reporting cardiologist') }}</span>
                     </div>
                 </div>
             </div>

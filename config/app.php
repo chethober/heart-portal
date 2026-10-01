@@ -95,6 +95,23 @@ return [
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
+    /*
+    | Locales users can switch the interface to, keyed by code and labelled in
+    | their own language. Right-to-left locales flip the page direction.
+    */
+
+    'available_locales' => [
+        'en' => 'English',
+        'fa' => 'فارسی',
+        'ar' => 'العربية',
+        'tr' => 'Türkçe',
+        'es' => 'Español',
+        'fr' => 'Français',
+        'de' => 'Deutsch',
+    ],
+
+    'rtl_locales' => ['fa', 'ar'],
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*
