@@ -17,11 +17,11 @@ beforeEach(function () {
 });
 
 test('a user can enrol an authenticator app and gets recovery codes', function () {
-    $this->actingAs($this->user)->post('/profile/two-factor', ['password' => 'password'])->assertRedirect();
-    $this->actingAs($this->user)->get('/profile')->assertSee('<svg', false)->assertSee('Setup key');
+    $this->actingAs($this->user)->post('/dashboard/profile/two-factor', ['password' => 'password'])->assertRedirect();
+    $this->actingAs($this->user)->get('/dashboard/profile')->assertSee('<svg', false)->assertSee('Setup key');
 
-    $this->actingAs($this->user)->post('/profile/two-factor/confirm', ['code' => '000000'])->assertSessionHasErrors('code', null, 'twoFactor');
-    $this->actingAs($this->user)->post('/profile/two-factor/confirm', ['code' => currentOtp($this->user)])->assertSessionHas('showRecoveryCodes');
+    $this->actingAs($this->user)->post('/dashboard/profile/two-factor/confirm', ['code' => '000000'])->assertSessionHasErrors('code', null, 'twoFactor');
+    $this->actingAs($this->user)->post('/dashboard/profile/two-factor/confirm', ['code' => currentOtp($this->user)])->assertSessionHas('showRecoveryCodes');
 
     $user = $this->user->fresh();
     expect($user->hasEnabledTwoFactor())->toBeTrue()
@@ -78,12 +78,12 @@ test('when enforced, users without two-factor are sent to set it up', function (
     config(['auth.two_factor.enforced' => true]);
 
     $this->actingAs($this->user)->get('/dashboard')->assertRedirect(route('profile.edit').'#two-factor');
-    $this->actingAs($this->user)->get('/patients')->assertRedirect(route('profile.edit').'#two-factor');
-    $this->actingAs($this->user)->getJson('/doctors')->assertForbidden();
-    $this->actingAs($this->user)->get('/profile')->assertOk();
+    $this->actingAs($this->user)->get('/dashboard/patients')->assertRedirect(route('profile.edit').'#two-factor');
+    $this->actingAs($this->user)->getJson('/dashboard/doctors')->assertForbidden();
+    $this->actingAs($this->user)->get('/dashboard/profile')->assertOk();
 
     app(TwoFactor::class)->enable($this->user);
     $this->user->forceFill(['two_factor_confirmed_at' => now()])->save();
 
-    $this->actingAs($this->user->fresh())->get('/patients')->assertRedirect(route('dashboard', ['tab' => 'patients']));
+    $this->actingAs($this->user->fresh())->get('/dashboard/patients')->assertOk();
 });

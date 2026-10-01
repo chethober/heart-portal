@@ -17,7 +17,7 @@ class StaffController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('staff.index', [
+        return view('dashboard.staff', [
             'staff' => $request->user()->hospital->users()->with('roles')->orderBy('name')->get(),
             'invitations' => Invitation::pending()->latest()->get(),
             'roles' => Role::assignableByHospital(),

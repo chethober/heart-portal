@@ -82,6 +82,6 @@ test('signed-in pages are translated', function () {
 
     $this->actingAs($doctor)->withCookie('locale', 'es')->get('/dashboard')
         ->assertSee('Panel')
-        ->assertSee('Estudios')
+        ->assertSee('Lista de trabajo')
         ->assertSee('Ecos del paciente');
 });

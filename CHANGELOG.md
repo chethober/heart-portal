@@ -19,5 +19,12 @@ All notable changes to this project are documented here. The format follows
 - Interface translations for Persian, Arabic, Turkish, Spanish, French and German, with a
   language switcher, browser-language detection and right-to-left layout for Persian and Arabic.
 
+### Changed
+- Every signed-in form, search and report now lives under `/dashboard`: the worklist, patient
+  echos, staff, audit log and (for platform admins) hospitals are tabs of one dashboard, and the
+  echo form, reports, help and profile moved to `/dashboard/...`. Old URLs redirect permanently.
+- The worklist filters by status in one click, with per-status counts; tabs show how many drafts,
+  pending invitations or hospitals awaiting approval need attention.
+
 ### Security
 - Report HTML built from free text is sanitized (fixes stored XSS present in the original app).

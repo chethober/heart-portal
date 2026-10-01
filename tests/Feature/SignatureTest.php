@@ -16,43 +16,43 @@ beforeEach(function () {
 
 test('doctors upload a private signature that colleagues can see but other hospitals cannot', function () {
     $this->actingAs($this->doctor)
-        ->post('/profile/signature', ['signature' => UploadedFile::fake()->image('sig.png', 400, 120)])
+        ->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('sig.png', 400, 120)])
         ->assertRedirect();
 
     $path = $this->doctor->fresh()->signature_path;
     Storage::disk('local')->assertExists($path);
 
     $colleague = User::factory()->for($this->hospital)->role(Role::Technician)->create();
-    $this->actingAs($colleague)->get("/users/{$this->doctor->id}/signature")->assertOk();
+    $this->actingAs($colleague)->get("/dashboard/users/{$this->doctor->id}/signature")->assertOk();
 
     $stranger = User::factory()->role(Role::Doctor)->create();
-    $this->actingAs($stranger)->get("/users/{$this->doctor->id}/signature")->assertNotFound();
+    $this->actingAs($stranger)->get("/dashboard/users/{$this->doctor->id}/signature")->assertNotFound();
 });
 
 test('technicians cannot upload signatures and non-images are rejected', function () {
     $tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
-    $this->actingAs($tech)->post('/profile/signature', ['signature' => UploadedFile::fake()->image('s.png')])->assertForbidden();
+    $this->actingAs($tech)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('s.png')])->assertForbidden();
 
     $this->actingAs($this->doctor)
-        ->post('/profile/signature', ['signature' => UploadedFile::fake()->create('evil.svg', 10, 'image/svg+xml')])
+        ->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->create('evil.svg', 10, 'image/svg+xml')])
         ->assertSessionHasErrors('signature', null, 'signature');
 });
 
 test('a signed version keeps the signature it was signed with', function () {
-    $this->actingAs($this->doctor)->post('/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
+    $this->actingAs($this->doctor)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
     $original = $this->doctor->fresh()->signature_path;
 
-    $this->actingAs($this->doctor)->postJson('/studies', echoPayload())->assertCreated();
+    $this->actingAs($this->doctor)->postJson('/dashboard/studies', echoPayload())->assertCreated();
     $study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
-    $this->actingAs($this->doctor)->post("/studies/{$study->id}/finalize");
+    $this->actingAs($this->doctor)->post("/dashboard/studies/{$study->id}/finalize");
 
-    $this->actingAs($this->doctor)->post('/profile/signature', ['signature' => UploadedFile::fake()->image('b.png', 300, 100)]);
+    $this->actingAs($this->doctor)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('b.png', 300, 100)]);
 
     $version = $study->versions()->sole();
     expect($version->signature_path)->toBe($original);
     Storage::disk('local')->assertExists($original);
 
-    $this->actingAs($this->doctor)->get("/studies/{$study->id}")
+    $this->actingAs($this->doctor)->get("/dashboard/studies/{$study->id}")
         ->assertSee(route('users.signature', [$this->doctor, 'version' => $version->id]), false);
-    $this->actingAs($this->doctor)->get("/users/{$this->doctor->id}/signature?version={$version->id}")->assertOk();
+    $this->actingAs($this->doctor)->get("/dashboard/users/{$this->doctor->id}/signature?version={$version->id}")->assertOk();
 });

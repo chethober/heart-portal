@@ -21,11 +21,11 @@ test('signed-in users get a dashboard link on the landing page', function () {
 
 test('help center is public; the echo form guide requires login', function () {
     $this->get('/help')->assertOk()->assertSee('Signing and amending')->assertDontSee(route('help.form'));
-    $this->get('/help/echo-form')->assertRedirect(route('login'));
+    $this->get('/dashboard/help')->assertRedirect(route('login'));
 
     $tech = User::factory()->role(Role::Technician)->create();
     $this->actingAs($tech)->get('/help')->assertSee(route('help.form'));
-    $this->actingAs($tech)->get('/help/echo-form')->assertOk();
+    $this->actingAs($tech)->get('/dashboard/help')->assertOk();
 });
 
 test('every authenticated page offers the source code link', function () {
@@ -40,12 +40,12 @@ test('hospital admins can reset a colleague\'s two-factor login', function () {
     app(TwoFactor::class)->enable($doctor);
     $doctor->forceFill(['two_factor_confirmed_at' => now()])->save();
 
-    $this->actingAs($admin)->get('/staff')->assertSee('Reset 2FA');
-    $this->actingAs($admin)->delete("/staff/{$doctor->id}/two-factor")->assertRedirect();
+    $this->actingAs($admin)->get('/dashboard/staff')->assertSee('Reset 2FA');
+    $this->actingAs($admin)->delete("/dashboard/staff/{$doctor->id}/two-factor")->assertRedirect();
 
     expect($doctor->fresh()->hasEnabledTwoFactor())->toBeFalse()
         ->and(AuditLog::withoutGlobalScope(HospitalScope::class)->where('action', 'staff.two_factor_reset')->exists())->toBeTrue();
 
     $stranger = User::factory()->role(Role::HospitalAdmin)->create();
-    $this->actingAs($stranger)->delete("/staff/{$doctor->id}/two-factor")->assertNotFound();
+    $this->actingAs($stranger)->delete("/dashboard/staff/{$doctor->id}/two-factor")->assertNotFound();
 });

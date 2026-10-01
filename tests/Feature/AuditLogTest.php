@@ -21,12 +21,12 @@ function auditActions(): array
 }
 
 test('clinical actions are recorded with the actor and subject', function () {
-    $this->actingAs($this->tech)->postJson('/studies', echoPayload())->assertCreated();
+    $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload())->assertCreated();
     $study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
-    $this->actingAs($this->tech)->get("/studies/{$study->id}");
-    $this->actingAs($this->tech)->putJson("/studies/{$study->id}", echoPayload(['lv_EF' => 40]));
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678');
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=999');
+    $this->actingAs($this->tech)->get("/dashboard/studies/{$study->id}");
+    $this->actingAs($this->tech)->putJson("/dashboard/studies/{$study->id}", echoPayload(['lv_EF' => 40]));
+    $this->actingAs($this->tech)->get('/dashboard/patients?nationalID=0012345678');
+    $this->actingAs($this->tech)->get('/dashboard/patients?nationalID=999');
 
     expect(auditActions())->toBe(['patient.created', 'study.created', 'study.viewed', 'study.updated', 'patient.viewed', 'patient.search_no_match']);
 
@@ -49,7 +49,7 @@ test('logins and failed logins are recorded', function () {
 });
 
 test('the audit log is append-only at the database level', function () {
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=1');
+    $this->actingAs($this->tech)->get('/dashboard/patients?nationalID=1');
     $log = AuditLog::withoutGlobalScope(HospitalScope::class)->sole();
 
     expect(fn () => $log->update(['action' => 'x']))->toThrow(LogicException::class);
@@ -58,25 +58,25 @@ test('the audit log is append-only at the database level', function () {
 });
 
 test('hospital admins see only their hospital audit log; other roles cannot', function () {
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=1');
+    $this->actingAs($this->tech)->get('/dashboard/patients?nationalID=1');
 
     $other = User::factory()->role(Role::HospitalAdmin)->create();
-    $this->actingAs($other)->get('/dashboard?tab=patients&nationalID=2');
+    $this->actingAs($other)->get('/dashboard/patients?nationalID=2');
 
-    $this->actingAs($this->admin)->get('/audit')
+    $this->actingAs($this->admin)->get('/dashboard/audit')
         ->assertOk()
         ->assertSee($this->tech->name)
         ->assertDontSee($other->name);
 
-    $this->actingAs($this->admin)->get('/audit?action=patient.search_no_match&user_id='.$this->tech->id)->assertOk()->assertSee('patient.search_no_match');
+    $this->actingAs($this->admin)->get('/dashboard/audit?action=patient.search_no_match&user_id='.$this->tech->id)->assertOk()->assertSee('patient.search_no_match');
 
-    $this->actingAs($this->tech)->get('/audit')->assertForbidden();
+    $this->actingAs($this->tech)->get('/dashboard/audit')->assertForbidden();
 });
 
 test('staff management is audited', function () {
     Notification::fake();
-    $this->actingAs($this->admin)->post('/staff/invitations', ['email' => 'new@example.com', 'role' => 'doctor']);
-    $this->actingAs($this->admin)->patch("/staff/{$this->tech->id}", ['role' => 'doctor', 'is_active' => 1]);
+    $this->actingAs($this->admin)->post('/dashboard/staff/invitations', ['email' => 'new@example.com', 'role' => 'doctor']);
+    $this->actingAs($this->admin)->patch("/dashboard/staff/{$this->tech->id}", ['role' => 'doctor', 'is_active' => 1]);
 
     $updated = AuditLog::withoutGlobalScope(HospitalScope::class)->where('action', 'staff.updated')->sole();
     expect(auditActions())->toContain('staff.invited')
