@@ -14,12 +14,25 @@ beforeEach(function () {
     $this->study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
 });
 
-test('the dashboard home is the worklist with actions', function () {
+test('the dashboard home is the echo form for staff who record studies', function () {
     $this->actingAs($this->tech)->get('/dashboard')
+        ->assertOk()
+        ->assertSee('echoForm', false)
+        ->assertSee(route('worklist'), false)
+        ->assertDontSee('Dashboard sections');
+});
+
+test('staff who cannot record studies land on the worklist', function () {
+    $admin = User::factory()->for($this->hospital)->role(Role::HospitalAdmin)->create();
+
+    $this->actingAs($admin)->get('/dashboard')->assertRedirect(route('worklist'));
+});
+
+test('the worklist lists studies with actions', function () {
+    $this->actingAs($this->tech)->get('/dashboard/worklist')
         ->assertOk()
         ->assertSee('Rezaei')
         ->assertSee('Draft')
-        ->assertSee(route('studies.create'), false)
         ->assertSee(route('studies.show', $this->study), false)
         ->assertSee(route('studies.edit', $this->study), false)
         ->assertSee(route('studies.destroy', $this->study), false)
@@ -27,17 +40,28 @@ test('the dashboard home is the worklist with actions', function () {
 });
 
 test('the worklist filters by status and patient name', function () {
-    $this->actingAs($this->tech)->get('/dashboard?status=final')->assertOk()->assertDontSee('Rezaei');
-    $this->actingAs($this->tech)->get('/dashboard?status=draft')->assertSee('Rezaei');
-    $this->actingAs($this->tech)->get('/dashboard?search=reza')->assertSee('Rezaei')->assertSee('Clear filters');
-    $this->actingAs($this->tech)->get('/dashboard?search=nobody')->assertDontSee('Rezaei');
+    $this->actingAs($this->tech)->get('/dashboard/worklist?status=final')->assertOk()->assertDontSee('Rezaei');
+    $this->actingAs($this->tech)->get('/dashboard/worklist?status=draft')->assertSee('Rezaei');
+    $this->actingAs($this->tech)->get('/dashboard/worklist?search=reza')->assertSee('Rezaei')->assertSee('Clear filters');
+    $this->actingAs($this->tech)->get('/dashboard/worklist?search=nobody')->assertDontSee('Rezaei');
+});
+
+test('old worklist filter links redirect to the worklist', function () {
+    $this->actingAs($this->tech)->get('/dashboard?status=draft&search=reza')
+        ->assertRedirect(route('worklist', ['status' => 'draft', 'search' => 'reza']));
+});
+
+test('the header searches patients by national ID', function () {
+    $this->actingAs($this->tech)->get('/dashboard/worklist')
+        ->assertSee('action="'.route('patients.index').'"', false)
+        ->assertSee('name="nationalID"', false);
 });
 
 test('doctors can sign drafts from the worklist', function () {
     $doctor = User::factory()->for($this->hospital)->role(Role::Doctor)->create();
 
-    $this->actingAs($this->tech)->get('/dashboard')->assertDontSee(route('studies.finalize', $this->study), false);
-    $this->actingAs($doctor)->get('/dashboard')->assertSee(route('studies.finalize', $this->study), false);
+    $this->actingAs($this->tech)->get('/dashboard/worklist')->assertDontSee(route('studies.finalize', $this->study), false);
+    $this->actingAs($doctor)->get('/dashboard/worklist')->assertSee(route('studies.finalize', $this->study), false);
 });
 
 test('the patient echos section searches by national ID', function () {
@@ -54,12 +78,12 @@ test('the patient echos section searches by national ID', function () {
         ->assertSee('Record a new echo study');
 });
 
-test('tabs only offer the sections a role may open', function () {
+test('the navigation only offers the sections a role may open', function () {
     $admin = User::factory()->for($this->hospital)->role(Role::HospitalAdmin)->create();
     $platformAdmin = User::factory()->platformAdmin()->create();
 
     $this->actingAs($this->tech)->get('/dashboard/patients')
-        ->assertSee(route('dashboard'), false)
+        ->assertSee(route('worklist'), false)
         ->assertDontSee(route('staff.index'), false)
         ->assertDontSee(route('audit.index'), false);
 
@@ -92,7 +116,7 @@ test('the old patients tab link redirects to the patient echos section', functio
 
 test('deleting a draft returns to the section it was deleted from', function () {
     $this->actingAs($this->tech)->delete("/dashboard/studies/{$this->study->id}", ['tab' => 'studies'])
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('worklist'));
 
     $second = $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload())->json('id');
 
@@ -103,12 +127,12 @@ test('deleting a draft returns to the section it was deleted from', function () 
 test('another hospital sees none of these studies on its dashboard', function () {
     $intruder = User::factory()->role(Role::Doctor)->create();
 
-    $this->actingAs($intruder)->get('/dashboard')
+    $this->actingAs($intruder)->get('/dashboard/worklist')
         ->assertOk()
         ->assertDontSee('Rezaei')
         ->assertSee('No studies found')
         ->assertViewHas('counts', fn ($counts) => $counts->isEmpty());
-    $this->actingAs($intruder)->get('/dashboard?search=Rezaei')->assertDontSee(route('studies.show', $this->study), false);
+    $this->actingAs($intruder)->get('/dashboard/worklist?search=Rezaei')->assertDontSee(route('studies.show', $this->study), false);
     $this->actingAs($intruder)->get('/dashboard/patients?nationalID=0012345678')->assertDontSee('Rezaei');
 });
 

@@ -1,4 +1,4 @@
-{{-- Row actions for one study, shared by both dashboard tabs. --}}
+{{-- Row actions for one study, shared by the worklist and patient echos. --}}
 <div class="flex flex-wrap items-center justify-end gap-2">
     <a href="{{ route('studies.show', $study) }}" class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500">{{ __('View report') }}</a>
     @can('update', $study)
