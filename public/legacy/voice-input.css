@@ -1,0 +1,394 @@
+/* voice-input.css - Speech-to-Text Styling */
+
+.voice-input-wrapper {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure flex/grid items with .voice-input-wrapper stretch properly */
+.field > .voice-input-wrapper {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+/* Input padding adjustment when voice button is present */
+input.voice-input-field {
+    padding-right: 38px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+textarea.voice-input-field {
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+/* Voice Microphone Button - Hidden by default, shown only on selected (focused) field or when recording */
+.voice-mic-btn {
+    position: absolute !important;
+    z-index: 4 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background: #f8fafc !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    outline: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+
+    /* Hidden by default on unselected fields */
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Ensure at least 44x44px touch target on mobile/touch screens without distorting the 30x30px circle */
+.voice-mic-btn::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    pointer-events: auto !important;
+}
+
+/* Position for standard inputs */
+.voice-input-wrapper > .voice-mic-btn.input-mic {
+    right: 6px !important;
+    top: 50% !important;
+    transform: translateY(-50%) scale(0.85) !important;
+}
+
+/* Position for textareas */
+.voice-input-wrapper > .voice-mic-btn.textarea-mic {
+    right: 8px !important;
+    top: 8px !important;
+    transform: scale(0.85) !important;
+}
+
+/* Show only on selected/focused field or actively recording */
+.voice-input-wrapper:focus-within > .voice-mic-btn.input-mic,
+.voice-input-wrapper.field-focused > .voice-mic-btn.input-mic,
+.voice-input-wrapper > .voice-mic-btn.input-mic.recording {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(-50%) scale(1) !important;
+}
+
+.voice-input-wrapper:focus-within > .voice-mic-btn.textarea-mic,
+.voice-input-wrapper.field-focused > .voice-mic-btn.textarea-mic,
+.voice-input-wrapper > .voice-mic-btn.textarea-mic.recording {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: scale(1) !important;
+}
+
+.voice-mic-btn.input-mic:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    transform: translateY(-50%) scale(1.08) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.voice-mic-btn.textarea-mic:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.voice-mic-btn svg {
+    width: 15px !important;
+    height: 15px !important;
+    stroke: currentColor !important;
+    fill: none !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    pointer-events: none !important;
+    transition: transform 0.2s ease !important;
+}
+
+/* Recording / Active State */
+.voice-mic-btn.recording {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #ffffff !important;
+    border-color: #b91c1c !important;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7) !important;
+    animation: voice-pulse-ring 1.5s cubic-bezier(0.24, 0, 0.38, 1) infinite !important;
+}
+
+.voice-mic-btn.recording svg {
+    stroke: #ffffff !important;
+    animation: voice-mic-bounce 1s ease infinite alternate !important;
+}
+
+/* Disabled / Unsupported State - only visible when field is selected */
+.voice-input-wrapper:focus-within > .voice-mic-btn.unsupported,
+.voice-input-wrapper.field-focused > .voice-mic-btn.unsupported,
+.voice-input-wrapper:focus-within > .voice-mic-btn:disabled,
+.voice-input-wrapper.field-focused > .voice-mic-btn:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    filter: grayscale(1) !important;
+    pointer-events: auto !important;
+}
+
+/* Highlight input field when active recording */
+.voice-recording-field {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+/* Keyframe Animations */
+@keyframes voice-pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.75), 0 2px 5px rgba(239, 68, 68, 0.3);
+    }
+    70% {
+        box-shadow: 0 0 0 9px rgba(239, 68, 68, 0), 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 2px 5px rgba(239, 68, 68, 0);
+    }
+}
+
+@keyframes voice-mic-bounce {
+    0% {
+        transform: scale(0.92);
+    }
+    100% {
+        transform: scale(1.12);
+    }
+}
+
+@keyframes voice-wave-bar {
+    0%, 100% {
+        height: 4px;
+    }
+    50% {
+        height: 14px;
+    }
+}
+
+/* Floating Status Indicator Pill */
+#voice-status-pill {
+    position: fixed;
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 9999px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    max-width: min(420px, calc(100vw - 24px));
+    box-sizing: border-box;
+}
+
+#voice-status-pill.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Waveform inside floating status */
+.voice-waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 16px;
+}
+
+.voice-waveform-bar {
+    width: 3px;
+    background: #ef4444;
+    border-radius: 2px;
+    animation: voice-wave-bar 0.8s ease-in-out infinite;
+}
+
+.voice-waveform-bar:nth-child(2) { animation-delay: 0.15s; }
+.voice-waveform-bar:nth-child(3) { animation-delay: 0.3s; }
+.voice-waveform-bar:nth-child(4) { animation-delay: 0.45s; }
+.voice-waveform-bar:nth-child(5) { animation-delay: 0.2s; }
+
+/* Language Switcher in Floating Pill */
+.voice-lang-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    min-height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.voice-lang-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+/* Stop Button in Floating Pill */
+.voice-stop-btn {
+    background: #ef4444;
+    border: none;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    min-height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.voice-stop-btn:hover {
+    background: #dc2626;
+}
+
+/* Toast Notifications */
+.voice-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1e293b;
+    color: #ffffff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    border-left: 4px solid #ef4444;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    max-width: min(380px, calc(100vw - 32px));
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .voice-toast {
+        right: 16px;
+        left: 16px;
+        top: 16px;
+        max-width: none;
+    }
+}
+
+.voice-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.voice-toast.warning {
+    border-left-color: #f59e0b;
+}
+
+.voice-toast.info {
+    border-left-color: #3b82f6;
+}
+
+/* Navbar inline search adaptations */
+.navbar-search-inline .voice-input-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+}
+
+.navbar-search-inline .voice-input-wrapper input.voice-input-field {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 28px 4px 8px !important;
+    font-size: 13px !important;
+    outline: none !important;
+    color: #1e293b !important;
+    width: 140px !important;
+    transition: width 0.2s ease !important;
+}
+
+.navbar-search-inline .voice-input-wrapper .voice-mic-btn {
+    right: 2px !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    min-height: 26px !important;
+    max-height: 26px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+}
+
+.navbar-search-inline .voice-input-wrapper .voice-mic-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+/* Print Isolation */
+@media print {
+    .voice-mic-btn,
+    #voice-status-pill,
+    .voice-toast {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    input.voice-input-field {
+        padding-right: 8px !important;
+    }
+}
