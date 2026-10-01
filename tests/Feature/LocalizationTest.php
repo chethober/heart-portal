@@ -77,10 +77,11 @@ test('the browser language is used until one is chosen', function () {
     $this->get('/', ['Accept-Language' => 'ja'])->assertSee('<html lang="en" dir="ltr"', false);
 });
 
-test('signed-in pages are translated, including role labels', function () {
+test('signed-in pages are translated', function () {
     $doctor = User::factory()->role(Role::Doctor)->create();
 
     $this->actingAs($doctor)->withCookie('locale', 'es')->get('/dashboard')
         ->assertSee('Panel')
-        ->assertSee('Médico');
+        ->assertSee('Estudios')
+        ->assertSee('Ecos del paciente');
 });
