@@ -35,11 +35,14 @@
 
             <div class="bg-white shadow-sm sm:rounded-lg">
                 @if (count($tabs) > 1)
-                    <nav class="flex gap-6 overflow-x-auto whitespace-nowrap border-b border-gray-200 px-6" aria-label="{{ __('Dashboard sections') }}">
+                    {{-- The divider is an inset shadow, not a border, so the active tab's underline can cover it
+                         without spilling past the nav: overflow-x-auto also scrolls vertically, so any overhang
+                         would add a scrollbar. --}}
+                    <nav class="flex gap-6 overflow-x-auto whitespace-nowrap px-6 shadow-[inset_0_-1px_0_0_theme(colors.gray.200)]" aria-label="{{ __('Dashboard sections') }}">
                         @foreach ($tabs as $tab)
                             <a href="{{ $tab['url'] }}"
                                @if ($tab['active']) aria-current="page" @endif
-                               class="-mb-px inline-flex items-center gap-2 border-b-2 py-4 text-sm font-medium {{ $tab['active'] ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
+                               class="inline-flex items-center gap-2 border-b-2 py-4 text-sm font-medium {{ $tab['active'] ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
                                 {{ $tab['label'] }}
                                 @if ($tab['count'])
                                     <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">{{ $tab['count'] }}</span>
