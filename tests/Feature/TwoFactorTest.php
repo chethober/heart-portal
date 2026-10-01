@@ -85,5 +85,5 @@ test('when enforced, users without two-factor are sent to set it up', function (
     app(TwoFactor::class)->enable($this->user);
     $this->user->forceFill(['two_factor_confirmed_at' => now()])->save();
 
-    $this->actingAs($this->user->fresh())->get('/patients')->assertOk();
+    $this->actingAs($this->user->fresh())->get('/patients')->assertRedirect(route('dashboard', ['tab' => 'patients']));
 });

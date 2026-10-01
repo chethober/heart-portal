@@ -138,14 +138,19 @@ class EchoStudyController extends Controller
         return $this->report(EchoCalculations::derive($report), isPreview: true);
     }
 
-    public function destroy(EchoStudy $study): RedirectResponse
+    public function destroy(Request $request, EchoStudy $study): RedirectResponse
     {
         Gate::authorize('delete', $study);
 
         $study->delete();
         Audit::record('study.deleted', $study);
 
-        return redirect()->route('patients.index', ['nationalID' => $study->patient->national_id]);
+        // Return to whichever dashboard tab the delete was made from.
+        $params = $request->input('tab') === 'studies'
+            ? ['tab' => 'studies']
+            : ['tab' => 'patients', 'nationalID' => $study->patient->national_id];
+
+        return redirect()->route('dashboard', $params)->with('status', __('Draft deleted.'));
     }
 
     /**

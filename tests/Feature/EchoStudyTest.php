@@ -82,7 +82,7 @@ test('history and report render with derived values and sanitized free text', fu
     $this->actingAs($this->tech)->postJson('/studies', echoPayload())->assertCreated();
     $study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
 
-    $this->actingAs($this->tech)->get('/patients?nationalID=0012345678')
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678')
         ->assertOk()
         ->assertSee('Rezaei')
         ->assertSee(route('studies.show', $study), false);
@@ -110,12 +110,12 @@ test('hospitals cannot see each others patients or studies', function () {
 
     $this->actingAs($intruder)->get("/studies/{$study->id}")->assertNotFound();
     $this->actingAs($intruder)->delete("/studies/{$study->id}")->assertNotFound();
-    $this->actingAs($intruder)->get('/patients?nationalID=0012345678')->assertOk()->assertDontSee('Rezaei');
+    $this->actingAs($intruder)->get('/dashboard?tab=patients&nationalID=0012345678')->assertOk()->assertDontSee('Rezaei');
 
     // Same national ID in another hospital creates a separate patient record.
     $this->actingAs($intruder)->postJson('/studies', echoPayload(['first_name' => 'Other']))->assertCreated();
     expect(Patient::withoutGlobalScope(HospitalScope::class)->count())->toBe(2);
-    $this->actingAs($this->tech)->get('/patients?nationalID=0012345678')->assertDontSee('Other');
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678')->assertDontSee('Other');
 });
 
 test('hospital admins can view but not create studies', function () {
@@ -123,7 +123,7 @@ test('hospital admins can view but not create studies', function () {
 
     $this->actingAs($admin)->get('/studies/create')->assertForbidden();
     $this->actingAs($admin)->postJson('/studies', echoPayload())->assertForbidden();
-    $this->actingAs($admin)->get('/patients')->assertOk();
+    $this->actingAs($admin)->get('/dashboard?tab=patients')->assertOk()->assertDontSee(route('studies.create'), false);
 });
 
 test('form page and doctor suggestions load', function () {

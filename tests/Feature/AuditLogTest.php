@@ -25,8 +25,8 @@ test('clinical actions are recorded with the actor and subject', function () {
     $study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
     $this->actingAs($this->tech)->get("/studies/{$study->id}");
     $this->actingAs($this->tech)->putJson("/studies/{$study->id}", echoPayload(['lv_EF' => 40]));
-    $this->actingAs($this->tech)->get('/patients?nationalID=0012345678');
-    $this->actingAs($this->tech)->get('/patients?nationalID=999');
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678');
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=999');
 
     expect(auditActions())->toBe(['patient.created', 'study.created', 'study.viewed', 'study.updated', 'patient.viewed', 'patient.search_no_match']);
 
@@ -49,7 +49,7 @@ test('logins and failed logins are recorded', function () {
 });
 
 test('the audit log is append-only at the database level', function () {
-    $this->actingAs($this->tech)->get('/patients?nationalID=1');
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=1');
     $log = AuditLog::withoutGlobalScope(HospitalScope::class)->sole();
 
     expect(fn () => $log->update(['action' => 'x']))->toThrow(LogicException::class);
@@ -58,10 +58,10 @@ test('the audit log is append-only at the database level', function () {
 });
 
 test('hospital admins see only their hospital audit log; other roles cannot', function () {
-    $this->actingAs($this->tech)->get('/patients?nationalID=1');
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=1');
 
     $other = User::factory()->role(Role::HospitalAdmin)->create();
-    $this->actingAs($other)->get('/patients?nationalID=2');
+    $this->actingAs($other)->get('/dashboard?tab=patients&nationalID=2');
 
     $this->actingAs($this->admin)->get('/audit')
         ->assertOk()

@@ -112,15 +112,15 @@ test('drafts can be deleted by their author or a hospital admin only', function 
 });
 
 test('history shows status and edit links', function () {
-    $this->actingAs($this->tech)->get('/patients?nationalID=0012345678')
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678')
         ->assertSee('Draft')
         ->assertSee(route('studies.edit', $this->study), false);
 
     $this->actingAs($this->doctor)->post("/studies/{$this->study->id}/finalize");
 
-    $this->actingAs($this->tech)->get('/patients?nationalID=0012345678')
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678')
         ->assertSee('Final')
         ->assertDontSee(route('studies.edit', $this->study), false);
-    $this->actingAs($this->doctor)->get('/patients?nationalID=0012345678')
+    $this->actingAs($this->doctor)->get('/dashboard?tab=patients&nationalID=0012345678')
         ->assertSee('Amend');
 });

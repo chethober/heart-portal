@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         Route::middleware('permission:patients.view')->group(function () {
+            // Redirects to the dashboard's patients tab, so old links and bookmarks keep working.
             Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
             Route::get('/studies/{study}', [EchoStudyController::class, 'show'])->name('studies.show');
             Route::delete('/studies/{study}', [EchoStudyController::class, 'destroy'])->name('studies.destroy');
