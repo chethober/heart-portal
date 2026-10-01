@@ -30,11 +30,11 @@ final class NavigationLinks
 
         if ($user->can('studies.create')) {
             // The dashboard home is the echo form.
-            $links[] = self::link(__('New echo study'), ['dashboard', 'studies.create']);
+            $links[] = self::link(__('New Study'), ['dashboard', 'studies.create']);
         }
         if ($user->can('patients.view')) {
             $links[] = self::link(__('Worklist'), 'worklist', EchoStudy::where('status', StudyStatus::Draft)->count());
-            $links[] = self::link(__('Patient echos'), 'patients.index');
+            $links[] = self::link(__('Patients'), 'patients.index');
         }
         if ($user->can('staff.manage')) {
             $links[] = self::link(__('Staff'), 'staff.*', Invitation::pending()->count());

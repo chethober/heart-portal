@@ -28,10 +28,10 @@
                 @auth
                     <p class="mt-3 flex flex-wrap gap-x-4 text-sm">
                         @can('studies.create')
-                            <a href="{{ route('studies.create') }}">{{ __('New echo study') }}</a>
+                            <a href="{{ route('studies.create') }}">{{ __('New Study') }}</a>
                         @endcan
                         @can('patients.view')
-                            <a href="{{ route('patients.index') }}">{{ __('Patient echos') }}</a>
+                            <a href="{{ route('patients.index') }}">{{ __('Patients') }}</a>
                         @endcan
                     </p>
                 @endauth
@@ -67,7 +67,7 @@
 
             <section id="recording">
                 <h2>{{ __('Recording a study') }}</h2>
-                <p class="mt-4">{{ __('Open New echo study from the dashboard. First name, last name and national ID are required; everything else is optional.') }}</p>
+                <p class="mt-4">{{ __('Open New Study from the dashboard. First name, last name and national ID are required; everything else is optional.') }}</p>
                 <h3>{{ __('What the form covers') }}</h3>
                 <ul>
                     <li>{{ __('Patient details: national ID, name, age, height, weight, BSA and blood pressure.') }}</li>
