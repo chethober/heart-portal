@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Clinical\DoctorController;
 use App\Http\Controllers\Clinical\EchoStudyController;
-use App\Http\Controllers\Clinical\HelpController;
 use App\Http\Controllers\Clinical\PatientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HospitalPendingController;
@@ -18,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('home');
 Route::view('/help', 'public.help')->name('help');
+// The echo form guide is now part of the help center; keep old links and bookmarks working.
+Route::permanentRedirect('/help/echo-form', '/help#recording');
 Route::post('/locale', LocaleController::class)->name('locale.update');
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -32,7 +33,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Everything below requires an active member of an approved hospital.
     Route::middleware(['hospital.active', 'two-factor'])->group(function () {
-        Route::get('/help/echo-form', HelpController::class)->name('help.form');
         Route::get('/users/{user}/signature', [SignatureController::class, 'show'])->name('users.signature');
         Route::post('/profile/signature', [SignatureController::class, 'update'])->middleware('permission:studies.finalize')->name('profile.signature');
         Route::get('/audit', [AuditLogController::class, 'index'])->middleware('permission:audit.view')->name('audit.index');

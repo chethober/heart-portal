@@ -3,6 +3,7 @@
         'getting-started' => 'Getting started',
         'roles' => 'Roles and permissions',
         'recording' => 'Recording a study',
+        'reports' => 'Viewing and printing reports',
         'signing' => 'Signing and amending',
         'patients' => 'Finding patients',
         'two-factor' => 'Two-factor login',
@@ -25,7 +26,14 @@
                 <h1 class="text-4xl font-bold tracking-tight text-gray-900">{{ __('Help center') }}</h1>
                 <p class="mt-3 text-lg text-gray-600">{{ __('Everything you need to run your echo lab on :app.', ['app' => config('app.name')]) }}</p>
                 @auth
-                    <p class="mt-3 text-sm">{{ __('Looking for field-by-field guidance on the echo form?') }} <a href="{{ route('help.form') }}">{{ __('Open the echo form guide') }}</a>.</p>
+                    <p class="mt-3 flex flex-wrap gap-x-4 text-sm">
+                        @can('studies.create')
+                            <a href="{{ route('studies.create') }}">{{ __('New echo study') }}</a>
+                        @endcan
+                        @can('patients.view')
+                            <a href="{{ route('patients.index') }}">{{ __('Patient echos') }}</a>
+                        @endcan
+                    </p>
                 @endauth
             </header>
 
@@ -60,12 +68,28 @@
             <section id="recording">
                 <h2>{{ __('Recording a study') }}</h2>
                 <p class="mt-4">{{ __('Open New echo study from the dashboard. First name, last name and national ID are required; everything else is optional.') }}</p>
+                <h3>{{ __('What the form covers') }}</h3>
+                <ul>
+                    <li>{{ __('Patient details: national ID, name, age, height, weight, BSA and blood pressure.') }}</li>
+                    <li>{{ __('Left ventricle (LV) and right ventricle (RV).') }}</li>
+                    <li>{{ __('Atria (LA / RA) and valves.') }}</li>
+                    <li>{{ __('IVC, SPAP and pericardium, with sensible defaults filled in for you.') }}</li>
+                </ul>
                 <h3>{{ __('Automatic values') }}</h3>
                 <p>{{ __('Leave a grading field on "Auto" (or empty) and it is calculated from your measurements: LV size from LVEDVI/LVEDV/LVEDDI/LVEDD, LV systolic function from EF, LVH from septal thickness, diastolic function from e′, E/e′, E/A and TR velocity, RV size and function, LA/RA size, SPAP from TRG plus estimated RAP, and aortic dilation by segment. Choose a value yourself to override it. On the report, auto-graded findings show how they were derived when you hover over them.') }}</p>
                 <h3>{{ __('Live preview and local drafts') }}</h3>
                 <p>{{ __('Turn on Live Preview to see the finished report while you type. Unsaved work is kept in your browser per patient tab, and only for your own account on that device, until you press Save to Database.') }}</p>
                 <h3>{{ __('Dates') }}</h3>
                 <p>{{ __('Date of birth and echo date use the Jalali (Solar Hijri) calendar, for example 1405/07/09. Persian digits are accepted.') }}</p>
+            </section>
+
+            <section id="reports">
+                <h2>{{ __('Viewing and printing reports') }}</h2>
+                <ul class="mt-4">
+                    <li>{{ __('The report is formatted automatically and abnormal findings are underlined.') }}</li>
+                    <li>{{ __('Press Print Report at the bottom of the report; it prints at a standard 120% scale.') }}</li>
+                    <li>{{ __('To save a PDF, choose Save as PDF as the printer in your browser\'s print window.') }}</li>
+                </ul>
             </section>
 
             <section id="signing">
@@ -113,6 +137,10 @@
 
             <section id="faq">
                 <h2>{{ __('FAQ') }}</h2>
+                <h3>{{ __('How is the IVC graded automatically?') }}</h3>
+                <p>{{ __('On "Auto", an IVC of 21 mm or less is reported as normal size and anything larger as dilated.') }}</p>
+                <h3>{{ __('How do I find a patient\'s previous echos?') }}</h3>
+                <p>{{ __('Enter the patient\'s national ID in the quick search box at the top of the page, or open Patient Echos.') }}</p>
                 <h3>{{ __('I did not receive my invitation email.') }}</h3>
                 <p>{{ __('Ask your hospital admin to check the address on the Staff page and send the invitation again; re-inviting replaces the old link.') }}</p>
                 <h3>{{ __('I lost my phone and my recovery codes.') }}</h3>
