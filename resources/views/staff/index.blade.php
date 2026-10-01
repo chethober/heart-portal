@@ -50,7 +50,7 @@
 
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50 text-left text-gray-600">
+                    <thead class="bg-gray-50 text-start text-gray-600">
                         <tr>
                             <th class="px-4 py-3">{{ __('Name') }}</th>
                             <th class="px-4 py-3">{{ __('Email') }}</th>
@@ -76,7 +76,7 @@
                                     <input type="hidden" name="is_active" value="0" form="staff-{{ $member->id }}">
                                     <input type="checkbox" name="is_active" value="1" form="staff-{{ $member->id }}" aria-label="{{ __('Active') }}" class="rounded border-gray-300" @checked($member->is_active)>
                                 </td>
-                                <td class="px-4 py-3 text-right">
+                                <td class="px-4 py-3 text-end">
                                     <form id="staff-{{ $member->id }}" method="POST" action="{{ route('staff.update', $member) }}">
                                         @csrf
                                         @method('PATCH')

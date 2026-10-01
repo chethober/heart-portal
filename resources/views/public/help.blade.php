@@ -20,7 +20,7 @@
             </nav>
         </aside>
 
-        <article class="max-w-3xl space-y-14 text-gray-700 leading-relaxed [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:scroll-mt-24 [&_h3]:font-semibold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:mt-1 [&_a]:text-rose-700 [&_a]:underline">
+        <article class="max-w-3xl space-y-14 text-gray-700 leading-relaxed [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:scroll-mt-24 [&_h3]:font-semibold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:mt-1 [&_a]:text-rose-700 [&_a]:underline">
             <header>
                 <h1 class="text-4xl font-bold tracking-tight text-gray-900">{{ __('Help center') }}</h1>
                 <p class="mt-3 text-lg text-gray-600">{{ __('Everything you need to run your echo lab on :app.', ['app' => config('app.name')]) }}</p>
@@ -44,7 +44,7 @@
                 <h2>{{ __('Roles and permissions') }}</h2>
                 <div class="mt-4 overflow-x-auto">
                     <table class="min-w-full text-sm border border-gray-200">
-                        <thead class="bg-gray-50 text-left">
+                        <thead class="bg-gray-50 text-start">
                             <tr><th class="p-2">{{ __('Role') }}</th><th class="p-2">{{ __('Can do') }}</th></tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">

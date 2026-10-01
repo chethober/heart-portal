@@ -1,14 +1,17 @@
 @props(['title' => null, 'description' => null])
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), config('app.rtl_locales'), true) ? 'rtl' : 'ltr' }}" class="scroll-smooth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ $title ? $title.' — '.config('app.name') : config('app.name').' — Echocardiography reporting for hospitals' }}</title>
-        <meta name="description" content="{{ $description ?? 'Open-source echocardiography reporting platform: structured echo entry, automatic grading, signed reports and audit trails for every hospital.' }}">
+        <title>{{ $title ? $title.' — '.config('app.name') : config('app.name').' — '.__('Echocardiography reporting for hospitals') }}</title>
+        <meta name="description" content="{{ $description ?? __('Open-source echocardiography reporting platform: structured echo entry, automatic grading, signed reports and audit trails for every hospital.') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+        @if (in_array(app()->getLocale(), config('app.rtl_locales'), true))
+            <link href="https://fonts.bunny.net/css?family=vazirmatn:400,500,600,700&display=swap" rel="stylesheet" />
+        @endif
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -29,6 +32,7 @@
                 </nav>
 
                 <div class="hidden md:flex items-center gap-3 text-sm">
+                    <x-language-switcher />
                     @auth
                         <a href="{{ route('dashboard') }}" class="rounded-md bg-gray-900 px-4 py-2 font-medium text-white hover:bg-gray-700">{{ __('Open dashboard') }}</a>
                     @else
@@ -48,6 +52,7 @@
                 <a href="{{ url('/') }}#security" class="block py-1">{{ __('Security') }}</a>
                 <a href="{{ route('help') }}" class="block py-1">{{ __('Help') }}</a>
                 <a href="{{ config('app.source_url') }}" class="block py-1">GitHub</a>
+                <x-language-switcher class="py-1" />
                 @auth
                     <a href="{{ route('dashboard') }}" class="block py-1 font-medium">{{ __('Open dashboard') }}</a>
                 @else

@@ -27,12 +27,12 @@ $helpUrl = route('help.form');
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
             </span>
-            <span class="brand-text"><?= e($navUser->hospital->name) ?> Echo Portal</span>
+            <span class="brand-text"><?= e(__(':hospital Echo Portal', ['hospital' => $navUser->hospital->name])) ?></span>
         </a>
     </div>
 
     <!-- Desktop Navigation -->
-    <nav class="navbar-desktop-nav" aria-label="Desktop Navigation">
+    <nav class="navbar-desktop-nav" aria-label="<?= e(__('Desktop Navigation')) ?>">
         <ul class="navbar-menu">
             <?php if ($canCreate) { ?>
             <li>
@@ -42,7 +42,7 @@ $helpUrl = route('help.form');
                         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                         <path d="M9 14l2 2 4-4"></path>
                     </svg>
-                    <span>Echo Form</span>
+                    <span><?= e(__('Echo Form')) ?></span>
                 </a>
             </li>
             <?php } ?>
@@ -52,7 +52,7 @@ $helpUrl = route('help.form');
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <span>Patient Echos</span>
+                    <span><?= e(__('Patient Echos')) ?></span>
                 </a>
             </li>
             <li>
@@ -65,10 +65,10 @@ $helpUrl = route('help.form');
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                             <line x1="10" y1="9" x2="8" y2="9"></line>
                         </svg>
-                        <span>Detailed Report</span>
+                        <span><?= e(__('Detailed Report')) ?></span>
                     </a>
                 <?php } else { ?>
-                    <a href="#" class="navbar-item disabled" title="Search a patient and view a report first" tabindex="-1" aria-disabled="true">
+                    <a href="#" class="navbar-item disabled" title="<?= e(__('Search a patient and view a report first')) ?>" tabindex="-1" aria-disabled="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
@@ -76,7 +76,7 @@ $helpUrl = route('help.form');
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                             <line x1="10" y1="9" x2="8" y2="9"></line>
                         </svg>
-                        <span>Detailed Report</span>
+                        <span><?= e(__('Detailed Report')) ?></span>
                     </a>
                 <?php } ?>
             </li>
@@ -87,7 +87,7 @@ $helpUrl = route('help.form');
                         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
-                    <span>Help</span>
+                    <span><?= e(__('Help')) ?></span>
                 </a>
             </li>
             <li>
@@ -98,20 +98,20 @@ $helpUrl = route('help.form');
             <li>
                 <form method="POST" action="<?= e(route('logout')) ?>" style="margin:0">
                     <input type="hidden" name="_token" value="<?= e(csrf_token()) ?>">
-                    <button type="submit" class="navbar-item" style="background:none;border:0;cursor:pointer;font:inherit">Log out</button>
+                    <button type="submit" class="navbar-item" style="background:none;border:0;cursor:pointer;font:inherit"><?= e(__('Log out')) ?></button>
                 </form>
             </li>
         </ul>
 
         <!-- Inline quick search -->
         <form action="<?= e(route('patients.index')) ?>" method="get" class="navbar-search-inline" role="search">
-            <input type="text" name="nationalID" class="no-voice" placeholder="Quick Search ID..." value="<?= e($navNationalID) ?>" required aria-label="National ID Quick Search">
-            <button type="submit">Search</button>
+            <input type="text" name="nationalID" class="no-voice" placeholder="<?= e(__('Quick Search ID...')) ?>" value="<?= e($navNationalID) ?>" required aria-label="<?= e(__('National ID Quick Search')) ?>">
+            <button type="submit"><?= e(__('Search')) ?></button>
         </form>
     </nav>
 
     <!-- Hamburger Toggle Button for Mobile / Tablet -->
-    <button type="button" class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navbarDrawer">
+    <button type="button" class="navbar-toggle" id="navbarToggle" aria-label="<?= e(__('Toggle navigation menu')) ?>" aria-expanded="false" aria-controls="navbarDrawer">
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
@@ -120,7 +120,7 @@ $helpUrl = route('help.form');
 
 <!-- Mobile Navigation Drawer & Backdrop -->
 <div class="navbar-backdrop no-print" id="navbarBackdrop"></div>
-<aside class="navbar-drawer no-print" id="navbarDrawer" aria-label="Mobile Navigation" aria-hidden="true">
+<aside class="navbar-drawer no-print" id="navbarDrawer" aria-label="<?= e(__('Mobile Navigation')) ?>" aria-hidden="true">
     <div class="drawer-header">
         <div class="drawer-brand">
             <span class="brand-icon">
@@ -128,9 +128,9 @@ $helpUrl = route('help.form');
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
             </span>
-            <span class="drawer-title">Navigation</span>
+            <span class="drawer-title"><?= e(__('Navigation')) ?></span>
         </div>
-        <button type="button" class="drawer-close-btn" id="navbarDrawerClose" aria-label="Close navigation menu">
+        <button type="button" class="drawer-close-btn" id="navbarDrawerClose" aria-label="<?= e(__('Close navigation menu')) ?>">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -145,8 +145,8 @@ $helpUrl = route('help.form');
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" name="nationalID" placeholder="Search National ID..." value="<?= e($navNationalID) ?>" required aria-label="Search National ID">
-            <button type="submit" aria-label="Submit search">
+            <input type="text" name="nationalID" placeholder="<?= e(__('Search National ID...')) ?>" value="<?= e($navNationalID) ?>" required aria-label="<?= e(__('Search National ID')) ?>">
+            <button type="submit" aria-label="<?= e(__('Submit search')) ?>">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
@@ -165,7 +165,7 @@ $helpUrl = route('help.form');
                         <path d="M9 14l2 2 4-4"></path>
                     </svg>
                 </span>
-                <span class="item-label">Echo Form</span>
+                <span class="item-label"><?= e(__('Echo Form')) ?></span>
             </a>
         </li>
         <?php } ?>
@@ -177,7 +177,7 @@ $helpUrl = route('help.form');
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </span>
-                <span class="item-label">Patient Echos</span>
+                <span class="item-label"><?= e(__('Patient Echos')) ?></span>
             </a>
         </li>
         <li>
@@ -192,10 +192,10 @@ $helpUrl = route('help.form');
                             <line x1="10" y1="9" x2="8" y2="9"></line>
                         </svg>
                     </span>
-                    <span class="item-label">Detailed Report</span>
+                    <span class="item-label"><?= e(__('Detailed Report')) ?></span>
                 </a>
             <?php } else { ?>
-                <a href="#" class="drawer-item disabled" title="Search a patient and view a report first" tabindex="-1" aria-disabled="true">
+                <a href="#" class="drawer-item disabled" title="<?= e(__('Search a patient and view a report first')) ?>" tabindex="-1" aria-disabled="true">
                     <span class="item-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -205,7 +205,7 @@ $helpUrl = route('help.form');
                             <line x1="10" y1="9" x2="8" y2="9"></line>
                         </svg>
                     </span>
-                    <span class="item-label">Detailed Report</span>
+                    <span class="item-label"><?= e(__('Detailed Report')) ?></span>
                 </a>
             <?php } ?>
         </li>
@@ -218,19 +218,19 @@ $helpUrl = route('help.form');
                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                 </span>
-                <span class="item-label">Help Center</span>
+                <span class="item-label"><?= e(__('Help Center')) ?></span>
             </a>
         </li>
         <li>
             <a href="<?= e(route('dashboard')) ?>" class="drawer-item">
-                <span class="item-label"><?= e($navUser->name) ?> — Dashboard</span>
+                <span class="item-label"><?= e($navUser->name) ?> — <?= e(__('Dashboard')) ?></span>
             </a>
         </li>
         <li>
             <form method="POST" action="<?= e(route('logout')) ?>" style="margin:0">
                 <input type="hidden" name="_token" value="<?= e(csrf_token()) ?>">
                 <button type="submit" class="drawer-item" style="background:none;border:0;width:100%;text-align:left;cursor:pointer;font:inherit">
-                    <span class="item-label">Log out</span>
+                    <span class="item-label"><?= e(__('Log out')) ?></span>
                 </button>
             </form>
         </li>
