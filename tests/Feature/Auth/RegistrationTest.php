@@ -54,5 +54,5 @@ test('users of a pending hospital are sent to the pending page', function () {
     $user = User::factory()->for(Hospital::factory()->pending())->role(Role::HospitalAdmin)->create();
 
     $this->actingAs($user)->get('/dashboard')->assertRedirect(route('hospital.pending'));
-    $this->actingAs($user)->get('/staff')->assertRedirect(route('hospital.pending'));
+    $this->actingAs($user)->get('/dashboard/staff')->assertRedirect(route('hospital.pending'));
 });

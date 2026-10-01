@@ -1,3 +1,5 @@
+@php($dashboardRoutes = ['dashboard', 'patients.index', 'staff.*', 'audit.*', 'admin.hospitals.*'])
+
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,24 +14,10 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 rtl:space-x-reverse sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{-- Every section (worklist, patients, staff, audit, hospitals) is a tab on the dashboard. --}}
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs($dashboardRoutes)">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @role('platform_admin')
-                        <x-nav-link :href="route('admin.hospitals.index')" :active="request()->routeIs('admin.hospitals.*')">
-                            {{ __('Hospitals') }}
-                        </x-nav-link>
-                    @endrole
-                    @can('staff.manage')
-                        <x-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                            {{ __('Staff') }}
-                        </x-nav-link>
-                    @endcan
-                    @can('audit.view')
-                        <x-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')">
-                            {{ __('Audit log') }}
-                        </x-nav-link>
-                    @endcan
                 </div>
                 @if (Auth::user()->hospital)
                     <div class="hidden sm:flex sm:items-center sm:ms-8 text-sm font-medium text-gray-500">
@@ -88,24 +76,9 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs($dashboardRoutes)">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @role('platform_admin')
-                <x-responsive-nav-link :href="route('admin.hospitals.index')" :active="request()->routeIs('admin.hospitals.*')">
-                    {{ __('Hospitals') }}
-                </x-responsive-nav-link>
-            @endrole
-            @can('staff.manage')
-                <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                    {{ __('Staff') }}
-                </x-responsive-nav-link>
-            @endcan
-            @can('audit.view')
-                <x-responsive-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')">
-                    {{ __('Audit log') }}
-                </x-responsive-nav-link>
-            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

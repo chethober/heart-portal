@@ -30,7 +30,7 @@ class AuditLogController extends Controller
             ->paginate(50)
             ->withQueryString();
 
-        return view('audit.index', [
+        return view('dashboard.audit', [
             'logs' => $logs,
             'filters' => $filters,
             'actions' => AuditLog::query()->distinct()->orderBy('action')->pluck('action'),

@@ -7,7 +7,7 @@ test('profile page is displayed', function () {
 
     $response = $this
         ->actingAs($user)
-        ->get('/profile');
+        ->get('/dashboard/profile');
 
     $response->assertOk();
 });
@@ -17,14 +17,14 @@ test('profile information can be updated', function () {
 
     $response = $this
         ->actingAs($user)
-        ->patch('/profile', [
+        ->patch('/dashboard/profile', [
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        ->assertRedirect('/dashboard/profile');
 
     $user->refresh();
 
@@ -38,14 +38,14 @@ test('email verification status is unchanged when the email address is unchanged
 
     $response = $this
         ->actingAs($user)
-        ->patch('/profile', [
+        ->patch('/dashboard/profile', [
             'name' => 'Test User',
             'email' => $user->email,
         ]);
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        ->assertRedirect('/dashboard/profile');
 
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
@@ -53,6 +53,6 @@ test('email verification status is unchanged when the email address is unchanged
 test('users cannot delete their own account', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user)->delete('/profile')->assertStatus(405);
+    $this->actingAs($user)->delete('/dashboard/profile')->assertStatus(405);
     $this->assertNotNull($user->fresh());
 });

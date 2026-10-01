@@ -17,7 +17,7 @@ test('hospital admin can invite staff and the invitee can join', function () {
     Notification::fake();
 
     $this->actingAs($this->admin)
-        ->post('/staff/invitations', ['email' => 'doc@example.com', 'role' => 'doctor'])
+        ->post('/dashboard/staff/invitations', ['email' => 'doc@example.com', 'role' => 'doctor'])
         ->assertRedirect();
 
     $invitation = Invitation::withoutGlobalScope(HospitalScope::class)->sole();
@@ -46,15 +46,15 @@ test('hospital admin can invite staff and the invitee can join', function () {
 
 test('hospital admins cannot grant the platform admin role', function () {
     $this->actingAs($this->admin)
-        ->post('/staff/invitations', ['email' => 'x@example.com', 'role' => 'platform_admin'])
+        ->post('/dashboard/staff/invitations', ['email' => 'x@example.com', 'role' => 'platform_admin'])
         ->assertSessionHasErrors('role');
 });
 
 test('doctors and technicians cannot manage staff', function (Role $role) {
     $user = User::factory()->for($this->hospital)->role($role)->create();
 
-    $this->actingAs($user)->get('/staff')->assertForbidden();
-    $this->actingAs($user)->post('/staff/invitations', ['email' => 'x@example.com', 'role' => 'doctor'])->assertForbidden();
+    $this->actingAs($user)->get('/dashboard/staff')->assertForbidden();
+    $this->actingAs($user)->post('/dashboard/staff/invitations', ['email' => 'x@example.com', 'role' => 'doctor'])->assertForbidden();
 })->with([Role::Doctor, Role::Technician]);
 
 test('hospital admin only sees and edits their own staff and invitations', function () {
@@ -70,15 +70,15 @@ test('hospital admin only sees and edits their own staff and invitations', funct
         'expires_at' => now()->addDay(),
     ]);
 
-    $this->actingAs($this->admin)->get('/staff')
+    $this->actingAs($this->admin)->get('/dashboard/staff')
         ->assertOk()
         ->assertDontSee($otherDoctor->email)
         ->assertDontSee('secret@example.com');
 
     $this->actingAs($this->admin)
-        ->patch("/staff/{$otherDoctor->id}", ['role' => 'technician', 'is_active' => 0])
+        ->patch("/dashboard/staff/{$otherDoctor->id}", ['role' => 'technician', 'is_active' => 0])
         ->assertNotFound();
-    $this->actingAs($this->admin)->delete("/staff/invitations/{$otherInvite->id}")->assertNotFound();
+    $this->actingAs($this->admin)->delete("/dashboard/staff/invitations/{$otherInvite->id}")->assertNotFound();
 
     expect($otherDoctor->fresh()->is_active)->toBeTrue();
 });
@@ -87,7 +87,7 @@ test('deactivated staff are logged out and cannot log in', function () {
     $tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
 
     $this->actingAs($this->admin)
-        ->patch("/staff/{$tech->id}", ['role' => 'technician', 'is_active' => 0])
+        ->patch("/dashboard/staff/{$tech->id}", ['role' => 'technician', 'is_active' => 0])
         ->assertRedirect();
     expect($tech->fresh()->is_active)->toBeFalse();
 
@@ -98,7 +98,7 @@ test('deactivated staff are logged out and cannot log in', function () {
 
 test('admin cannot demote or deactivate themselves', function () {
     $this->actingAs($this->admin)
-        ->patch("/staff/{$this->admin->id}", ['role' => 'doctor', 'is_active' => 1])
+        ->patch("/dashboard/staff/{$this->admin->id}", ['role' => 'doctor', 'is_active' => 1])
         ->assertSessionHasErrors('staff');
 
     expect($this->admin->fresh()->hasRole('hospital_admin'))->toBeTrue();

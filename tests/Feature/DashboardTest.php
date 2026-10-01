@@ -10,11 +10,11 @@ beforeEach(function () {
     $this->hospital = Hospital::factory()->create();
     $this->tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
 
-    $this->actingAs($this->tech)->postJson('/studies', echoPayload())->assertCreated();
+    $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload())->assertCreated();
     $this->study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
 });
 
-test('the studies tab is the default and lists the hospital worklist with actions', function () {
+test('the dashboard home is the worklist with actions', function () {
     $this->actingAs($this->tech)->get('/dashboard')
         ->assertOk()
         ->assertSee('Rezaei')
@@ -22,57 +22,95 @@ test('the studies tab is the default and lists the hospital worklist with action
         ->assertSee(route('studies.create'), false)
         ->assertSee(route('studies.show', $this->study), false)
         ->assertSee(route('studies.edit', $this->study), false)
-        ->assertSee(route('studies.destroy', $this->study), false);
+        ->assertSee(route('studies.destroy', $this->study), false)
+        ->assertViewHas('counts', fn ($counts) => $counts->all() === ['draft' => 1]);
 });
 
-test('the studies tab filters by status and patient name', function () {
-    $this->actingAs($this->tech)->get('/dashboard?tab=studies&status=final')->assertOk()->assertDontSee('Rezaei');
-    $this->actingAs($this->tech)->get('/dashboard?tab=studies&status=draft')->assertSee('Rezaei');
-    $this->actingAs($this->tech)->get('/dashboard?tab=studies&search=reza')->assertSee('Rezaei');
-    $this->actingAs($this->tech)->get('/dashboard?tab=studies&search=nobody')->assertDontSee('Rezaei');
+test('the worklist filters by status and patient name', function () {
+    $this->actingAs($this->tech)->get('/dashboard?status=final')->assertOk()->assertDontSee('Rezaei');
+    $this->actingAs($this->tech)->get('/dashboard?status=draft')->assertSee('Rezaei');
+    $this->actingAs($this->tech)->get('/dashboard?search=reza')->assertSee('Rezaei')->assertSee('Clear filters');
+    $this->actingAs($this->tech)->get('/dashboard?search=nobody')->assertDontSee('Rezaei');
 });
 
-test('doctors can sign drafts from the dashboard', function () {
+test('doctors can sign drafts from the worklist', function () {
     $doctor = User::factory()->for($this->hospital)->role(Role::Doctor)->create();
 
     $this->actingAs($this->tech)->get('/dashboard')->assertDontSee(route('studies.finalize', $this->study), false);
     $this->actingAs($doctor)->get('/dashboard')->assertSee(route('studies.finalize', $this->study), false);
 });
 
-test('the patients tab searches by national ID', function () {
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients')->assertOk()->assertDontSee('Rezaei');
+test('the patient echos section searches by national ID', function () {
+    $this->actingAs($this->tech)->get('/dashboard/patients')->assertOk()->assertDontSee('Rezaei');
 
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678')
+    $this->actingAs($this->tech)->get('/dashboard/patients?nationalID=0012345678')
         ->assertOk()
         ->assertSee('Rezaei')
         ->assertSee(route('studies.show', $this->study), false);
 
-    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=999')
+    $this->actingAs($this->tech)->get('/dashboard/patients?nationalID=999')
         ->assertOk()
-        ->assertSee('No echo reports found');
+        ->assertSee('No echo reports found')
+        ->assertSee('Record a new echo study');
 });
 
-test('the old patients page redirects to the patients tab', function () {
-    $this->actingAs($this->tech)->get('/patients?nationalID=0012345678')
-        ->assertRedirect(route('dashboard', ['tab' => 'patients', 'nationalID' => '0012345678']));
+test('tabs only offer the sections a role may open', function () {
+    $admin = User::factory()->for($this->hospital)->role(Role::HospitalAdmin)->create();
+    $platformAdmin = User::factory()->platformAdmin()->create();
+
+    $this->actingAs($this->tech)->get('/dashboard/patients')
+        ->assertSee(route('dashboard'), false)
+        ->assertDontSee(route('staff.index'), false)
+        ->assertDontSee(route('audit.index'), false);
+
+    $this->actingAs($admin)->get('/dashboard/staff')
+        ->assertOk()
+        ->assertSee(route('patients.index'), false)
+        ->assertSee(route('audit.index'), false)
+        ->assertDontSee(route('studies.create'), false);
+
+    $this->actingAs($platformAdmin)->get('/dashboard')->assertRedirect(route('admin.hospitals.index'));
+    $this->actingAs($platformAdmin)->get('/dashboard/hospitals')->assertOk()->assertDontSee(route('patients.index'), false);
 });
 
-test('deleting a draft returns to the tab it was deleted from', function () {
-    $this->actingAs($this->tech)->delete("/studies/{$this->study->id}", ['tab' => 'studies'])
-        ->assertRedirect(route('dashboard', ['tab' => 'studies']));
+test('old URLs redirect to their dashboard section', function (string $from, string $to) {
+    $this->actingAs($this->tech)->get($from)->assertRedirect($to)->assertStatus(301);
+})->with([
+    ['/patients?nationalID=0012345678', '/dashboard/patients?nationalID=0012345678'],
+    ['/studies/create', '/dashboard/studies/create'],
+    ['/studies/7/edit', '/dashboard/studies/7/edit'],
+    ['/staff', '/dashboard/staff'],
+    ['/audit?action=study.viewed', '/dashboard/audit?action=study.viewed'],
+    ['/admin/hospitals', '/dashboard/hospitals'],
+    ['/help/echo-form', '/dashboard/help'],
+    ['/profile', '/dashboard/profile'],
+]);
 
-    $second = $this->actingAs($this->tech)->postJson('/studies', echoPayload())->json('id');
+test('the old patients tab link redirects to the patient echos section', function () {
+    $this->actingAs($this->tech)->get('/dashboard?tab=patients&nationalID=0012345678')
+        ->assertRedirect(route('patients.index', ['nationalID' => '0012345678']));
+});
 
-    $this->actingAs($this->tech)->delete("/studies/{$second}")
-        ->assertRedirect(route('dashboard', ['tab' => 'patients', 'nationalID' => '0012345678']));
+test('deleting a draft returns to the section it was deleted from', function () {
+    $this->actingAs($this->tech)->delete("/dashboard/studies/{$this->study->id}", ['tab' => 'studies'])
+        ->assertRedirect(route('dashboard'));
+
+    $second = $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload())->json('id');
+
+    $this->actingAs($this->tech)->delete("/dashboard/studies/{$second}")
+        ->assertRedirect(route('patients.index', ['nationalID' => '0012345678']));
 });
 
 test('another hospital sees none of these studies on its dashboard', function () {
     $intruder = User::factory()->role(Role::Doctor)->create();
 
-    $this->actingAs($intruder)->get('/dashboard')->assertOk()->assertDontSee('Rezaei')->assertSee('No studies found');
-    $this->actingAs($intruder)->get('/dashboard?tab=studies&search=Rezaei')->assertDontSee(route('studies.show', $this->study), false);
-    $this->actingAs($intruder)->get('/dashboard?tab=patients&nationalID=0012345678')->assertDontSee('Rezaei');
+    $this->actingAs($intruder)->get('/dashboard')
+        ->assertOk()
+        ->assertDontSee('Rezaei')
+        ->assertSee('No studies found')
+        ->assertViewHas('counts', fn ($counts) => $counts->isEmpty());
+    $this->actingAs($intruder)->get('/dashboard?search=Rezaei')->assertDontSee(route('studies.show', $this->study), false);
+    $this->actingAs($intruder)->get('/dashboard/patients?nationalID=0012345678')->assertDontSee('Rezaei');
 });
 
 test('deactivated staff are logged out instead of seeing patient data', function () {

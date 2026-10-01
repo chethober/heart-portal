@@ -21,7 +21,7 @@ class HospitalController extends Controller
             ->latest()
             ->paginate(25);
 
-        return view('admin.hospitals.index', ['hospitals' => $hospitals]);
+        return view('dashboard.hospitals', ['hospitals' => $hospitals]);
     }
 
     public function updateStatus(Request $request, Hospital $hospital): RedirectResponse
