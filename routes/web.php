@@ -13,6 +13,7 @@ use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\Staff\InvitationController;
 use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\WorklistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,7 @@ Route::get('/hospital/pending', HospitalPendingController::class)->middleware(['
 // Every signed-in form, search and report lives under /dashboard.
 Route::prefix('dashboard')->group(function () {
     Route::middleware(['auth', 'verified'])->group(function () {
-        // The hospital worklist; platform admins are sent to the hospitals tab.
+        // The echo form for staff who record studies; everyone else is sent to their first section.
         Route::get('/', DashboardController::class)->middleware('two-factor')->name('dashboard');
 
         // Platform administration (no access to patient data).
@@ -50,6 +51,7 @@ Route::prefix('dashboard')->group(function () {
             });
 
             Route::middleware('permission:patients.view')->group(function () {
+                Route::get('/worklist', WorklistController::class)->name('worklist');
                 Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
                 Route::get('/studies/{study}', [EchoStudyController::class, 'show'])->name('studies.show');
                 Route::delete('/studies/{study}', [EchoStudyController::class, 'destroy'])->name('studies.destroy');

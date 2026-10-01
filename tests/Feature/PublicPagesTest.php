@@ -37,6 +37,7 @@ test('the old echo form guide address redirects to the help center', function ()
 
 test('every authenticated page offers the source code link', function () {
     $this->actingAs(User::factory()->role(Role::HospitalAdmin)->create())
+        ->followingRedirects()
         ->get('/dashboard')
         ->assertSee(config('app.source_url'));
 });

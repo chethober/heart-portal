@@ -81,7 +81,7 @@ test('signed-in pages are translated', function () {
     $doctor = User::factory()->role(Role::Doctor)->create();
 
     $this->actingAs($doctor)->withCookie('locale', 'es')->get('/dashboard')
-        ->assertSee('Panel')
+        ->assertSee('Nuevo estudio de eco')
         ->assertSee('Lista de trabajo')
         ->assertSee('Ecos del paciente');
 });

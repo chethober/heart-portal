@@ -3,14 +3,7 @@
 @endphp
 
 <x-dashboard-layout :title="__('Patient echos')">
-    <form method="GET" action="{{ route('patients.index') }}" class="mb-4 flex flex-wrap items-end gap-3" role="search">
-        <div>
-            <x-input-label for="nationalID" :value="__('National ID')" />
-            <x-text-input id="nationalID" name="nationalID" class="mt-1 block w-56" :value="$nationalID" required autofocus />
-        </div>
-        <x-primary-button>{{ __('Search') }}</x-primary-button>
-    </form>
-
+    {{-- The National ID search is in the dashboard header. --}}
     @if ($nationalID === '')
         <p class="py-8 text-center text-gray-500">{{ __("Enter the patient's National ID to see their recorded echocardiograms.") }}</p>
     @elseif ($echoReports->isEmpty())

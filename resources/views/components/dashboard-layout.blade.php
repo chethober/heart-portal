@@ -1,9 +1,9 @@
-{{-- Shared shell for every dashboard section: header, primary actions, flash messages and section tabs. --}}
+{{-- Shared shell for every dashboard section: header with patient search and help, and flash messages.
+     The sections themselves are linked from the top navigation. --}}
 @props(['title'])
 
 @php
     $user = Auth::user();
-    $tabs = \App\Support\DashboardTabs::for($user);
 @endphp
 
 <x-app-layout>
@@ -15,11 +15,20 @@
                     <p class="mt-1 text-sm text-gray-500">{{ $user->hospital->name }}</p>
                 @endif
             </div>
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 {{ $actions ?? '' }}
-                @if ($user->can('studies.create') && ! request()->routeIs('studies.create'))
-                    <a href="{{ route('studies.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">{{ __('New echo study') }}</a>
-                @endif
+                @can('patients.view')
+                    <form method="GET" action="{{ route('patients.index') }}" class="flex items-center gap-2" role="search">
+                        <label for="header-national-id" class="sr-only">{{ __('National ID') }}</label>
+                        @php($onPatients = request()->routeIs('patients.index'))
+                        <input id="header-national-id" name="nationalID" type="search" required
+                               value="{{ $onPatients ? request()->query('nationalID') : '' }}"
+                               @if ($onPatients && blank(request()->query('nationalID'))) autofocus @endif
+                               placeholder="{{ __('National ID') }}"
+                               class="no-voice block w-48 rounded-md border-gray-300 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">{{ __('Search') }}</button>
+                    </form>
+                @endcan
                 @if ($user->hospital_id)
                     <a href="{{ route('help') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">{{ __('Help') }}</a>
                 @endif
@@ -34,24 +43,6 @@
             @endif
 
             <div class="bg-white shadow-sm sm:rounded-lg">
-                @if (count($tabs) > 1)
-                    {{-- The divider is an inset shadow, not a border, so the active tab's underline can cover it
-                         without spilling past the nav: overflow-x-auto also scrolls vertically, so any overhang
-                         would add a scrollbar. --}}
-                    <nav class="flex gap-6 overflow-x-auto whitespace-nowrap px-6 shadow-[inset_0_-1px_0_0_theme(colors.gray.200)]" aria-label="{{ __('Dashboard sections') }}">
-                        @foreach ($tabs as $tab)
-                            <a href="{{ $tab['url'] }}"
-                               @if ($tab['active']) aria-current="page" @endif
-                               class="inline-flex items-center gap-2 border-b-2 py-4 text-sm font-medium {{ $tab['active'] ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
-                                {{ $tab['label'] }}
-                                @if ($tab['count'])
-                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">{{ $tab['count'] }}</span>
-                                @endif
-                            </a>
-                        @endforeach
-                    </nav>
-                @endif
-
                 <div class="p-6 text-gray-900">
                     {{ $slot }}
                 </div>

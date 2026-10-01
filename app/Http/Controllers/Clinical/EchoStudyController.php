@@ -147,7 +147,7 @@ class EchoStudyController extends Controller
 
         // Return to whichever dashboard section the delete was made from.
         $redirect = $request->input('tab') === 'studies'
-            ? redirect()->route('dashboard')
+            ? redirect()->route('worklist')
             : redirect()->route('patients.index', ['nationalID' => $study->patient->national_id]);
 
         return $redirect->with('status', __('Draft deleted.'));
