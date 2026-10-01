@@ -5,3 +5,9 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Reserve the scrollbar's space on every page so the layout doesn't shift
+   sideways when moving between short and long pages. */
+html {
+    scrollbar-gutter: stable;
+}

@@ -52,7 +52,7 @@
                 <a href="{{ url('/') }}#security" class="block py-1">{{ __('Security') }}</a>
                 <a href="{{ route('help') }}" class="block py-1">{{ __('Help') }}</a>
                 <a href="{{ config('app.source_url') }}" class="block py-1">GitHub</a>
-                <x-language-switcher class="py-1" />
+                <x-language-switcher align="left" class="-ms-3" />
                 @auth
                     <a href="{{ route('dashboard') }}" class="block py-1 font-medium">{{ __('Open dashboard') }}</a>
                 @else

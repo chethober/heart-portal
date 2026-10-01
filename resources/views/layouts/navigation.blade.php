@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <!-- Patient search, help and settings -->
+            <!-- Patient search, settings and help -->
             <div class="hidden lg:flex lg:items-center lg:ms-6 gap-4">
                 @if ($navSearch)
                     <form method="GET" action="{{ route('patients.index') }}" class="relative" role="search">
@@ -48,9 +48,6 @@
                                class="no-voice block w-44 rounded-md border-gray-300 py-1.5 ps-9 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <button type="submit" class="sr-only">{{ __('Search') }}</button>
                     </form>
-                @endif
-                @if ($navUser->hospital_id)
-                    <a href="{{ route('help') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">{{ __('Help') }}</a>
                 @endif
                 <x-language-switcher />
                 <x-dropdown align="right" width="48">
@@ -86,6 +83,14 @@
                         </form>
                     </x-slot>
                 </x-dropdown>
+                @if ($navUser->hospital_id)
+                    <a href="{{ route('help') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
+                        </svg>
+                        {{ __('Help') }}
+                    </a>
+                @endif
             </div>
 
             <!-- Hamburger -->
@@ -140,7 +145,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-language-switcher class="px-4 py-2" />
+                <x-language-switcher align="left" class="px-1" />
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
