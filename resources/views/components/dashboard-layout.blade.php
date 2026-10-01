@@ -17,9 +17,9 @@
             </div>
             <div class="flex flex-wrap gap-3">
                 {{ $actions ?? '' }}
-                @can('studies.create')
+                @if ($user->can('studies.create') && ! request()->routeIs('studies.create'))
                     <a href="{{ route('studies.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">{{ __('New echo study') }}</a>
-                @endcan
+                @endif
                 @if ($user->hospital_id)
                     <a href="{{ route('help') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">{{ __('Help') }}</a>
                 @endif
