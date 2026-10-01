@@ -12,12 +12,6 @@
 @endphp
 
 <x-dashboard-layout :title="$title">
-    @if ($editing)
-        <x-slot name="actions">
-            <a href="{{ route('studies.show', $study) }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">{{ __('Back to report') }}</a>
-        </x-slot>
-    @endif
-
     <link rel="stylesheet" href="/legacy/persianDatepicker/css/persianDatepicker-default.css">
     <link rel="stylesheet" href="/legacy/voice-input.css">
     <script src="/legacy/persianDatepicker/js/jquery-1.10.1.min.js"></script>
@@ -48,10 +42,13 @@
       <input type="hidden" name="_token" value="{{ csrf_token() }}" />
       @if ($editing)
       <div class="edit-banner {{ $amending ? 'is-amending' : '' }}">
-        <p class="edit-banner-title">
-          {{ $amending ? 'Amending signed report' : 'Editing draft' }} #{{ $study->id }}
-          — {{ $study->patient->first_name.' '.$study->patient->last_name }}
-        </p>
+        <div class="edit-banner-head">
+          <p class="edit-banner-title">
+            {{ $amending ? 'Amending signed report' : 'Editing draft' }} #{{ $study->id }}
+            — {{ $study->patient->first_name.' '.$study->patient->last_name }}
+          </p>
+          <a href="{{ route('studies.show', $study) }}" class="ef-btn ef-btn-secondary">{{ __('Back to report') }}</a>
+        </div>
         @if ($amending)
         <div class="field">
           <label for="amendment_reason">Reason for amendment <span class="req">*</span></label>

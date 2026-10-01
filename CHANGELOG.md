@@ -29,8 +29,8 @@ All notable changes to this project are documented here. The format follows
   styling instead of the old standalone page; every form feature (patient tabs, section chips,
   live preview, drafts, voice input, Jalali dates, auto summary) is unchanged.
 - `/dashboard` now opens the echo form; the worklist moved to `/dashboard/worklist` (old filter
-  links redirect). The dashboard tabs are gone: sections and their counts are in the top
-  navigation, and the National ID search sits in the dashboard header beside Help.
+  links redirect). The dashboard tabs and header row are gone: sections and their counts, the
+  National ID search and Help are all in the top navigation.
 
 ### Security
 - Report HTML built from free text is sanitized (fixes stored XSS present in the original app).
