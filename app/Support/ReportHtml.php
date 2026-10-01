@@ -7,7 +7,7 @@ use DOMElement;
 use DOMNode;
 
 /**
- * Sanitizes HTML fragments built by the legacy report templates.
+ * Sanitizes HTML fragments built by the report template.
  *
  * Those templates concatenate free text typed on the form (descriptions,
  * findings) into markup that is echoed raw, so a value like "<script>" would

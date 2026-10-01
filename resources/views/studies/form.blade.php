@@ -12,11 +12,11 @@
 @endphp
 
 <x-dashboard-layout :title="$title">
-    <link rel="stylesheet" href="/legacy/persianDatepicker/css/persianDatepicker-default.css">
-    <link rel="stylesheet" href="/legacy/voice-input.css">
-    <script src="/legacy/persianDatepicker/js/jquery-1.10.1.min.js"></script>
-    <script src="/legacy/persianDatepicker/js/persianDatepicker.min.js"></script>
-    <script src="/legacy/voice-input.js" defer></script>
+    <link rel="stylesheet" href="/echo-form/persianDatepicker/css/persianDatepicker-default.css">
+    <link rel="stylesheet" href="/echo-form/voice-input.css">
+    <script src="/echo-form/persianDatepicker/js/jquery-1.10.1.min.js"></script>
+    <script src="/echo-form/persianDatepicker/js/persianDatepicker.min.js"></script>
+    <script src="/echo-form/voice-input.js" defer></script>
     @include('studies.partials.form-styles')
 
     <div id="echo-app" dir="ltr" lang="en">

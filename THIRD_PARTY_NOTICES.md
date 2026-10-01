@@ -6,8 +6,6 @@ listed in `composer.lock` and `package-lock.json` with their licenses.
 
 | Component | Location | License |
 |---|---|---|
-| [persianDatepicker](https://github.com/behzadi/persianDatepicker) v0.1.0 — © 2013 Mohammad hasan Behzadi | `public/legacy/persianDatepicker/` | MIT ([LICENSE](public/legacy/persianDatepicker/LICENSE)) |
-| [jQuery](https://jquery.com) v1.10.1 — © jQuery Foundation | `public/legacy/persianDatepicker/js/jquery-1.10.1.min.js` | MIT |
-| [Vazirmatn](https://github.com/rastikerdar/vazirmatn) font — © Saber Rastikerdar | `public/legacy/fonts/Vazirmatn-*.ttf` | SIL Open Font License 1.1 |
-| [Lato](https://www.latofonts.com) font — © Łukasz Dziedzic | `public/legacy/fonts/Lato-*.ttf` | SIL Open Font License 1.1 |
+| [persianDatepicker](https://github.com/behzadi/persianDatepicker) v0.1.0 — © 2013 Mohammad hasan Behzadi | `public/echo-form/persianDatepicker/` | MIT ([LICENSE](public/echo-form/persianDatepicker/LICENSE)) |
+| [jQuery](https://jquery.com) v1.10.1 — © jQuery Foundation | `public/echo-form/persianDatepicker/js/jquery-1.10.1.min.js` | MIT |
 | [Figtree](https://github.com/erikdkennedy/figtree) font (loaded from Bunny Fonts) — © Erik Kennedy | external | SIL Open Font License 1.1 |

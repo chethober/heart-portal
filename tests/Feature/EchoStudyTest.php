@@ -92,14 +92,20 @@ test('history and report render with derived values and sanitized free text', fu
         ->assertSee($this->hospital->name)
         ->assertSeeText('There is mild LV enlargement')
         ->assertSee('apical thinning', false)
-        ->assertDontSee('<script>alert(1)</script>', false);
+        ->assertDontSee('<script>alert(1)</script>', false)
+        // The report opens inside the dashboard, with its navigation and no old navbar.
+        ->assertSee('class="echo-report"', false)
+        ->assertSee('id="nav-national-id"', false)
+        ->assertDontSee('app-navbar', false);
 });
 
-test('live preview renders unsaved form data', function () {
+test('live preview renders unsaved form data on a bare page', function () {
     $this->actingAs($this->tech)
         ->post('/dashboard/studies/preview', [...echoPayload(), 'lv_size' => 'Manual', 'lv_size_manual' => 'Borderline LV size'])
         ->assertOk()
-        ->assertSee('Borderline LV size');
+        ->assertSee('Borderline LV size')
+        ->assertDontSee('id="nav-national-id"', false)
+        ->assertDontSee('DRAFT — NOT SIGNED');
 });
 
 test('hospitals cannot see each others patients or studies', function () {
@@ -130,7 +136,7 @@ test('form page and doctor suggestions load', function () {
     User::factory()->for($this->hospital)->role(Role::Doctor)->create(['name' => 'Dr. Ahmadi']);
     User::factory()->role(Role::Doctor)->create(['name' => 'Dr. Elsewhere']);
 
-    // The form lives inside the dashboard: its tabs are shown and the legacy navbar is gone.
+    // The form lives inside the dashboard: its navigation is shown and the old navbar is gone.
     $this->actingAs($this->tech)->get('/dashboard/studies/create')
         ->assertOk()
         ->assertSee('echoForm', false)

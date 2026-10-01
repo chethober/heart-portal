@@ -31,6 +31,10 @@ All notable changes to this project are documented here. The format follows
 - `/dashboard` now opens the echo form; the worklist moved to `/dashboard/worklist` (old filter
   links redirect). The dashboard tabs and header row are gone: sections and their counts, the
   National ID search and Help are all in the top navigation.
+- The detailed report (drafts to sign, signed and amended reports, earlier signed versions) opens
+  inside the dashboard too, with print, edit/amend, sign and version history unchanged. The old
+  standalone navbar, its stylesheet and the unused bundled fonts are removed, and the remaining
+  form assets moved from `public/legacy/` to `public/echo-form/`.
 
 ### Security
 - Report HTML built from free text is sanitized (fixes stored XSS present in the original app).
