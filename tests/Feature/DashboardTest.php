@@ -51,10 +51,16 @@ test('old worklist filter links redirect to the worklist', function () {
         ->assertRedirect(route('worklist', ['status' => 'draft', 'search' => 'reza']));
 });
 
-test('the header searches patients by national ID', function () {
-    $this->actingAs($this->tech)->get('/dashboard/worklist')
+test('the navbar holds the patient search and help, with no header row', function () {
+    $this->actingAs($this->tech)->get('/dashboard')
+        ->assertSee('id="nav-national-id"', false)
         ->assertSee('action="'.route('patients.index').'"', false)
-        ->assertSee('name="nationalID"', false);
+        ->assertSee(route('help'), false)
+        ->assertDontSee('<header', false);
+
+    // Members of a hospital awaiting approval have nothing to search yet.
+    $pending = User::factory()->for(Hospital::factory()->pending())->role(Role::HospitalAdmin)->create();
+    $this->actingAs($pending)->get('/hospital/pending')->assertOk()->assertDontSee('id="nav-national-id"', false);
 });
 
 test('doctors can sign drafts from the worklist', function () {

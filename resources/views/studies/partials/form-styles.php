@@ -294,6 +294,14 @@
     background: #fffbeb;
   }
 
+  #echo-app .edit-banner-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
   #echo-app .edit-banner-title {
     margin: 0;
     font-size: 0.875rem;
