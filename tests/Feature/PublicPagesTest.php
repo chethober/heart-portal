@@ -19,13 +19,20 @@ test('signed-in users get a dashboard link on the landing page', function () {
     $this->actingAs(User::factory()->create())->get('/')->assertSee(route('dashboard'));
 });
 
-test('help center is public; the echo form guide requires login', function () {
-    $this->get('/help')->assertOk()->assertSee('Signing and amending')->assertDontSee(route('help.form'));
-    $this->get('/dashboard/help')->assertRedirect(route('login'));
+test('help center is one public page that includes the echo form guide', function () {
+    $this->get('/help')->assertOk()
+        ->assertSee('Signing and amending')
+        ->assertSee('What the form covers')
+        ->assertSee('Viewing and printing reports')
+        ->assertDontSee(route('studies.create'));
 
     $tech = User::factory()->role(Role::Technician)->create();
-    $this->actingAs($tech)->get('/help')->assertSee(route('help.form'));
-    $this->actingAs($tech)->get('/dashboard/help')->assertOk();
+    $this->actingAs($tech)->get('/help')->assertOk()->assertSee(route('studies.create'));
+    $this->actingAs($tech)->get('/dashboard')->assertSee(route('help'));
+});
+
+test('the old echo form guide address redirects to the help center', function () {
+    $this->get('/help/echo-form')->assertStatus(301)->assertRedirect('/help#recording');
 });
 
 test('every authenticated page offers the source code link', function () {

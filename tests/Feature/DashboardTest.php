@@ -82,7 +82,6 @@ test('old URLs redirect to their dashboard section', function (string $from, str
     ['/staff', '/dashboard/staff'],
     ['/audit?action=study.viewed', '/dashboard/audit?action=study.viewed'],
     ['/admin/hospitals', '/dashboard/hospitals'],
-    ['/help/echo-form', '/dashboard/help'],
     ['/profile', '/dashboard/profile'],
 ]);
 

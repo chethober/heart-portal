@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Clinical\DoctorController;
 use App\Http\Controllers\Clinical\EchoStudyController;
-use App\Http\Controllers\Clinical\HelpController;
 use App\Http\Controllers\Clinical\PatientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HospitalPendingController;
@@ -19,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('home');
 Route::view('/help', 'public.help')->name('help');
+// The echo form guide is now part of the help center; keep old links and bookmarks working.
+Route::permanentRedirect('/help/echo-form', '/help#recording');
 Route::post('/locale', LocaleController::class)->name('locale.update');
 
 Route::get('/hospital/pending', HospitalPendingController::class)->middleware(['auth', 'verified'])->name('hospital.pending');
@@ -37,7 +38,6 @@ Route::prefix('dashboard')->group(function () {
 
         // Everything below requires an active member of an approved hospital.
         Route::middleware(['hospital.active', 'two-factor'])->group(function () {
-            Route::get('/help', HelpController::class)->name('help.form');
             Route::get('/users/{user}/signature', [SignatureController::class, 'show'])->name('users.signature');
             Route::post('/profile/signature', [SignatureController::class, 'update'])->middleware('permission:studies.finalize')->name('profile.signature');
             Route::get('/audit', [AuditLogController::class, 'index'])->middleware('permission:audit.view')->name('audit.index');
@@ -83,10 +83,10 @@ Route::prefix('dashboard')->group(function () {
 
 // Pages that used to live outside /dashboard: keep old links and bookmarks working.
 Route::get('/{page}', function (Request $request, string $page) {
-    $path = preg_replace(['#^admin/hospitals#', '#^help/echo-form#'], ['hospitals', 'help'], $page);
+    $path = preg_replace('#^admin/hospitals#', 'hospitals', $page);
     $query = $request->getQueryString();
 
     return redirect()->to('/dashboard/'.$path.($query ? '?'.$query : ''), 301);
-})->where('page', '(patients|studies|staff|audit|profile|admin/hospitals|help/echo-form)(/.*)?');
+})->where('page', '(patients|studies|staff|audit|profile|admin/hospitals)(/.*)?');
 
 require __DIR__.'/auth.php';

@@ -9,13 +9,12 @@ $navReportID = $navStudy ? (is_object($navStudy) ? $navStudy->getKey() : $navStu
 $isFormPage = $routeName === 'studies.create';
 $isEchosPage = $routeName === 'patients.index';
 $isReportPage = $routeName === 'studies.show';
-$isHelpPage = $routeName === 'help.form';
 
 $canCreate = $navUser->can('studies.create');
 $formUrl = route('studies.create');
 $echosUrl = route('patients.index', $navNationalID !== '' ? ['nationalID' => $navNationalID] : []);
 $reportUrl = $navReportID !== '' ? route('studies.show', $navReportID) : '#';
-$helpUrl = route('help.form');
+$helpUrl = route('help');
 ?>
 
 <!-- Persistent Navigation Bar -->
@@ -81,7 +80,7 @@ $helpUrl = route('help.form');
                 <?php } ?>
             </li>
             <li>
-                <a href="<?= e($helpUrl) ?>" class="navbar-item <?= $isHelpPage ? 'active' : '' ?>">
+                <a href="<?= e($helpUrl) ?>" class="navbar-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -210,7 +209,7 @@ $helpUrl = route('help.form');
             <?php } ?>
         </li>
         <li>
-            <a href="<?= e($helpUrl) ?>" class="drawer-item <?= $isHelpPage ? 'active' : '' ?>">
+            <a href="<?= e($helpUrl) ?>" class="drawer-item">
                 <span class="item-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
