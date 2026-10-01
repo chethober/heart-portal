@@ -25,6 +25,9 @@ All notable changes to this project are documented here. The format follows
   echo form, reports, help and profile moved to `/dashboard/...`. Old URLs redirect permanently.
 - The worklist filters by status in one click, with per-status counts; tabs show how many drafts,
   pending invitations or hospitals awaiting approval need attention.
+- The echo form (new, edit and amend) now opens inside the dashboard with its header, tabs and
+  styling instead of the old standalone page; every form feature (patient tabs, section chips,
+  live preview, drafts, voice input, Jalali dates, auto summary) is unchanged.
 
 ### Security
 - Report HTML built from free text is sanitized (fixes stored XSS present in the original app).

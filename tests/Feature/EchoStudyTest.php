@@ -130,6 +130,11 @@ test('form page and doctor suggestions load', function () {
     User::factory()->for($this->hospital)->role(Role::Doctor)->create(['name' => 'Dr. Ahmadi']);
     User::factory()->role(Role::Doctor)->create(['name' => 'Dr. Elsewhere']);
 
-    $this->actingAs($this->tech)->get('/dashboard/studies/create')->assertOk()->assertSee('echoForm', false);
+    // The form lives inside the dashboard: its tabs are shown and the legacy navbar is gone.
+    $this->actingAs($this->tech)->get('/dashboard/studies/create')
+        ->assertOk()
+        ->assertSee('echoForm', false)
+        ->assertSee(route('patients.index'), false)
+        ->assertDontSee('app-navbar', false);
     $this->actingAs($this->tech)->getJson('/dashboard/doctors')->assertOk()->assertJson(['Dr. Ahmadi'])->assertJsonMissing(['Dr. Elsewhere']);
 });
