@@ -74,7 +74,7 @@ class Patient extends Model
     }
 
     /**
-     * Demographics keyed by the names the legacy form and report templates use.
+     * Demographics keyed by the names the echo form and report use.
      *
      * @return array<string, string|null>
      */

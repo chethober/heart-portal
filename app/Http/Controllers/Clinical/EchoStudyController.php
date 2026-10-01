@@ -179,9 +179,9 @@ class EchoStudyController extends Controller
      */
     private function report(array $report, bool $isPreview, ?EchoStudy $study = null, ?EchoStudyVersion $version = null): View
     {
-        return view('studies.report', [
+        // The preview is a bare page for the form's preview pane; saved reports open in the dashboard.
+        return view($isPreview ? 'studies.preview' : 'studies.report', [
             'report' => $report,
-            'isPreview' => $isPreview,
             'hospital' => auth()->user()->hospital,
             'study' => $study,
             'version' => $version,

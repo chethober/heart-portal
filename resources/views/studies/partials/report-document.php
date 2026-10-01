@@ -1,9 +1,9 @@
 <?php
 /**
- * Detailed echo report, ported from the legacy view_report.php.
+ * The echo report document itself: shared by the report page (studies/report.blade.php) and the
+ * form's live preview (studies/preview.php). Styles are in report-styles.php, scoped to .echo-report.
  *
  * @var array<string, mixed>|null $report  Output of EchoCalculations::derive(), or null.
- * @var bool $isPreview  Rendering live form data inside the form's preview pane.
  * @var Hospital $hospital
  * @var EchoStudy|null $study  The saved study (null in preview).
  * @var EchoStudyVersion|null $version  Set when viewing an earlier signed version.
@@ -1669,321 +1669,9 @@ if (! function_exists('generateSummary')) {
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Echo Report — <?= e($hospital->name) ?></title>
-    <link type="text/css" rel="stylesheet" href="/legacy/fonts.css" />
-    <link type="text/css" rel="stylesheet" href="/legacy/navbar.css" />
-    <style>
-        /* Tooltip Container */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-            border-bottom: 1px dotted #0066cc;
-            color: #0066cc;
-        }
-
-        /* Tooltip Table Box */
-        .tooltip-table-box {
-            visibility: hidden;
-            position: absolute;
-            z-index: 9999;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ffffff;
-            color: #2d3748;
-            padding: 8px 10px;
-            border-radius: 6px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid #e2e8f0;
-            width: min(320px, calc(100vw - 32px));
-            font-size: 11px;
-            line-height: 1.4;
-            transition: opacity 0.2s, visibility 0.2s;
-            opacity: 0;
-            text-align: left;
-            pointer-events: none;
-        }
-
-        .tooltip-container:hover .tooltip-table-box {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.4;
-            margin: 12px;
-            background: #f6f7fb;
-            color: #111;
-            direction: ltr;
-            text-align: left;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        @media (min-width: 768px) {
-            body {
-                margin: 16px;
-            }
-        }
-
-        .report-container {
-            width: 100%;
-            max-width: 1200px;
-            box-sizing: border-box;
-            margin: 0 auto;
-            background: white;
-            padding: 16px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, .05);
-            border-radius: 12px;
-        }
-
-        @media (min-width: 768px) {
-            .report-container {
-                padding: 24px;
-            }
-        }
-
-        .section {
-            margin-bottom: 24px;
-            page-break-inside: avoid;
-        }
-
-        .section-title {
-            font-size: 1.25em;
-            font-weight: 700;
-            margin: 18px 0 10px;
-            padding-bottom: 6px;
-            border-bottom: 2px solid #0066cc;
-            color: #0066cc;
-        }
-
-        .patient-info-line,
-        .clinical-info-line {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 18px;
-            padding: 12px;
-            background-color: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            margin: 10px 0;
-            box-sizing: border-box;
-        }
-
-        .patient-info-line {
-            direction: rtl;
-            gap: 12px 20px;
-        }
-
-        .info-item,
-        .patient-info-item {
-            display: inline-flex;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-right: 4px;
-        }
-
-        .value {
-            color: #1a365d;
-        }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin: 6px 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            border: 1px solid #e2e8f0;
-        }
-
-        td {
-            padding: 6px 8px;
-            border: 1px solid #edf2f7;
-        }
-
-        .report-summary {
-            background-color: #f8fafc;
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border-left: 4px solid #0066cc;
-            border: 1px solid #e2e8f0;
-            border-left: 4px solid #0066cc;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #0066cc;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .header h1 {
-            color: #0066cc;
-            margin: 0;
-            font-size: 1.6em;
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .header-logo {
-            height: 76px;
-            max-width: 120px;
-            width: auto;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 640px) {
-            .header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .header h1 {
-                font-size: 1.25em !important;
-                padding: 0 !important;
-            }
-            .header-logo {
-                height: 52px;
-            }
-        }
-
-        u {
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .report-actions {
-            max-width: 1200px;
-            margin: 20px auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .btn-print {
-            padding: 10px 24px;
-            min-height: 44px;
-            font-size: 14px;
-            font-weight: 600;
-            background: #0066cc;
-            color: #fff;
-            border: 0;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .btn-print:hover {
-            background: #0052a3;
-        }
-
-        .btn-back {
-            padding: 10px 20px;
-            min-height: 44px;
-            font-size: 14px;
-            font-weight: 600;
-            background: #e2e8f0;
-            color: #4a5568;
-            border-radius: 8px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .btn-back:hover {
-            background: #cbd5e0;
-        }
-
-        @media (max-width: 640px) {
-            .report-actions {
-                flex-direction: column;
-            }
-            .btn-print, .btn-back {
-                width: 100%;
-            }
-        }
-
-        @media print {
-            body { padding: 0; font-size: 12pt; }
-            .report-container { box-shadow: none; padding: 0; max-width: 100%; }
-            .no-print { display: none !important; }
-            .clinical-info-line, .patient-info-line { border: 1px solid #d1d5db; background-color: #fff !important; -webkit-print-color-adjust: exact; }
-            .tooltip-container { border-bottom: none !important; color: inherit !important; cursor: default !important; }
-            u .tooltip-container { text-decoration: underline !important; }
-            .header { flex-direction: row !important; }
-            .header-logo { height: 66px !important; }
-            u {
-                text-decoration: underline !important;
-                -webkit-text-decoration: underline !important;
-                text-underline-offset: 2px;
-            }
-        }
-    </style>
-    <?php if ($isPreview) { ?>
-    <style>
-        .app-navbar, .print-button, .no-print, header {
-            display: none !important;
-        }
-        body {
-            margin: 0 !important;
-            padding: 8px !important;
-            background: #fff !important;
-        }
-        .report-container {
-            box-shadow: none !important;
-            border: 0 !important;
-            padding: 10px !important;
-            margin-top: 0 !important;
-        }
-    </style>
-    <?php } ?>
-</head>
-<body>
-    <?php if (! $isPreview) { ?><?= view('clinical.navbar')->render() ?><?php } ?>
-    <?php if ($report) { ?>
     <div class="report-container">
-        <?php if (session('status')) { ?>
-        <div class="no-print" style="background:#f0fff4;border:1px solid #9ae6b4;color:#22543d;border-radius:8px;padding:8px 12px;margin-bottom:10px"><?= e(session('status')) ?></div>
-        <?php } ?>
         <?php if ($study && $shownStatus === StudyStatus::Draft) { ?>
         <div style="border:2px solid #c53030;color:#c53030;font-weight:700;text-align:center;padding:6px;margin-bottom:10px;letter-spacing:2px">DRAFT — NOT SIGNED</div>
-        <?php } ?>
-        <?php if ($version) { ?>
-        <div class="no-print" style="background:#fffbeb;border:1px solid #f6e05e;border-radius:8px;padding:8px 12px;margin-bottom:10px">
-            Showing signed version <?= e($version->version) ?> of <?= e($study->versions->count()) ?>.
-            <a href="<?= e(route('studies.show', $study)) ?>">View current report</a>
-        </div>
         <?php } ?>
         <div class="header" style="position: relative; padding: 15px 0 5px; display: flex; align-items: center; justify-content: space-between;">
             <?php if (! empty($hospital->settings['secondary_logo_path'])) { ?>
@@ -2018,7 +1706,7 @@ if (! function_exists('generateSummary')) {
                 ($report['Echo_type'] == 'Other' && ! empty($report['other_Echo_type'])
                     ? ' - '.htmlspecialchars($report['other_Echo_type'])
                     : '')
-        ?></span></span>
+?></span></span>
                 <span class="patient-info-item"><span class="label">تاریخ اکو:</span><span class="value"><?= htmlspecialchars(
                     $report['echo_date'] ?? 'N/A',
                 ) ?></span></span>
@@ -2027,105 +1715,105 @@ if (! function_exists('generateSummary')) {
             <div class="clinical-info-line">
                 <?php
                 $clinicalInfo = [];
-        if (shouldDisplay($report['Echo_indication'])) {
-            $ind = getDisplayText(
-                $report['Echo_indication'],
-                'Echo_indication',
-            );
-            if (
-                $report['Echo_indication'] == 'Other' &&
-                ! empty($report['other_Echo_indication'])
-            ) {
-                $ind = $report['other_Echo_indication'];
-            }
-            $clinicalInfo[] =
-                '<span class="info-item"><span class="label">Indication:</span> '.
-                htmlspecialchars($ind).
-                '</span>';
-        }
-        if (shouldDisplay($report['History_diseases'])) {
-            $clinicalInfo[] =
-                '<span class="info-item"><span class="label">History:</span> '.
-                htmlspecialchars($report['History_diseases']).
-                '</span>';
-        }
+if (shouldDisplay($report['Echo_indication'])) {
+    $ind = getDisplayText(
+        $report['Echo_indication'],
+        'Echo_indication',
+    );
+    if (
+        $report['Echo_indication'] == 'Other' &&
+        ! empty($report['other_Echo_indication'])
+    ) {
+        $ind = $report['other_Echo_indication'];
+    }
+    $clinicalInfo[] =
+        '<span class="info-item"><span class="label">Indication:</span> '.
+        htmlspecialchars($ind).
+        '</span>';
+}
+if (shouldDisplay($report['History_diseases'])) {
+    $clinicalInfo[] =
+        '<span class="info-item"><span class="label">History:</span> '.
+        htmlspecialchars($report['History_diseases']).
+        '</span>';
+}
 
-        $vitals = [];
-        $measures = [];
-        if (shouldDisplay($report['BP'])) {
-            $vitals[] =
-                'BP: '.htmlspecialchars($report['BP']).' mmHg';
-        }
-        if (shouldDisplay($report['HR'])) {
-            $vitals[] =
-                'HR: '.htmlspecialchars($report['HR']).' bpm';
-        }
-        if (shouldDisplay($report['O2_sat'])) {
-            $vitals[] =
-                'O<sub>2</sub> Sat: '.
-                htmlspecialchars($report['O2_sat']).
-                '%';
-        }
-        if (shouldDisplay($report['Weight'])) {
-            $vitals[] =
-                'Wt: '.htmlspecialchars($report['Weight']).'kg';
-        }
-        if (shouldDisplay($report['Height'])) {
-            $vitals[] =
-                'Ht: '.htmlspecialchars($report['Height']).'cm';
-        }
-        if (
-            shouldDisplay($report['Weight']) &&
-            shouldDisplay($report['Height']) &&
-            $report['Height'] > 0
-        ) {
-            $vitals[] =
-                'BMI: '.
-                round(
-                    $report['Weight'] / ($report['Height'] / 100) ** 2,
-                    1,
-                );
-        }
-        if (isset($report['computed_BSA']) && $report['computed_BSA'] > 0) {
-            $height = isset($report['Height']) ? $report['Height'] : 0;
-            $weight = isset($report['Weight']) ? $report['Weight'] : 0;
-            $bsa_val = round($report['computed_BSA'], 2).' m²';
+$vitals = [];
+$measures = [];
+if (shouldDisplay($report['BP'])) {
+    $vitals[] =
+        'BP: '.htmlspecialchars($report['BP']).' mmHg';
+}
+if (shouldDisplay($report['HR'])) {
+    $vitals[] =
+        'HR: '.htmlspecialchars($report['HR']).' bpm';
+}
+if (shouldDisplay($report['O2_sat'])) {
+    $vitals[] =
+        'O<sub>2</sub> Sat: '.
+        htmlspecialchars($report['O2_sat']).
+        '%';
+}
+if (shouldDisplay($report['Weight'])) {
+    $vitals[] =
+        'Wt: '.htmlspecialchars($report['Weight']).'kg';
+}
+if (shouldDisplay($report['Height'])) {
+    $vitals[] =
+        'Ht: '.htmlspecialchars($report['Height']).'cm';
+}
+if (
+    shouldDisplay($report['Weight']) &&
+    shouldDisplay($report['Height']) &&
+    $report['Height'] > 0
+) {
+    $vitals[] =
+        'BMI: '.
+        round(
+            $report['Weight'] / ($report['Height'] / 100) ** 2,
+            1,
+        );
+}
+if (isset($report['computed_BSA']) && $report['computed_BSA'] > 0) {
+    $height = isset($report['Height']) ? $report['Height'] : 0;
+    $weight = isset($report['Weight']) ? $report['Weight'] : 0;
+    $bsa_val = round($report['computed_BSA'], 2).' m²';
 
-            $bsa_tooltip = '<span class="tooltip-container">'.htmlspecialchars($bsa_val);
-            $bsa_tooltip .= '<span class="tooltip-table-box no-print" style="width: 250px;">';
-            $bsa_tooltip .= '<strong style="display: block; margin-bottom: 5px; text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px;">BSA Calculation (Mosteller)</strong>';
-            $bsa_tooltip .= '<span style="display: block; margin-top: 5px; font-size: 10px; line-height: 1.5; font-weight: normal; color: #2d3748;">';
-            $bsa_tooltip .= '<strong>Formula:</strong> √((Height × Weight) / 3600)<br>';
-            $bsa_tooltip .= '<strong>Height:</strong> '.htmlspecialchars($height).' cm<br>';
-            $bsa_tooltip .= '<strong>Weight:</strong> '.htmlspecialchars($weight).' kg<br>';
-            $bsa_tooltip .= '<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">';
-            $bsa_tooltip .= '<strong>Calculation:</strong> √(('.$height.' × '.$weight.') / 3600) = '.round($report['computed_BSA'], 4).' m²';
-            $bsa_tooltip .= '</span></span></span>';
+    $bsa_tooltip = '<span class="tooltip-container">'.htmlspecialchars($bsa_val);
+    $bsa_tooltip .= '<span class="tooltip-table-box no-print" style="width: 250px;">';
+    $bsa_tooltip .= '<strong style="display: block; margin-bottom: 5px; text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px;">BSA Calculation (Mosteller)</strong>';
+    $bsa_tooltip .= '<span style="display: block; margin-top: 5px; font-size: 10px; line-height: 1.5; font-weight: normal; color: #2d3748;">';
+    $bsa_tooltip .= '<strong>Formula:</strong> √((Height × Weight) / 3600)<br>';
+    $bsa_tooltip .= '<strong>Height:</strong> '.htmlspecialchars($height).' cm<br>';
+    $bsa_tooltip .= '<strong>Weight:</strong> '.htmlspecialchars($weight).' kg<br>';
+    $bsa_tooltip .= '<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">';
+    $bsa_tooltip .= '<strong>Calculation:</strong> √(('.$height.' × '.$weight.') / 3600) = '.round($report['computed_BSA'], 4).' m²';
+    $bsa_tooltip .= '</span></span></span>';
 
-            $vitals[] = 'BSA: '.$bsa_tooltip;
-        }
-        if (shouldDisplay($report['Rhythm'])) {
-            $rh = getDisplayText($report['Rhythm'], 'Rhythm');
-            if (
-                $report['Rhythm'] == 'Other' &&
-                ! empty($report['other_Rhythm'])
-            ) {
-                $rh = $report['other_Rhythm'];
-            }
-            $clinicalInfo[] =
-                '<span class="info-item"><span class="label">Rhythm:</span> '.
-                htmlspecialchars($rh).
-                '</span>';
-        }
-        if ($vitals) {
-            $clinicalInfo[] =
-                '<span class="info-item"><span class="label">Clinical Data:</span> '.
-                implode(' | ', $vitals).
-                '</span>';
-        }
+    $vitals[] = 'BSA: '.$bsa_tooltip;
+}
+if (shouldDisplay($report['Rhythm'])) {
+    $rh = getDisplayText($report['Rhythm'], 'Rhythm');
+    if (
+        $report['Rhythm'] == 'Other' &&
+        ! empty($report['other_Rhythm'])
+    ) {
+        $rh = $report['other_Rhythm'];
+    }
+    $clinicalInfo[] =
+        '<span class="info-item"><span class="label">Rhythm:</span> '.
+        htmlspecialchars($rh).
+        '</span>';
+}
+if ($vitals) {
+    $clinicalInfo[] =
+        '<span class="info-item"><span class="label">Clinical Data:</span> '.
+        implode(' | ', $vitals).
+        '</span>';
+}
 
-        echo ReportHtml::clean(implode(' ', $clinicalInfo));
-        ?>
+echo ReportHtml::clean(implode(' ', $clinicalInfo));
+?>
             </div>
         </div>
 
@@ -2135,148 +1823,148 @@ if (! function_exists('generateSummary')) {
                 <table>
                     <tbody>
                     <?php
-            $chamberRows = [];
-        // LV
-        if (shouldDisplay($report['lv_LVEDD'])) {
-            $chamberRows[] = ['LVEDD', $report['lv_LVEDD'].' mm'];
-        }
-        if (shouldDisplay($report['lv_LVESD'])) {
-            $chamberRows[] = ['LVESD', $report['lv_LVESD'].' mm'];
-        }
-        if (shouldDisplay($report['lv_LVEDV'])) {
-            $chamberRows[] = ['LVEDV', $report['lv_LVEDV'].' cc'];
-        }
-        if (shouldDisplay($report['lv_LVESV'])) {
-            $chamberRows[] = ['LVESV', $report['lv_LVESV'].' cc'];
-        }
-        if (shouldDisplay($report['lv_IVS_thickness'])) {
-            $chamberRows[] = [
-                'IVS',
-                $report['lv_IVS_thickness'].' mm',
-            ];
-        }
-        if (shouldDisplay($report['lv_Posterior'])) {
-            $chamberRows[] = [
-                'PW',
-                $report['lv_Posterior'].' mm',
-            ];
-        }
-        if (shouldDisplay($report['lv_EF'])) {
-            $chamberRows[] = ['EF', $report['lv_EF'].' %'];
-        }
+    $chamberRows = [];
+// LV
+if (shouldDisplay($report['lv_LVEDD'])) {
+    $chamberRows[] = ['LVEDD', $report['lv_LVEDD'].' mm'];
+}
+if (shouldDisplay($report['lv_LVESD'])) {
+    $chamberRows[] = ['LVESD', $report['lv_LVESD'].' mm'];
+}
+if (shouldDisplay($report['lv_LVEDV'])) {
+    $chamberRows[] = ['LVEDV', $report['lv_LVEDV'].' cc'];
+}
+if (shouldDisplay($report['lv_LVESV'])) {
+    $chamberRows[] = ['LVESV', $report['lv_LVESV'].' cc'];
+}
+if (shouldDisplay($report['lv_IVS_thickness'])) {
+    $chamberRows[] = [
+        'IVS',
+        $report['lv_IVS_thickness'].' mm',
+    ];
+}
+if (shouldDisplay($report['lv_Posterior'])) {
+    $chamberRows[] = [
+        'PW',
+        $report['lv_Posterior'].' mm',
+    ];
+}
+if (shouldDisplay($report['lv_EF'])) {
+    $chamberRows[] = ['EF', $report['lv_EF'].' %'];
+}
 
-        if (isset($report['computed_LVEDVI']) && $report['computed_LVEDVI'] > 0) {
-            $chamberRows[] = ['LVEDVI', round($report['computed_LVEDVI'], 1).' cc/m²'];
-        }
-        if (isset($report['computed_LVEDDI']) && $report['computed_LVEDDI'] > 0) {
-            $chamberRows[] = ['LVEDDI', round($report['computed_LVEDDI'], 1).' mm/m²'];
-        }
-        // RV
-        if (shouldDisplay($report['rv_RV_basal_diameter'])) {
-            $chamberRows[] = [
-                'RV Basal',
-                $report['rv_RV_basal_diameter'].' mm',
-            ];
-        }
-        if (shouldDisplay($report['rv_RV_mid_diameter'])) {
-            $chamberRows[] = [
-                'RV Mid',
-                $report['rv_RV_mid_diameter'].' mm',
-            ];
-        }
-        if (shouldDisplay($report['rv_RV_longitudinal_diameter'])) {
-            $chamberRows[] = [
-                'RV Longitudinal',
-                $report['rv_RV_longitudinal_diameter'].' mm',
-            ];
-        }
-        if (shouldDisplay($report['rv_TAPSE'])) {
-            $chamberRows[] = ['TAPSE', $report['rv_TAPSE'].' mm'];
-        }
-        // LA
-        if (shouldDisplay($report['la_diameter'])) {
-            $chamberRows[] = [
-                'LA Diam',
-                $report['la_diameter'].' mm',
-            ];
-        }
-        if (shouldDisplay($report['la_area'])) {
-            $chamberRows[] = [
-                'LA Area',
-                $report['la_area'].' cm²',
-            ];
-        }
-        if (shouldDisplay($report['la_volume'])) {
-            $chamberRows[] = [
-                'LA Vol',
-                $report['la_volume'].' ml',
-            ];
-        }
-        // RA
-        if (shouldDisplay($report['ra_area'])) {
-            $chamberRows[] = [
-                'RA Area',
-                $report['ra_area'].' cm²',
-            ];
-        }
-        if (shouldDisplay($report['ra_volume'])) {
-            $chamberRows[] = [
-                'RA Vol',
-                $report['ra_volume'].' ml',
-            ];
-        }
-        if (shouldDisplay($report['av_AVA_CE'])) {
-            $chamberRows[] = ['AVA', $report['av_AVA_CE'].' cm²'];
-        }
-        // Aorta Measurements
-        if (shouldDisplay($report['av_annulus'] ?? null)) {
-            $chamberRows[] = ['Annulus', $report['av_annulus'].' mm'];
-        } elseif (shouldDisplay($report['AV_annulus'] ?? null)) {
-            $chamberRows[] = ['Annulus', $report['AV_annulus'].' mm'];
-        }
-        if (shouldDisplay($report['av_sinus_valsalva'] ?? null)) {
-            $chamberRows[] = ['Sinus Valsalva', $report['av_sinus_valsalva'].' mm'];
-        } elseif (shouldDisplay($report['Sinus_valsalva'] ?? null)) {
-            $chamberRows[] = ['Sinus Valsalva', $report['Sinus_valsalva'].' mm'];
-        }
-        if (shouldDisplay($report['av_st_junction'] ?? null)) {
-            $chamberRows[] = ['ST Junction', $report['av_st_junction'].' mm'];
-        } elseif (shouldDisplay($report['ST_junction'] ?? null)) {
-            $chamberRows[] = ['ST Junction', $report['ST_junction'].' mm'];
-        }
-        if (shouldDisplay($report['av_proximal_ascending_aorta'] ?? null)) {
-            $chamberRows[] = ['Asc Aorta', $report['av_proximal_ascending_aorta'].' mm'];
-        } elseif (shouldDisplay($report['ascending_aorta'] ?? null)) {
-            $chamberRows[] = ['Asc Aorta', $report['ascending_aorta'].' mm'];
-        }
-        // IVC
-        if (shouldDisplay($report['cp_ivc_size'])) {
-            $chamberRows[] = [
-                'IVC Size',
-                $report['cp_ivc_size'].' mm',
-            ];
-        }
+if (isset($report['computed_LVEDVI']) && $report['computed_LVEDVI'] > 0) {
+    $chamberRows[] = ['LVEDVI', round($report['computed_LVEDVI'], 1).' cc/m²'];
+}
+if (isset($report['computed_LVEDDI']) && $report['computed_LVEDDI'] > 0) {
+    $chamberRows[] = ['LVEDDI', round($report['computed_LVEDDI'], 1).' mm/m²'];
+}
+// RV
+if (shouldDisplay($report['rv_RV_basal_diameter'])) {
+    $chamberRows[] = [
+        'RV Basal',
+        $report['rv_RV_basal_diameter'].' mm',
+    ];
+}
+if (shouldDisplay($report['rv_RV_mid_diameter'])) {
+    $chamberRows[] = [
+        'RV Mid',
+        $report['rv_RV_mid_diameter'].' mm',
+    ];
+}
+if (shouldDisplay($report['rv_RV_longitudinal_diameter'])) {
+    $chamberRows[] = [
+        'RV Longitudinal',
+        $report['rv_RV_longitudinal_diameter'].' mm',
+    ];
+}
+if (shouldDisplay($report['rv_TAPSE'])) {
+    $chamberRows[] = ['TAPSE', $report['rv_TAPSE'].' mm'];
+}
+// LA
+if (shouldDisplay($report['la_diameter'])) {
+    $chamberRows[] = [
+        'LA Diam',
+        $report['la_diameter'].' mm',
+    ];
+}
+if (shouldDisplay($report['la_area'])) {
+    $chamberRows[] = [
+        'LA Area',
+        $report['la_area'].' cm²',
+    ];
+}
+if (shouldDisplay($report['la_volume'])) {
+    $chamberRows[] = [
+        'LA Vol',
+        $report['la_volume'].' ml',
+    ];
+}
+// RA
+if (shouldDisplay($report['ra_area'])) {
+    $chamberRows[] = [
+        'RA Area',
+        $report['ra_area'].' cm²',
+    ];
+}
+if (shouldDisplay($report['ra_volume'])) {
+    $chamberRows[] = [
+        'RA Vol',
+        $report['ra_volume'].' ml',
+    ];
+}
+if (shouldDisplay($report['av_AVA_CE'])) {
+    $chamberRows[] = ['AVA', $report['av_AVA_CE'].' cm²'];
+}
+// Aorta Measurements
+if (shouldDisplay($report['av_annulus'] ?? null)) {
+    $chamberRows[] = ['Annulus', $report['av_annulus'].' mm'];
+} elseif (shouldDisplay($report['AV_annulus'] ?? null)) {
+    $chamberRows[] = ['Annulus', $report['AV_annulus'].' mm'];
+}
+if (shouldDisplay($report['av_sinus_valsalva'] ?? null)) {
+    $chamberRows[] = ['Sinus Valsalva', $report['av_sinus_valsalva'].' mm'];
+} elseif (shouldDisplay($report['Sinus_valsalva'] ?? null)) {
+    $chamberRows[] = ['Sinus Valsalva', $report['Sinus_valsalva'].' mm'];
+}
+if (shouldDisplay($report['av_st_junction'] ?? null)) {
+    $chamberRows[] = ['ST Junction', $report['av_st_junction'].' mm'];
+} elseif (shouldDisplay($report['ST_junction'] ?? null)) {
+    $chamberRows[] = ['ST Junction', $report['ST_junction'].' mm'];
+}
+if (shouldDisplay($report['av_proximal_ascending_aorta'] ?? null)) {
+    $chamberRows[] = ['Asc Aorta', $report['av_proximal_ascending_aorta'].' mm'];
+} elseif (shouldDisplay($report['ascending_aorta'] ?? null)) {
+    $chamberRows[] = ['Asc Aorta', $report['ascending_aorta'].' mm'];
+}
+// IVC
+if (shouldDisplay($report['cp_ivc_size'])) {
+    $chamberRows[] = [
+        'IVC Size',
+        $report['cp_ivc_size'].' mm',
+    ];
+}
 
-        // Display Logic (5 Cols)
-        $colsCount = 5;
-        $rowsNeeded = ceil(count($chamberRows) / $colsCount);
-        for ($i = 0; $i < $rowsNeeded; $i++) {
-            echo '<tr>';
-            for ($c = 0; $c < $colsCount; $c++) {
-                $idx = $i + $c * $rowsNeeded;
-                if (isset($chamberRows[$idx])) {
-                    $val = ! empty($chamberRows[$idx][2]) ? $chamberRows[$idx][1] : htmlspecialchars($chamberRows[$idx][1]);
-                    echo '<td style="width: 20%;">'.
-                        '<span style="font-weight: 600;">'.htmlspecialchars($chamberRows[$idx][0]).':</span> '.
-                        ReportHtml::clean((string) $val).
-                        '</td>';
-                } else {
-                    echo '<td></td>';
-                }
-            }
-            echo '</tr>';
+// Display Logic (5 Cols)
+$colsCount = 5;
+$rowsNeeded = ceil(count($chamberRows) / $colsCount);
+for ($i = 0; $i < $rowsNeeded; $i++) {
+    echo '<tr>';
+    for ($c = 0; $c < $colsCount; $c++) {
+        $idx = $i + $c * $rowsNeeded;
+        if (isset($chamberRows[$idx])) {
+            $val = ! empty($chamberRows[$idx][2]) ? $chamberRows[$idx][1] : htmlspecialchars($chamberRows[$idx][1]);
+            echo '<td style="width: 20%;">'.
+                '<span style="font-weight: 600;">'.htmlspecialchars($chamberRows[$idx][0]).':</span> '.
+                ReportHtml::clean((string) $val).
+                '</td>';
+        } else {
+            echo '<td></td>';
         }
-        ?>
+    }
+    echo '</tr>';
+}
+?>
                     </tbody>
                 </table>
             </div>
@@ -2286,150 +1974,150 @@ if (! function_exists('generateSummary')) {
                 <table>
                     <tbody>
                     <?php
-        $dopplerRows = [];
-        // MV
-        if (shouldDisplay($report['mv_PE_Velocity'])) {
-            $dopplerRows[] = [
-                'MV E Vel',
-                $report['mv_PE_Velocity'].' m/s',
-            ];
-        }
-        if (shouldDisplay($report['mv_PA_Velocity'])) {
-            $dopplerRows[] = [
-                'MV A Vel',
-                $report['mv_PA_Velocity'].' m/s',
-            ];
-        }
-        if (shouldDisplay($report['mv_DT'])) {
-            $dopplerRows[] = ['MV DT', $report['mv_DT'].' ms'];
-        }
-        if (shouldDisplay($report['mv_MV_area'])) {
-            $dopplerRows[] = [
-                'MVA',
-                $report['mv_MV_area'].' cm²',
-            ];
-        }
-        if (shouldDisplay($report['mv_MPG'])) {
-            $dopplerRows[] = [
-                'MV MPG',
-                $report['mv_MPG'].' mmHg',
-            ];
-        }
-        // AV
-        if (shouldDisplay($report['av_peakvelocity'])) {
-            $dopplerRows[] = [
-                'AV Vel',
-                $report['av_peakvelocity'].' m/s',
-            ];
-        }
-        if (shouldDisplay($report['av_MPG'])) {
-            $dopplerRows[] = [
-                'AV MPG',
-                $report['av_MPG'].' mmHg',
-            ];
-        }
-        if (shouldDisplay($report['av_DVI'])) {
-            $dopplerRows[] = ['AV DVI', $report['av_DVI']];
-        }
-        if (shouldDisplay($report['tv_MPG'])) {
-            $dopplerRows[] = [
-                'TV MPG',
-                $report['tv_MPG'].' mmHg',
-            ];
-        }
-        if (shouldDisplay($report['tv_PPG'])) {
-            $dopplerRows[] = [
-                'TV PPG',
-                $report['tv_PPG'].' mmHg',
-            ];
-        }
-        if (shouldDisplay($report['tv_VC'])) {
-            $dopplerRows[] = ['TV VC', $report['tv_VC'].' cm'];
-        }
-        if (shouldDisplay($report['tv_PE_Velocity'])) {
-            $dopplerRows[] = [
-                'TV E Vel',
-                $report['tv_PE_Velocity'].' m/s',
-            ];
-        }
-        if (shouldDisplay($report['tv_PA_Velocity'])) {
-            $dopplerRows[] = [
-                'TV A Vel',
-                $report['tv_PA_Velocity'].' m/s',
-            ];
-        }
-        // PV
-        if (shouldDisplay($report['pv_PV_velocity'])) {
-            $dopplerRows[] = [
-                'PV Vmax',
-                $report['pv_PV_velocity'].' m/s',
-            ];
-        }
-        if (shouldDisplay($report['pv_MPG'])) {
-            $dopplerRows[] = [
-                'PV MPG',
-                $report['pv_MPG'].' mmHg',
-            ];
-        }
-        // Tissue Doppler
-        if (shouldDisplay($report['lv_septale'])) {
-            $dopplerRows[] = [
-                "Septal e'",
-                $report['lv_septale'].' cm/s',
-            ];
-        }
-        if (shouldDisplay($report['lv_septala'])) {
-            $dopplerRows[] = [
-                "Septal a'",
-                $report['lv_septala'].' cm/s',
-            ];
-        }
-        if (shouldDisplay($report['lv_septal_Sm'])) {
-            $dopplerRows[] = [
-                "Septal s'",
-                $report['lv_septal_Sm'].' cm/s',
-            ];
-        }
-        if (shouldDisplay($report['lv_lateral'])) {
-            $dopplerRows[] = [
-                "Lateral e'",
-                $report['lv_lateral'].' cm/s',
-            ];
-        }
-        // RV
-        if (shouldDisplay($report['rv_S_velocity'])) {
-            $dopplerRows[] = [
-                "RV S' vel",
-                $report['rv_S_velocity'].' cm/s',
-            ];
-        }
-        // Hemodynamics
-        if (shouldDisplay($report['cp_SPAP'])) {
-            $spapTooltip = getAutoTooltipHtml('cp_SPAP', $report['gender'] ?? '', $report['cp_SPAP_input_used'] ?? 'TRG + RAP', $report['cp_SPAP'].' mmHg', $report['cp_SPAP_input_value'] ?? null, $report);
-            $dopplerRows[] = ['SPAP', $spapTooltip, true];
-        }
+$dopplerRows = [];
+// MV
+if (shouldDisplay($report['mv_PE_Velocity'])) {
+    $dopplerRows[] = [
+        'MV E Vel',
+        $report['mv_PE_Velocity'].' m/s',
+    ];
+}
+if (shouldDisplay($report['mv_PA_Velocity'])) {
+    $dopplerRows[] = [
+        'MV A Vel',
+        $report['mv_PA_Velocity'].' m/s',
+    ];
+}
+if (shouldDisplay($report['mv_DT'])) {
+    $dopplerRows[] = ['MV DT', $report['mv_DT'].' ms'];
+}
+if (shouldDisplay($report['mv_MV_area'])) {
+    $dopplerRows[] = [
+        'MVA',
+        $report['mv_MV_area'].' cm²',
+    ];
+}
+if (shouldDisplay($report['mv_MPG'])) {
+    $dopplerRows[] = [
+        'MV MPG',
+        $report['mv_MPG'].' mmHg',
+    ];
+}
+// AV
+if (shouldDisplay($report['av_peakvelocity'])) {
+    $dopplerRows[] = [
+        'AV Vel',
+        $report['av_peakvelocity'].' m/s',
+    ];
+}
+if (shouldDisplay($report['av_MPG'])) {
+    $dopplerRows[] = [
+        'AV MPG',
+        $report['av_MPG'].' mmHg',
+    ];
+}
+if (shouldDisplay($report['av_DVI'])) {
+    $dopplerRows[] = ['AV DVI', $report['av_DVI']];
+}
+if (shouldDisplay($report['tv_MPG'])) {
+    $dopplerRows[] = [
+        'TV MPG',
+        $report['tv_MPG'].' mmHg',
+    ];
+}
+if (shouldDisplay($report['tv_PPG'])) {
+    $dopplerRows[] = [
+        'TV PPG',
+        $report['tv_PPG'].' mmHg',
+    ];
+}
+if (shouldDisplay($report['tv_VC'])) {
+    $dopplerRows[] = ['TV VC', $report['tv_VC'].' cm'];
+}
+if (shouldDisplay($report['tv_PE_Velocity'])) {
+    $dopplerRows[] = [
+        'TV E Vel',
+        $report['tv_PE_Velocity'].' m/s',
+    ];
+}
+if (shouldDisplay($report['tv_PA_Velocity'])) {
+    $dopplerRows[] = [
+        'TV A Vel',
+        $report['tv_PA_Velocity'].' m/s',
+    ];
+}
+// PV
+if (shouldDisplay($report['pv_PV_velocity'])) {
+    $dopplerRows[] = [
+        'PV Vmax',
+        $report['pv_PV_velocity'].' m/s',
+    ];
+}
+if (shouldDisplay($report['pv_MPG'])) {
+    $dopplerRows[] = [
+        'PV MPG',
+        $report['pv_MPG'].' mmHg',
+    ];
+}
+// Tissue Doppler
+if (shouldDisplay($report['lv_septale'])) {
+    $dopplerRows[] = [
+        "Septal e'",
+        $report['lv_septale'].' cm/s',
+    ];
+}
+if (shouldDisplay($report['lv_septala'])) {
+    $dopplerRows[] = [
+        "Septal a'",
+        $report['lv_septala'].' cm/s',
+    ];
+}
+if (shouldDisplay($report['lv_septal_Sm'])) {
+    $dopplerRows[] = [
+        "Septal s'",
+        $report['lv_septal_Sm'].' cm/s',
+    ];
+}
+if (shouldDisplay($report['lv_lateral'])) {
+    $dopplerRows[] = [
+        "Lateral e'",
+        $report['lv_lateral'].' cm/s',
+    ];
+}
+// RV
+if (shouldDisplay($report['rv_S_velocity'])) {
+    $dopplerRows[] = [
+        "RV S' vel",
+        $report['rv_S_velocity'].' cm/s',
+    ];
+}
+// Hemodynamics
+if (shouldDisplay($report['cp_SPAP'])) {
+    $spapTooltip = getAutoTooltipHtml('cp_SPAP', $report['gender'] ?? '', $report['cp_SPAP_input_used'] ?? 'TRG + RAP', $report['cp_SPAP'].' mmHg', $report['cp_SPAP_input_value'] ?? null, $report);
+    $dopplerRows[] = ['SPAP', $spapTooltip, true];
+}
 
-        // Display Logic (5 Cols)
-        $colsCount = 5;
-        $rowsNeeded = ceil(count($dopplerRows) / $colsCount);
-        for ($i = 0; $i < $rowsNeeded; $i++) {
-            echo '<tr>';
-            for ($c = 0; $c < $colsCount; $c++) {
-                $idx = $i + $c * $rowsNeeded;
-                if (isset($dopplerRows[$idx])) {
-                    $isHtml = isset($dopplerRows[$idx][2]) && $dopplerRows[$idx][2] === true;
-                    $valHtml = $isHtml ? $dopplerRows[$idx][1] : htmlspecialchars($dopplerRows[$idx][1]);
-                    echo '<td style="width: 20%;">'.
-                        '<span style="font-weight: 600;">'.htmlspecialchars($dopplerRows[$idx][0]).':</span> '.
-                        ReportHtml::clean((string) $valHtml).
-                        '</td>';
-                } else {
-                    echo '<td></td>';
-                }
-            }
-            echo '</tr>';
+// Display Logic (5 Cols)
+$colsCount = 5;
+$rowsNeeded = ceil(count($dopplerRows) / $colsCount);
+for ($i = 0; $i < $rowsNeeded; $i++) {
+    echo '<tr>';
+    for ($c = 0; $c < $colsCount; $c++) {
+        $idx = $i + $c * $rowsNeeded;
+        if (isset($dopplerRows[$idx])) {
+            $isHtml = isset($dopplerRows[$idx][2]) && $dopplerRows[$idx][2] === true;
+            $valHtml = $isHtml ? $dopplerRows[$idx][1] : htmlspecialchars($dopplerRows[$idx][1]);
+            echo '<td style="width: 20%;">'.
+                '<span style="font-weight: 600;">'.htmlspecialchars($dopplerRows[$idx][0]).':</span> '.
+                ReportHtml::clean((string) $valHtml).
+                '</td>';
+        } else {
+            echo '<td></td>';
         }
-        ?>
+    }
+    echo '</tr>';
+}
+?>
                     </tbody>
                 </table>
             </div>
@@ -2496,118 +2184,3 @@ if (! function_exists('generateSummary')) {
         </div>
         <?php } ?>
     </div>
-    <div class="report-actions no-print">
-        <button class="btn-print" onclick="window.print()">Print Report</button>
-        <a href="<?= e(route('patients.index', ! empty($report['nationalID']) ? ['nationalID' => $report['nationalID']] : [])) ?>" class="btn-back">Back to Patient Echos</a>
-        <?php if ($study && ! $version) { ?>
-            <?php if (auth()->user()->can('update', $study)) { ?>
-            <a href="<?= e(route('studies.edit', $study)) ?>" class="btn-back"><?= $study->isSigned() ? 'Amend Report' : 'Edit Draft' ?></a>
-            <?php } ?>
-            <?php if (auth()->user()->can('finalize', $study)) { ?>
-            <form method="POST" action="<?= e(route('studies.finalize', $study)) ?>" style="display:inline" onsubmit="return confirm('Sign and finalize this report? It can only be changed by amendment afterwards.');">
-                <input type="hidden" name="_token" value="<?= e(csrf_token()) ?>">
-                <button type="submit" class="btn-print" style="background:#2f855a">Sign &amp; Finalize</button>
-            </form>
-            <?php } ?>
-        <?php } ?>
-    </div>
-    <?php if ($study && $study->versions->isNotEmpty()) { ?>
-    <div class="report-actions no-print" style="flex-direction:column;align-items:flex-start;font-size:13px">
-        <strong>Signed versions</strong>
-        <?php foreach ($study->versions as $v) { ?>
-        <div>
-            <a href="<?= e(route('studies.show', [$study, 'version' => $v->version])) ?>">v<?= e($v->version) ?></a>
-            — <?= e($v->status->label()) ?> by <?= e($v->signer?->name ?? 'unknown') ?>, <?= e(JalaliDate::format($v->created_at)) ?>
-            <?= $v->reason ? '— '.e($v->reason) : '' ?>
-        </div>
-        <?php } ?>
-    </div>
-    <?php } ?>
-    <?php } else { ?>
-        <div class="report-container no-print" style="margin-top: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border-radius: 12px;">
-            <div style="text-align: center; padding: 40px 16px; max-width: 600px; margin: 0 auto;">
-                <div style="font-size: 48px; margin-bottom: 16px; color: #3182ce;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <line x1="10" y1="9" x2="8" y2="9"></line>
-                    </svg>
-                </div>
-                <h2 style="font-size: 22px; color: #2d3748; margin-bottom: 12px; font-weight: 700;">No Report Selected</h2>
-                <p style="color: #718096; margin-bottom: 24px; font-size: 15px; line-height: 1.5;">To view a detailed echocardiogram report, please search for a patient on the Patient Echos page first, and click "View Full Report".</p>
-                <a href="<?= e(route('patients.index')) ?>" class="btn-print" style="text-decoration: none;">
-                    Go to Patient Echos
-                </a>
-            </div>
-        </div>
-    <?php } ?>
-    <style>
-        @media print {
-            @page {
-                size: A4 portrait;
-                margin: 8mm 10mm;
-            }
-            body {
-                margin: 0;
-                padding: 0;
-                font-size: 10.5pt;
-                line-height: 1.35;
-            }
-            .report-container {
-                box-shadow: none;
-                padding: 0;
-                max-width: 100%;
-                width: 100%;
-                zoom: 1.2;
-            }
-            .report-summary {
-                padding: 10px !important;
-                margin-top: 0 !important;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            .section {
-                margin-bottom: 8px !important;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            .section-title {
-                margin: 8px 0 4px !important;
-                font-size: 1.15em !important;
-                padding-bottom: 2px !important;
-            }
-            .header {
-                margin-bottom: 8px !important;
-                padding-bottom: 4px !important;
-            }
-            table {
-                font-size: 11.5px !important;
-            }
-            td {
-                padding: 3px 5px !important;
-            }
-            .patient-info-line, .clinical-info-line {
-                margin: 4px 0 !important;
-                padding: 5px !important;
-                gap: 8px !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .container {
-                width: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            u {
-                text-decoration: underline !important;
-                -webkit-text-decoration: underline !important;
-                text-underline-offset: 2px;
-            }
-        }
-    </style>
-    <script>if (window.location.search.includes('print=1')) { window.onload = function() { setTimeout(function() { window.print(); }, 500); }; }</script>
-</body>
-</html>

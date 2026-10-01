@@ -18,7 +18,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gray-100 print:bg-white">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
@@ -35,7 +35,7 @@
                 {{ $slot }}
             </main>
 
-            <x-source-footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" />
+            <x-source-footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 print:hidden" />
         </div>
     </body>
 </html>
