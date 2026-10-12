@@ -6,6 +6,7 @@ use App\Enums\HospitalStatus;
 use App\Enums\Role;
 use App\Models\Hospital;
 use App\Models\User;
+use Database\Seeders\DrugCatalogSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -52,6 +53,7 @@ class SeedDemo extends Command
         }
 
         $this->call('app:seed-heart-demo');
+        $this->call('db:seed', ['--class' => DrugCatalogSeeder::class, '--force' => true]);
 
         $this->table(['Email', 'Password', 'Role'], $rows);
         $this->components->warn('These passwords are shown once. Run the command again to reset them.');

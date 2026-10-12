@@ -118,6 +118,9 @@
         @endif
         @endif
 
+        {{-- Discharge medications come from the summary's prescription (e-prescription), under the report. --}}
+        @includeWhen($procedure === 'discharge', 'prescriptions.partials.discharge', ['study' => $study, 'report' => $report])
+
         @if ($study->versions->isNotEmpty())
             <section class="mt-8 print:hidden">
                 <h2 class="mb-2 font-semibold">Signed versions</h2>

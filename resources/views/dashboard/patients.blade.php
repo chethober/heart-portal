@@ -65,6 +65,8 @@
                     @endif
                 </section>
             @endforeach
+
+            @includeWhen($patient, 'prescriptions.partials.patient', ['patient' => $patient])
         </div>
     @endif
 </x-dashboard-layout>
