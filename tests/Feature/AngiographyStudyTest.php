@@ -65,7 +65,7 @@ test('clinical staff record a draft and the patient is created', function () {
     $this->actingAs($this->tech)->get("/dashboard/procedures/angiography/{$study->id}")
         ->assertOk()
         ->assertSee('DRAFT — NOT SIGNED')
-        ->assertSee('severe stenosis(70-89%)')
+        ->assertSee('Severe stenosis(70-89%) at proximal part segment')
         ->assertSee('Tight proximal LAD lesion.');
 });
 
@@ -138,7 +138,7 @@ test('only doctors sign, and signed studies are only amended by a doctor with a 
     $this->actingAs($this->tech)->get("/dashboard/procedures/angiography/{$study->id}?version=1")
         ->assertOk()
         ->assertSee('Viewing signed version 1 of 2')
-        ->assertSee('severe stenosis(70-89%)');
+        ->assertSee('Severe stenosis(70-89%) at proximal part segment');
 });
 
 test('drafts can be deleted by their author', function () {

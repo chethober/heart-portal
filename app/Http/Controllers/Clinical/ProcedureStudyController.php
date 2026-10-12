@@ -7,6 +7,7 @@ use App\Http\Requests\ProcedureStudyRequest;
 use App\Models\Admission;
 use App\Models\Patient;
 use App\Models\ProcedureStudy;
+use App\Reports\ProcedureReport;
 use App\Support\Audit;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
@@ -71,11 +72,16 @@ class ProcedureStudyController extends Controller
 
         Audit::record("{$procedure}.viewed", $procedureStudy, $version ? ['version' => $version->version] : []);
 
+        $report = $version ? $version->data : $procedureStudy->toReportArray();
+
         return view('procedures.show', [
             'procedure' => $procedure,
             'study' => $procedureStudy,
             'version' => $version,
-            'report' => $version ? $version->data : $procedureStudy->toReportArray(),
+            'report' => $report,
+            // Clinical narrative for procedures that have one (app/Reports); the others list their fields.
+            'narrative' => ProcedureReport::for($procedure, $report),
+            'hospital' => $request->user()->hospital,
         ]);
     }
 

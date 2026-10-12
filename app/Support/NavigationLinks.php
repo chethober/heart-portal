@@ -45,6 +45,7 @@ final class NavigationLinks
         if ($user->can('patients.view')) {
             $links[] = self::link(__('Worklist'), 'worklist', EchoStudy::where('status', StudyStatus::Draft)->count());
             $links[] = self::link(__('Patients'), 'patients.index');
+            $links[] = self::link(__('Statistics'), 'statistics');
         }
         if ($user->can('staff.manage')) {
             $links[] = self::link(__('Staff'), 'staff.*', Invitation::pending()->count());

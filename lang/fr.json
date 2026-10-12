@@ -303,5 +303,20 @@
     "Right Heart Catheterization": "Cathétérisme cardiaque droit",
     "Peripheral Angiography": "Angiographie périphérique",
     "Cardiac Intervention": "Intervention cardiaque",
-    "Discharge Summary": "Résumé de sortie"
+    "Discharge Summary": "Résumé de sortie",
+    "Statistics": "Statistiques",
+    "Studies per form": "Études par formulaire",
+    "Form": "Formulaire",
+    "Studies": "Études",
+    "Drafts": "Brouillons",
+    "Studies per month": "Études par mois",
+    "Period": "Période",
+    "Last :count months": "Les :count derniers mois",
+    "No studies in this period.": "Aucune étude sur cette période.",
+    "Show as a table": "Afficher sous forme de tableau",
+    "Month": "Mois",
+    "Total": "Total",
+    "Findings": "Résultats",
+    "No studies recorded yet.": "Aucune étude enregistrée pour l’instant.",
+    "Not recorded": "Non renseigné"
 }

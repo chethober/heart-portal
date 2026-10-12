@@ -303,5 +303,20 @@
     "Right Heart Catheterization": "قسطرة القلب الأيمن",
     "Peripheral Angiography": "تصوير الأوعية الطرفية",
     "Cardiac Intervention": "تدخل قلبي",
-    "Discharge Summary": "ملخص الخروج"
+    "Discharge Summary": "ملخص الخروج",
+    "Statistics": "الإحصاءات",
+    "Studies per form": "الدراسات حسب النموذج",
+    "Form": "النموذج",
+    "Studies": "الدراسات",
+    "Drafts": "المسودات",
+    "Studies per month": "الدراسات شهريًا",
+    "Period": "الفترة",
+    "Last :count months": "آخر :count أشهر",
+    "No studies in this period.": "لا توجد دراسات في هذه الفترة.",
+    "Show as a table": "عرض كجدول",
+    "Month": "الشهر",
+    "Total": "المجموع",
+    "Findings": "النتائج",
+    "No studies recorded yet.": "لم تُسجَّل أي دراسات بعد.",
+    "Not recorded": "غير مسجل"
 }
