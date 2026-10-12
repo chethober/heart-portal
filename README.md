@@ -76,8 +76,8 @@ With `APP_ENV=local` the seeder creates demo accounts, all with the password `pa
 | `qc@echo.test` | Quality control |
 
 It also adds six fictional patients with admissions and coronary angiographies recorded in the
-heart system's fields (drafts, signed and amended). On a demo deployment, add the same data to the
-demo hospital with `php artisan app:seed-heart-demo`; it is safe to run again.
+heart system's fields (drafts, signed and amended). On a demo deployment `app:seed-demo` adds the
+same data (or run `php artisan app:seed-heart-demo` on its own); it is safe to run again.
 
 Two-factor login is enforced by default; set `TWO_FACTOR_ENFORCED=false` in `.env` to try the
 demo accounts without an authenticator app.
@@ -90,7 +90,7 @@ demo accounts without an authenticator app.
   `php artisan app:create-platform-admin`
 - Keep `TWO_FACTOR_ENFORCED=true`.
 - For a demo deployment, `php artisan app:seed-demo` creates the demo hospital and accounts with
-  random passwords, printed once (re-run to reset them).
+  random passwords, printed once (re-run to reset them), and adds the heart demo patients.
 - Back up the database **and** `APP_KEY` — encrypted fields cannot be read without the key.
 
 ## Configuration

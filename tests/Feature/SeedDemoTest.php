@@ -1,7 +1,9 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\AngiographyStudy;
 use App\Models\Hospital;
+use App\Models\Scopes\HospitalScope;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +31,8 @@ test('running demo seeding again resets passwords without duplicating accounts',
 
     $this->artisan('app:seed-demo')->assertSuccessful();
 
-    expect(User::where('email', 'like', '%@echo.test')->count())->toBe(4)
+    expect(User::where('email', 'like', '%@echo.test')->count())->toBe(6)
+        ->and(AngiographyStudy::withoutGlobalScope(HospitalScope::class)->count())->toBe(6)
         ->and(Hospital::where('slug', 'demo-heart-hospital')->count())->toBe(1)
         ->and(User::where('email', 'tech@echo.test')->value('password'))->not->toBe($before);
 });

@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
 #[Signature('app:seed-demo')]
-#[Description('Create (or reset) the demo hospital and accounts with fresh random passwords')]
+#[Description('Create (or reset) the demo hospital and accounts with fresh random passwords, and add the demo patients')]
 class SeedDemo extends Command
 {
     /**
@@ -23,6 +23,8 @@ class SeedDemo extends Command
         'hadmin@echo.test' => ['Hospital Admin', Role::HospitalAdmin],
         'doctor@echo.test' => ['Dr. Demo', Role::Doctor],
         'tech@echo.test' => ['Tech Demo', Role::Technician],
+        'nurse@echo.test' => ['Nurse Demo', Role::Nurse],
+        'qc@echo.test' => ['QC Demo', Role::QualityControl],
     ];
 
     public function handle(): int
@@ -48,6 +50,8 @@ class SeedDemo extends Command
 
             $rows[] = [$email, $password, $role->label()];
         }
+
+        $this->call('app:seed-heart-demo');
 
         $this->table(['Email', 'Password', 'Role'], $rows);
         $this->components->warn('These passwords are shown once. Run the command again to reset them.');
