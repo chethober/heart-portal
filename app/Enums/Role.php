@@ -8,6 +8,9 @@ enum Role: string
     case HospitalAdmin = 'hospital_admin';
     case Doctor = 'doctor';
     case Technician = 'technician';
+    // Roles from the heart system: ward nurses and registry quality control record studies too.
+    case Nurse = 'nurse';
+    case QualityControl = 'quality_control';
 
     public function label(): string
     {
@@ -16,6 +19,8 @@ enum Role: string
             self::HospitalAdmin => __('Hospital admin'),
             self::Doctor => __('Doctor'),
             self::Technician => __('Echo technician'),
+            self::Nurse => __('Nurse'),
+            self::QualityControl => __('Quality control'),
         };
     }
 
@@ -26,7 +31,7 @@ enum Role: string
      */
     public static function assignableByHospital(): array
     {
-        return [self::HospitalAdmin, self::Doctor, self::Technician];
+        return [self::HospitalAdmin, self::Doctor, self::Technician, self::Nurse, self::QualityControl];
     }
 
     /**
@@ -38,7 +43,8 @@ enum Role: string
             self::PlatformAdmin => ['hospitals.manage'],
             self::HospitalAdmin => ['staff.manage', 'hospital.settings', 'audit.view', 'patients.view'],
             self::Doctor => ['patients.view', 'studies.create', 'studies.edit', 'studies.finalize'],
-            self::Technician => ['patients.view', 'studies.create', 'studies.edit'],
+            self::Technician, self::Nurse => ['patients.view', 'studies.create', 'studies.edit'],
+            self::QualityControl => ['patients.view', 'studies.create', 'studies.edit', 'audit.view'],
         };
     }
 }

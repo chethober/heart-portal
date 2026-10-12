@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\StudyStatus;
 use App\Models\Concerns\BelongsToHospital;
+use App\Models\Concerns\HasStudyLifecycle;
 use Database\Factories\EchoStudyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,12 +24,12 @@ use Illuminate\Support\Carbon;
 class EchoStudy extends Model
 {
     /** @use HasFactory<EchoStudyFactory> */
-    use BelongsToHospital, HasFactory, SoftDeletes;
+    use BelongsToHospital, HasFactory, HasStudyLifecycle, SoftDeletes;
 
     public function getFillable(): array
     {
         return [
-            'hospital_id', 'patient_id', 'created_by', 'legacy_id',
+            'hospital_id', 'patient_id', 'admission_id', 'created_by', 'legacy_id',
             ...config('echo.meta_fields'),
             ...array_keys(config('echo.fields')),
         ];
@@ -66,27 +67,11 @@ class EchoStudy extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<Admission, $this>
      */
-    public function author(): BelongsTo
+    public function admission(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function reporter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'reported_by');
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function amender(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'amended_by');
+        return $this->belongsTo(Admission::class);
     }
 
     /**
@@ -97,55 +82,14 @@ class EchoStudy extends Model
         return $this->hasMany(EchoStudyVersion::class)->orderBy('version');
     }
 
-    public function isSigned(): bool
-    {
-        return $this->status->isSigned();
-    }
-
     /**
-     * Sign a draft as the reporting doctor; the report is locked afterwards.
-     */
-    public function finalize(User $doctor): void
-    {
-        $this->forceFill([
-            'status' => StudyStatus::Final,
-            'reported_by' => $doctor->id,
-            'finalized_at' => now(),
-            'doctor' => $doctor->name,
-        ])->save();
-
-        $this->recordVersion($doctor);
-    }
-
-    /**
-     * Change a signed report. The amending doctor re-signs it with a reason.
+     * The signing doctor's name is printed on the report.
      *
-     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
      */
-    public function amend(array $attributes, User $doctor, string $reason): void
+    protected function signingAttributes(User $doctor): array
     {
-        $this->fill($attributes)->forceFill([
-            'status' => StudyStatus::Amended,
-            'amended_by' => $doctor->id,
-            'amended_at' => now(),
-            'amendment_reason' => $reason,
-            'doctor' => $doctor->name,
-        ])->save();
-
-        $this->recordVersion($doctor, $reason);
-    }
-
-    private function recordVersion(User $signer, ?string $reason = null): void
-    {
-        $this->versions()->create([
-            'hospital_id' => $this->hospital_id,
-            'version' => ($this->versions()->max('version') ?? 0) + 1,
-            'status' => $this->status,
-            'data' => $this->load('patient')->toReportArray(),
-            'signed_by' => $signer->id,
-            'signature_path' => $signer->signature_path,
-            'reason' => $reason,
-        ]);
+        return ['doctor' => $doctor->name];
     }
 
     /**

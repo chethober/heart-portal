@@ -74,6 +74,14 @@ class Patient extends Model
     }
 
     /**
+     * @return HasMany<Admission, $this>
+     */
+    public function admissions(): HasMany
+    {
+        return $this->hasMany(Admission::class);
+    }
+
+    /**
      * Demographics keyed by the names the echo form and report use.
      *
      * @return array<string, string|null>

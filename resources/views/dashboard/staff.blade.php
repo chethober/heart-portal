@@ -3,7 +3,7 @@
         <x-input-error :messages="$errors->get('staff')" />
 
         <section>
-            <h3 class="font-semibold text-gray-900">{{ __('Invite a doctor or technician') }}</h3>
+            <h3 class="font-semibold text-gray-900">{{ __('Invite a staff member') }}</h3>
             <form method="POST" action="{{ route('staff.invitations.store') }}" class="mt-3 flex flex-col sm:flex-row gap-3 sm:items-end">
                 @csrf
                 <div class="flex-1">

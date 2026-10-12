@@ -50,12 +50,12 @@ test('hospital admins cannot grant the platform admin role', function () {
         ->assertSessionHasErrors('role');
 });
 
-test('doctors and technicians cannot manage staff', function (Role $role) {
+test('clinical staff cannot manage staff', function (Role $role) {
     $user = User::factory()->for($this->hospital)->role($role)->create();
 
     $this->actingAs($user)->get('/dashboard/staff')->assertForbidden();
     $this->actingAs($user)->post('/dashboard/staff/invitations', ['email' => 'x@example.com', 'role' => 'doctor'])->assertForbidden();
-})->with([Role::Doctor, Role::Technician]);
+})->with([Role::Doctor, Role::Technician, Role::Nurse, Role::QualityControl]);
 
 test('hospital admin only sees and edits their own staff and invitations', function () {
     $otherHospital = Hospital::factory()->create();

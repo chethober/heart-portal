@@ -112,7 +112,6 @@
     "Install an authenticator app such as Google Authenticator, Microsoft Authenticator or Aegis.": "یک برنامه احراز هویت مانند Google Authenticator، Microsoft Authenticator یا Aegis نصب کنید.",
     "Invitation revoked.": "دعوت لغو شد.",
     "Invitation sent to :email.": "دعوت به :email ارسال شد.",
-    "Invite a doctor or technician": "دعوت از پزشک یا تکنسین",
     "Invite and manage staff, change roles, deactivate accounts, view reports and the audit log, and delete drafts.": "دعوت و مدیریت کارکنان، تغییر نقش‌ها، غیرفعال‌سازی حساب‌ها، مشاهده گزارش‌ها و گزارش ممیزی، و حذف پیش‌نویس‌ها.",
     "Join :hospital": "پیوستن به :hospital",
     "Language": "زبان",
@@ -289,5 +288,13 @@
     "of": "از",
     "results": "نتیجه",
     "to": "تا",
-    "with its name, city and phone number, and create the first administrator account.": "با نام، شهر و شماره تلفن آن، و نخستین حساب مدیر را ایجاد کنید."
+    "with its name, city and phone number, and create the first administrator account.": "با نام، شهر و شماره تلفن آن، و نخستین حساب مدیر را ایجاد کنید.",
+    "Record a new study": "ثبت مطالعه جدید",
+    "Study saved.": "مطالعه ذخیره شد.",
+    "The admission belongs to another patient.": "این پذیرش متعلق به بیمار دیگری است.",
+    "Nurse": "پرستار",
+    "Quality control": "کنترل کیفی",
+    "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "همانند تکنسین اکو: ثبت مطالعات، ویرایش پیش‌نویس‌ها، جستجوی بیماران، مشاهده و چاپ گزارش‌ها.",
+    "Everything a nurse can, plus review the audit log.": "همه کارهای پرستار، به‌علاوه بررسی گزارش ممیزی.",
+    "Invite a staff member": "دعوت از کارمند"
 }

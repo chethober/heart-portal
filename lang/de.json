@@ -112,7 +112,6 @@
     "Install an authenticator app such as Google Authenticator, Microsoft Authenticator or Aegis.": "Installieren Sie eine Authenticator-App wie Google Authenticator, Microsoft Authenticator oder Aegis.",
     "Invitation revoked.": "Einladung widerrufen.",
     "Invitation sent to :email.": "Einladung an :email gesendet.",
-    "Invite a doctor or technician": "Arzt/Ärztin oder Echo-Fachkraft einladen",
     "Invite and manage staff, change roles, deactivate accounts, view reports and the audit log, and delete drafts.": "Personal einladen und verwalten, Rollen ändern, Konten deaktivieren, Befunde und Audit-Protokoll einsehen sowie Entwürfe löschen.",
     "Join :hospital": ":hospital beitreten",
     "Language": "Sprache",
@@ -289,5 +288,13 @@
     "of": "von",
     "results": "Ergebnissen",
     "to": "bis",
-    "with its name, city and phone number, and create the first administrator account.": "mit Name, Stadt und Telefonnummer und legen Sie das erste Administratorkonto an."
+    "with its name, city and phone number, and create the first administrator account.": "mit Name, Stadt und Telefonnummer und legen Sie das erste Administratorkonto an.",
+    "Record a new study": "Neue Untersuchung erfassen",
+    "Study saved.": "Untersuchung gespeichert.",
+    "The admission belongs to another patient.": "Die Aufnahme gehört zu einem anderen Patienten.",
+    "Nurse": "Pflegekraft",
+    "Quality control": "Qualitätskontrolle",
+    "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "Wie eine Echo-Fachkraft: Untersuchungen erfassen, Entwürfe bearbeiten, Patienten suchen, Befunde ansehen und drucken.",
+    "Everything a nurse can, plus review the audit log.": "Alles, was eine Pflegekraft kann, plus Einsicht in das Audit-Protokoll.",
+    "Invite a staff member": "Mitarbeitende einladen"
 }

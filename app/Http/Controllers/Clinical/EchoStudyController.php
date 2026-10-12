@@ -7,9 +7,9 @@ use App\Http\Requests\StoreEchoStudyRequest;
 use App\Http\Requests\UpdateEchoStudyRequest;
 use App\Models\EchoStudy;
 use App\Models\EchoStudyVersion;
-use App\Models\Patient;
 use App\Services\EchoCalculations;
 use App\Support\Audit;
+use App\Support\PatientRecords;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +27,7 @@ class EchoStudyController extends Controller
     public function store(StoreEchoStudyRequest $request): JsonResponse
     {
         $study = DB::transaction(function () use ($request) {
-            $patient = $this->resolvePatient($request);
+            $patient = PatientRecords::resolve($request->patientAttributes());
 
             $study = $patient->studies()->create([
                 ...$request->studyAttributes(),
@@ -79,7 +79,7 @@ class EchoStudyController extends Controller
     public function update(UpdateEchoStudyRequest $request, EchoStudy $study): JsonResponse
     {
         DB::transaction(function () use ($request, $study) {
-            $patient = $this->resolvePatient($request);
+            $patient = PatientRecords::resolve($request->patientAttributes());
             $attributes = [...$request->studyAttributes(), 'patient_id' => $patient->id];
 
             if ($study->isSigned()) {
@@ -151,27 +151,6 @@ class EchoStudyController extends Controller
             : redirect()->route('patients.index', ['nationalID' => $study->patient->national_id]);
 
         return $redirect->with('status', __('Draft deleted.'));
-    }
-
-    /**
-     * Finds the patient by national ID (or creates them) and refreshes their demographics.
-     */
-    private function resolvePatient(StoreEchoStudyRequest $request): Patient
-    {
-        $attributes = $request->patientAttributes();
-        $patient = Patient::whereNationalId($attributes['national_id'])->lockForUpdate()->first() ?? new Patient;
-
-        // Keep the latest demographics, but never blank out a value with an empty field.
-        $patient->fill(array_filter($attributes, fn ($value) => $value !== null && $value !== ''));
-
-        if (! $patient->exists || $patient->isDirty()) {
-            $action = $patient->exists ? 'patient.updated' : 'patient.created';
-            $changes = $patient->exists ? Audit::diff($patient) : [];
-            $patient->save();
-            Audit::record($action, $patient, $changes);
-        }
-
-        return $patient;
     }
 
     /**
