@@ -7,6 +7,8 @@
      * @var \App\Models\ProcedureStudy $study
      * @var \App\Models\ProcedureStudyVersion|null $version  Set when viewing an earlier signed version.
      * @var array<string, mixed> $report  Current values, or the version's snapshot.
+     * @var \App\Reports\ProcedureReport|null $narrative  The clinical narrative, for procedures that have one.
+     * @var \App\Models\Hospital|null $hospital
      */
     use App\Support\JalaliDate;
     use App\Support\Procedures;
@@ -69,6 +71,9 @@
             </div>
         @endif
 
+        @if ($narrative ?? null)
+            @include('procedures.report', ['narrative' => $narrative])
+        @else
         <header class="mb-6 border-b border-gray-200 pb-4">
             <h1 class="text-2xl font-semibold">{{ Procedures::label($procedure) }} Report</h1>
             @unless (($version?->status ?? $study->status)->isSigned())
@@ -110,6 +115,7 @@
                     <p class="mt-1 text-gray-600">Amendment reason: {{ $reason }}</p>
                 @endif
             </footer>
+        @endif
         @endif
 
         @if ($study->versions->isNotEmpty())

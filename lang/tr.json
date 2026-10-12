@@ -303,5 +303,20 @@
     "Right Heart Catheterization": "Sağ kalp kateterizasyonu",
     "Peripheral Angiography": "Periferik anjiyografi",
     "Cardiac Intervention": "Kardiyak girişim",
-    "Discharge Summary": "Taburcu özeti"
+    "Discharge Summary": "Taburcu özeti",
+    "Statistics": "İstatistikler",
+    "Studies per form": "Forma göre çalışmalar",
+    "Form": "Form",
+    "Studies": "Çalışmalar",
+    "Drafts": "Taslaklar",
+    "Studies per month": "Aylık çalışmalar",
+    "Period": "Dönem",
+    "Last :count months": "Son :count ay",
+    "No studies in this period.": "Bu dönemde çalışma yok.",
+    "Show as a table": "Tablo olarak göster",
+    "Month": "Ay",
+    "Total": "Toplam",
+    "Findings": "Bulgular",
+    "No studies recorded yet.": "Henüz kayıtlı çalışma yok.",
+    "Not recorded": "Kaydedilmedi"
 }

@@ -303,5 +303,20 @@
     "Right Heart Catheterization": "کاتتریزاسیون قلب راست",
     "Peripheral Angiography": "آنژیوگرافی محیطی",
     "Cardiac Intervention": "مداخله قلبی",
-    "Discharge Summary": "خلاصه ترخیص"
+    "Discharge Summary": "خلاصه ترخیص",
+    "Statistics": "آمار",
+    "Studies per form": "مطالعات به تفکیک فرم",
+    "Form": "فرم",
+    "Studies": "مطالعات",
+    "Drafts": "پیش‌نویس‌ها",
+    "Studies per month": "مطالعات در هر ماه",
+    "Period": "بازه زمانی",
+    "Last :count months": ":count ماه اخیر",
+    "No studies in this period.": "در این بازه مطالعه‌ای ثبت نشده است.",
+    "Show as a table": "نمایش به صورت جدول",
+    "Month": "ماه",
+    "Total": "مجموع",
+    "Findings": "یافته‌ها",
+    "No studies recorded yet.": "هنوز مطالعه‌ای ثبت نشده است.",
+    "Not recorded": "ثبت نشده"
 }
