@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind a TLS-terminating proxy (e.g. a Cloudflare Tunnel), honour its X-Forwarded-* headers.
+        if ($proxies = env('TRUSTED_PROXIES')) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', $proxies));
+        }
         $middleware->web(append: [SetLocale::class]);
         $middleware->alias([
             'hospital.active' => EnsureHospitalIsActive::class,

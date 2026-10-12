@@ -1,0 +1,53 @@
+# Production stack for the VPS. Needs a production .env (see README "Production").
+#   docker compose -f compose.prod.yaml up -d --build
+# Only Caddy publishes ports; Postgres and PHP-FPM stay on the internal network.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: app
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      pgsql:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: web
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  pgsql:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?set DB_DATABASE in .env}
+      POSTGRES_USER: ${DB_USERNAME:?set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  storage:
+  pgsql-data:
+  caddy-data:
+  caddy-config:

@@ -83,6 +83,8 @@ demo accounts without an authenticator app.
 - Create the first platform administrator interactively:
   `php artisan app:create-platform-admin`
 - Keep `TWO_FACTOR_ENFORCED=true`.
+- For a demo deployment, `php artisan app:seed-demo` creates the demo hospital and accounts with
+  random passwords, printed once (re-run to reset them).
 - Back up the database **and** `APP_KEY` — encrypted fields cannot be read without the key.
 
 ## Configuration

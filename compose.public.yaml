@@ -1,0 +1,30 @@
+# Public-serving overlay: run alongside the base stack with
+#   docker compose -f compose.yaml -f compose.public.yaml up -d
+# A Cloudflare Tunnel carries public traffic in, so no router port-forwarding is needed:
+#   internet -> Cloudflare (TLS) -> cloudflared -> caddy:80 -> app:8000
+# Needs CLOUDFLARE_TUNNEL_TOKEN in .env (Zero Trust -> Networks -> Tunnels), with the
+# tunnel's public hostname routed to http://caddy:80.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  cloudflared:
+    image: cloudflare/cloudflared:2025.8.1
+    restart: unless-stopped
+    # UDP/QUIC is unreliable on this network; the tunnel runs over TCP 7844 instead.
+    command: tunnel --no-autoupdate --protocol http2 run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      - caddy
+
+volumes:
+  caddy-data:
+  caddy-config:

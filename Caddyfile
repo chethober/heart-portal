@@ -1,0 +1,10 @@
+{
+	# Cloudflare terminates public TLS and the tunnel delivers plain HTTP here.
+	auto_https off
+}
+
+:80 {
+	reverse_proxy app:8000 {
+		header_up X-Forwarded-Proto https
+	}
+}

@@ -1,0 +1,13 @@
+# Serves chth.ir directly (no CDN in front) with an automatic Let's Encrypt certificate.
+{$SITE_ADDRESS} {
+	root * /var/www/html/public
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	php_fastcgi app:9000
+	file_server
+}
