@@ -296,5 +296,12 @@
     "Quality control": "Kalite kontrol",
     "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "Eko teknisyeniyle aynı: çalışma kaydetme, taslakları düzenleme, hasta arama, raporları görüntüleme ve yazdırma.",
     "Everything a nurse can, plus review the audit log.": "Hemşirenin yapabildiği her şey, ayrıca denetim kaydını inceleme.",
-    "Invite a staff member": "Personel davet et"
+    "Invite a staff member": "Personel davet et",
+    "Echocardiography": "Ekokardiyografi",
+    "Coronary Angiography": "Koroner anjiyografi",
+    "Coronary Angioplasty (PCI)": "Koroner anjiyoplasti (PCI)",
+    "Right Heart Catheterization": "Sağ kalp kateterizasyonu",
+    "Peripheral Angiography": "Periferik anjiyografi",
+    "Cardiac Intervention": "Kardiyak girişim",
+    "Discharge Summary": "Taburcu özeti"
 }

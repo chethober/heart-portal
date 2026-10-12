@@ -296,5 +296,12 @@
     "Quality control": "مراقبة الجودة",
     "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "مثل فني الإيكو: تسجيل الدراسات، وتعديل المسودات، والبحث عن المرضى، وعرض التقارير وطباعتها.",
     "Everything a nurse can, plus review the audit log.": "كل ما يمكن للممرض فعله، بالإضافة إلى مراجعة سجل التدقيق.",
-    "Invite a staff member": "دعوة موظف"
+    "Invite a staff member": "دعوة موظف",
+    "Echocardiography": "تخطيط صدى القلب",
+    "Coronary Angiography": "تصوير الأوعية التاجية",
+    "Coronary Angioplasty (PCI)": "رأب الأوعية التاجية (PCI)",
+    "Right Heart Catheterization": "قسطرة القلب الأيمن",
+    "Peripheral Angiography": "تصوير الأوعية الطرفية",
+    "Cardiac Intervention": "تدخل قلبي",
+    "Discharge Summary": "ملخص الخروج"
 }

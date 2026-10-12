@@ -37,7 +37,7 @@
 @endphp
 
 <x-dashboard-layout :title="Procedures::label($procedure)">
-    <div dir="ltr" lang="en">
+    <div dir="{{ Procedures::dir($procedure) }}" lang="{{ Procedures::dir($procedure) === 'rtl' ? 'fa' : 'en' }}">
         <div class="mb-6 flex flex-wrap items-center gap-3 print:hidden">
             <button type="button" onclick="window.print()" class="{{ $buttonPrimary }}">Print Report</button>
             <a href="{{ route('patients.index', ['nationalID' => $report['nationalID']]) }}" class="{{ $buttonSecondary }}">Back to Patient</a>

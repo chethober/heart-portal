@@ -296,5 +296,12 @@
     "Quality control": "کنترل کیفی",
     "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "همانند تکنسین اکو: ثبت مطالعات، ویرایش پیش‌نویس‌ها، جستجوی بیماران، مشاهده و چاپ گزارش‌ها.",
     "Everything a nurse can, plus review the audit log.": "همه کارهای پرستار، به‌علاوه بررسی گزارش ممیزی.",
-    "Invite a staff member": "دعوت از کارمند"
+    "Invite a staff member": "دعوت از کارمند",
+    "Echocardiography": "اکوکاردیوگرافی",
+    "Coronary Angiography": "آنژیوگرافی عروق کرونر",
+    "Coronary Angioplasty (PCI)": "آنژیوپلاستی عروق کرونر (PCI)",
+    "Right Heart Catheterization": "کاتتریزاسیون قلب راست",
+    "Peripheral Angiography": "آنژیوگرافی محیطی",
+    "Cardiac Intervention": "مداخله قلبی",
+    "Discharge Summary": "خلاصه ترخیص"
 }

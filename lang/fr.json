@@ -296,5 +296,12 @@
     "Quality control": "Contrôle qualité",
     "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "Comme un technicien d’échographie : enregistrer des études, modifier les brouillons, rechercher des patients, consulter et imprimer les comptes rendus.",
     "Everything a nurse can, plus review the audit log.": "Tout ce que peut faire un infirmier, plus la consultation du journal d’audit.",
-    "Invite a staff member": "Inviter un membre du personnel"
+    "Invite a staff member": "Inviter un membre du personnel",
+    "Echocardiography": "Échocardiographie",
+    "Coronary Angiography": "Coronarographie",
+    "Coronary Angioplasty (PCI)": "Angioplastie coronaire (ICP)",
+    "Right Heart Catheterization": "Cathétérisme cardiaque droit",
+    "Peripheral Angiography": "Angiographie périphérique",
+    "Cardiac Intervention": "Intervention cardiaque",
+    "Discharge Summary": "Résumé de sortie"
 }

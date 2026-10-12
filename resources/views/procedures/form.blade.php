@@ -26,7 +26,7 @@
 
 <x-dashboard-layout :title="$title">
     <form method="POST" action="{{ $study ? route('procedures.update', [$procedure, $study]) : route('procedures.store', $procedure) }}"
-          dir="ltr" lang="en" x-data="{ v: @js($watched) }" class="space-y-4">
+          dir="{{ Procedures::dir($procedure) }}" lang="{{ Procedures::dir($procedure) === 'rtl' ? 'fa' : 'en' }}" x-data="{ v: @js($watched) }" class="space-y-4">
         @csrf
         @if ($study)
             @method('PUT')

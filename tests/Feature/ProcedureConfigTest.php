@@ -12,6 +12,7 @@ dataset('procedures', array_keys(Procedures::MODELS));
 test('every show_if depends on an earlier field and one of its values', function (string $procedure) {
     $fields = Procedures::fields($procedure);
     $order = array_flip(array_keys($fields));
+    expect($fields)->not->toBeEmpty();
 
     foreach ($fields as $name => $field) {
         if (! isset($field['show_if'])) {
