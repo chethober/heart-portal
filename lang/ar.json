@@ -112,7 +112,6 @@
     "Install an authenticator app such as Google Authenticator, Microsoft Authenticator or Aegis.": "ثبّت تطبيق مصادقة مثل Google Authenticator أو Microsoft Authenticator أو Aegis.",
     "Invitation revoked.": "تم إلغاء الدعوة.",
     "Invitation sent to :email.": "تم إرسال الدعوة إلى :email.",
-    "Invite a doctor or technician": "دعوة طبيب أو فني",
     "Invite and manage staff, change roles, deactivate accounts, view reports and the audit log, and delete drafts.": "دعوة الطاقم وإدارته، وتغيير الأدوار، وتعطيل الحسابات، وعرض التقارير وسجل التدقيق، وحذف المسودات.",
     "Join :hospital": "الانضمام إلى :hospital",
     "Language": "اللغة",
@@ -292,5 +291,10 @@
     "with its name, city and phone number, and create the first administrator account.": "باسمه ومدينته ورقم هاتفه، وأنشئ أول حساب مسؤول.",
     "Record a new study": "تسجيل دراسة جديدة",
     "Study saved.": "تم حفظ الدراسة.",
-    "The admission belongs to another patient.": "هذا الدخول يخص مريضًا آخر."
+    "The admission belongs to another patient.": "هذا الدخول يخص مريضًا آخر.",
+    "Nurse": "ممرض/ممرضة",
+    "Quality control": "مراقبة الجودة",
+    "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "مثل فني الإيكو: تسجيل الدراسات، وتعديل المسودات، والبحث عن المرضى، وعرض التقارير وطباعتها.",
+    "Everything a nurse can, plus review the audit log.": "كل ما يمكن للممرض فعله، بالإضافة إلى مراجعة سجل التدقيق.",
+    "Invite a staff member": "دعوة موظف"
 }

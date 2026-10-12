@@ -112,7 +112,6 @@
     "Install an authenticator app such as Google Authenticator, Microsoft Authenticator or Aegis.": "Google Authenticator, Microsoft Authenticator veya Aegis gibi bir doğrulama uygulaması yükleyin.",
     "Invitation revoked.": "Davet iptal edildi.",
     "Invitation sent to :email.": "Davet :email adresine gönderildi.",
-    "Invite a doctor or technician": "Hekim veya teknisyen davet et",
     "Invite and manage staff, change roles, deactivate accounts, view reports and the audit log, and delete drafts.": "Personel davet edin ve yönetin, rolleri değiştirin, hesapları devre dışı bırakın, raporları ve denetim kaydını görüntüleyin, taslakları silin.",
     "Join :hospital": ":hospital kurumuna katıl",
     "Language": "Dil",
@@ -292,5 +291,10 @@
     "with its name, city and phone number, and create the first administrator account.": "adı, şehri ve telefon numarasıyla; ardından ilk yönetici hesabını oluşturun.",
     "Record a new study": "Yeni çalışma kaydet",
     "Study saved.": "Çalışma kaydedildi.",
-    "The admission belongs to another patient.": "Bu yatış başka bir hastaya ait."
+    "The admission belongs to another patient.": "Bu yatış başka bir hastaya ait.",
+    "Nurse": "Hemşire",
+    "Quality control": "Kalite kontrol",
+    "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "Eko teknisyeniyle aynı: çalışma kaydetme, taslakları düzenleme, hasta arama, raporları görüntüleme ve yazdırma.",
+    "Everything a nurse can, plus review the audit log.": "Hemşirenin yapabildiği her şey, ayrıca denetim kaydını inceleme.",
+    "Invite a staff member": "Personel davet et"
 }

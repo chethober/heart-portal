@@ -112,7 +112,6 @@
     "Install an authenticator app such as Google Authenticator, Microsoft Authenticator or Aegis.": "Instale una aplicación de autenticación como Google Authenticator, Microsoft Authenticator o Aegis.",
     "Invitation revoked.": "Invitación revocada.",
     "Invitation sent to :email.": "Invitación enviada a :email.",
-    "Invite a doctor or technician": "Invitar a un médico o técnico",
     "Invite and manage staff, change roles, deactivate accounts, view reports and the audit log, and delete drafts.": "Invitar y gestionar al personal, cambiar roles, desactivar cuentas, ver informes y el registro de auditoría, y eliminar borradores.",
     "Join :hospital": "Unirse a :hospital",
     "Language": "Idioma",
@@ -292,5 +291,10 @@
     "with its name, city and phone number, and create the first administrator account.": "con su nombre, ciudad y teléfono, y cree la primera cuenta de administrador.",
     "Record a new study": "Registrar un nuevo estudio",
     "Study saved.": "Estudio guardado.",
-    "The admission belongs to another patient.": "El ingreso pertenece a otro paciente."
+    "The admission belongs to another patient.": "El ingreso pertenece a otro paciente.",
+    "Nurse": "Enfermero/a",
+    "Quality control": "Control de calidad",
+    "The same as an echo technician: record studies, edit drafts, search patients, view and print reports.": "Lo mismo que un técnico de eco: registrar estudios, editar borradores, buscar pacientes, ver e imprimir informes.",
+    "Everything a nurse can, plus review the audit log.": "Todo lo que puede un enfermero, además de revisar el registro de auditoría.",
+    "Invite a staff member": "Invitar a un miembro del personal"
 }
