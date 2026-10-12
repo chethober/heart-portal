@@ -1,6 +1,6 @@
-// Usage: node to-config.js spec.json <key> <label> <dateField> <sourceForm> > config/procedures/<key>.php
+// Usage: node to-config.cjs spec.json <key> <label> <dateField> <sourceForm> > config/procedures/<key>.php
 // Run from the repository root; see tools/heart/README.md.
-// Turns a heart form spec (from extract.js) into an Echo Portal procedure config.
+// Turns a heart form spec (from extract.cjs) into an Echo Portal procedure config.
 const [specFile, key, label, dateField, sourceForm] = process.argv.slice(2);
 const spec = require(require('path').resolve(specFile));
 
@@ -8,22 +8,26 @@ const spec = require(require('path').resolve(specFile));
 const RESERVED = new Set(['id', 'hospital_id', 'patient_id', 'admission_id', 'created_by', 'reported_by', 'status',
   'finalized_at', 'amended_by', 'amended_at', 'amendment_reason', 'legacy_id', 'created_at', 'updated_at', 'deleted_at']);
 // Heart fields that become relations instead of columns.
-const SKIP = new Set(['nationalcode', 'admitId']);
+const SKIP = new Set(['nationalcode', 'admitId', 'patientId']);
+// Embedded record lists, computed values and the prescription widget are handled by relations,
+// the report and the e-prescription module instead of columns.
+const SKIP_TYPES = new Set(['auto', 'form', 'computed', 'prescription']);
 // Placeholder choices that mean "not answered"; stored as null instead of a code.
-const BLANK = /^\W*(missing|select|please select|بی جواب)\W*$/i;
+const BLANK = /^\W*(missing|select|please select|بی جواب|لطفا انتخاب کنید)\W*$/i;
 const FARSI = { 'خیر': 'No', 'بلی': 'Yes' };
 const TYPES = { radio: 'choice', combo: 'choice', yesno: 'choice', checkbox: 'boolean', number: 'number',
-  text: 'text', multiline: 'multiline', shamsidate: 'date', time: 'time' };
+  text: 'text', multiline: 'multiline', shamsidate: 'date', time: 'time', email: 'text' };
 
 const renamed = {};
 const column = name => RESERVED.has(name) ? (renamed[name] = `${key}_${name}`) : name;
 
 const sections = [];
 for (const f of spec.fields) {
-  if (f.type === 'auto' || SKIP.has(f.name)) continue;
-  const type = TYPES[f.type];
+  if (SKIP_TYPES.has(f.type) || SKIP.has(f.name)) continue;
+  // Combos filled from heart's database at runtime (hospitals, wards, physicians) have no codes here.
+  const type = f.type === 'combo' && !(f.values || []).length ? 'text' : TYPES[f.type];
   if (!type) throw new Error(`Unmapped type ${f.type} for ${f.name}`);
-  const title = /[^\x00-\x7f]/.test(f.chapter || '') || !f.chapter ? 'Registration' : f.chapter.replace(/_/g, ' ');
+  const title = !f.chapter || /سامانه ثبت/.test(f.chapter) ? 'Registration' : f.chapter.replace(/<[^>]*>/g, '').replace(/_/g, ' ').trim();
   let section = sections[sections.length - 1];
   if (!section || section.title !== title) sections.push(section = { title, fields: [] });
 
@@ -41,6 +45,12 @@ for (const f of spec.fields) {
   if (f.linked) out.show_if = [column(f.linked[0]), String(f.linked[1])];
   section.fields.push(out);
 }
+
+const all = sections.flatMap(s => s.fields);
+// Heart ignores a condition on a field the form does not have (the field is always shown).
+const names = new Set(all.map(f => f.name));
+for (const f of all) if (f.show_if && !names.has(f.show_if[0])) { console.error(`dropped show_if on ${f.name}: no ${f.show_if[0]}`); delete f.show_if; }
+const rtl = all.filter(f => /[\u0600-\u06ff]/.test(f.label)).length > all.length / 3;
 
 const q = s => `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 const field = f => {
@@ -73,7 +83,7 @@ console.log(`<?php
 */
 
 return [
-    'label' => ${q(label)},
+    'label' => ${q(label)},${rtl ? "\n    // Heart's labels for this form are Persian, so it is shown right to left.\n    'dir' => 'rtl'," : ''}
     'date_field' => ${q(dateField)},
     'sections' => [
 ${sections.map(s => `        [

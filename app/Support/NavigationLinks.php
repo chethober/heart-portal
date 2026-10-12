@@ -16,7 +16,7 @@ use App\Models\User;
 final class NavigationLinks
 {
     /**
-     * @return list<array{label: string, url: string, active: bool, count: int|null}>
+     * @return list<array{label: string, url: string, active: bool, count: int|null, children?: list<array{label: string, url: string, active: bool}>}>
      */
     public static function for(User $user): array
     {
@@ -29,8 +29,18 @@ final class NavigationLinks
         $links = [];
 
         if ($user->can('studies.create')) {
-            // The dashboard home is the echo form.
-            $links[] = self::link(__('New Study'), ['dashboard', 'studies.create']);
+            // The dashboard home is the echo form; the other forms come from the heart system.
+            $links[] = [
+                ...self::link(__('New Study'), ['dashboard', 'studies.create', 'procedures.create']),
+                'children' => [
+                    ['label' => __('Echocardiography'), 'url' => route('studies.create'), 'active' => request()->routeIs('dashboard', 'studies.create')],
+                    ...array_map(fn (string $key) => [
+                        'label' => __(Procedures::label($key)),
+                        'url' => route('procedures.create', $key),
+                        'active' => request()->routeIs('procedures.create') && request()->route('procedure') === $key,
+                    ], array_keys(Procedures::MODELS)),
+                ],
+            ];
         }
         if ($user->can('patients.view')) {
             $links[] = self::link(__('Worklist'), 'worklist', EchoStudy::where('status', StudyStatus::Draft)->count());
