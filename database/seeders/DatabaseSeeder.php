@@ -28,5 +28,10 @@ class DatabaseSeeder extends Seeder
         User::factory()->for($hospital)->role(Role::HospitalAdmin)->create(['name' => 'Hospital Admin', 'email' => 'hadmin@echo.test']);
         User::factory()->for($hospital)->role(Role::Doctor)->create(['name' => 'Dr. Demo', 'email' => 'doctor@echo.test']);
         User::factory()->for($hospital)->role(Role::Technician)->create(['name' => 'Tech Demo', 'email' => 'tech@echo.test']);
+        User::factory()->for($hospital)->role(Role::Nurse)->create(['name' => 'Nurse Demo', 'email' => 'nurse@echo.test']);
+        User::factory()->for($hospital)->role(Role::QualityControl)->create(['name' => 'QC Demo', 'email' => 'qc@echo.test']);
+
+        // Patients, admissions and angiographies in the heart system's fields.
+        (new HeartDemoSeeder)->run($hospital);
     }
 }
