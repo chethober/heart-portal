@@ -103,4 +103,5 @@ Route::get('/{page}', function (Request $request, string $page) {
     return redirect()->to('/dashboard/'.$path.($query ? '?'.$query : ''), 301);
 })->where('page', '(patients|studies|staff|audit|profile|admin/hospitals)(/.*)?');
 
+require __DIR__.'/prescriptions.php';
 require __DIR__.'/auth.php';
