@@ -289,5 +289,8 @@
     "of": "/ toplam",
     "results": "sonuç",
     "to": "-",
-    "with its name, city and phone number, and create the first administrator account.": "adı, şehri ve telefon numarasıyla; ardından ilk yönetici hesabını oluşturun."
+    "with its name, city and phone number, and create the first administrator account.": "adı, şehri ve telefon numarasıyla; ardından ilk yönetici hesabını oluşturun.",
+    "Record a new study": "Yeni çalışma kaydet",
+    "Study saved.": "Çalışma kaydedildi.",
+    "The admission belongs to another patient.": "Bu yatış başka bir hastaya ait."
 }

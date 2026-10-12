@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Patient;
+use App\Http\Requests\Concerns\HasPatientFields;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 /**
  * Validates the JSON the echo form posts. Only fields listed in
@@ -13,7 +12,7 @@ use Illuminate\Validation\Validator;
  */
 class StoreEchoStudyRequest extends FormRequest
 {
-    private const JALALI_DATE = 'regex:/^\d{4}\/\d{1,2}\/\d{1,2}$/';
+    use HasPatientFields;
 
     public function authorize(): bool
     {
@@ -22,19 +21,7 @@ class StoreEchoStudyRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $normalized = [];
-
-        if (is_string($this->input('nationalID'))) {
-            $normalized['nationalID'] = Patient::normalizeNationalId($this->input('nationalID'));
-        }
-
-        foreach (['dob', 'echo_date'] as $dateField) {
-            if (is_string($this->input($dateField))) {
-                $normalized[$dateField] = Patient::normalizeNationalId($this->input($dateField)) ?: null;
-            }
-        }
-
-        $this->merge($normalized);
+        $this->normalizePatientInput(['echo_date']);
     }
 
     /**
@@ -43,12 +30,7 @@ class StoreEchoStudyRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'nationalID' => ['required', 'string', 'max:32', 'regex:/^[0-9A-Za-z]+$/'],
-            'dob' => ['nullable', 'string', self::JALALI_DATE],
-            'phone_number' => ['nullable', 'string', 'max:32'],
-            'gender' => ['nullable', 'in:Male,Female'],
+            ...$this->patientRules(),
             'echo_date' => ['nullable', 'string', self::JALALI_DATE],
             'doctor' => ['nullable', 'string', 'max:255'],
         ];
@@ -62,37 +44,6 @@ class StoreEchoStudyRequest extends FormRequest
         }
 
         return $rules;
-    }
-
-    /**
-     * @return array<int, callable>
-     */
-    public function after(): array
-    {
-        return [
-            function (Validator $validator) {
-                $known = [...array_keys($this->rules()), '_token', '_method'];
-
-                foreach (array_diff(array_keys($this->all()), $known) as $unknown) {
-                    $validator->errors()->add($unknown, __('Unknown field :field.', ['field' => $unknown]));
-                }
-            },
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function patientAttributes(): array
-    {
-        return [
-            'national_id' => $this->validated('nationalID'),
-            'first_name' => $this->validated('first_name'),
-            'last_name' => $this->validated('last_name'),
-            'dob' => $this->validated('dob'),
-            'gender' => $this->validated('gender'),
-            'phone_number' => $this->validated('phone_number'),
-        ];
     }
 
     /**

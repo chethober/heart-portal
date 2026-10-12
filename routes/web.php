@@ -5,6 +5,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Clinical\DoctorController;
 use App\Http\Controllers\Clinical\EchoStudyController;
 use App\Http\Controllers\Clinical\PatientController;
+use App\Http\Controllers\Clinical\ProcedureStudyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HospitalPendingController;
 use App\Http\Controllers\LocaleController;
@@ -48,6 +49,8 @@ Route::prefix('dashboard')->group(function () {
                 Route::post('/studies', [EchoStudyController::class, 'store'])->name('studies.store');
                 Route::post('/studies/preview', [EchoStudyController::class, 'preview'])->name('studies.preview');
                 Route::get('/doctors', DoctorController::class)->name('doctors.index');
+                Route::get('/procedures/{procedure}/create', [ProcedureStudyController::class, 'create'])->name('procedures.create');
+                Route::post('/procedures/{procedure}', [ProcedureStudyController::class, 'store'])->name('procedures.store');
             });
 
             Route::middleware('permission:patients.view')->group(function () {
@@ -59,6 +62,13 @@ Route::prefix('dashboard')->group(function () {
                 Route::get('/studies/{study}/edit', [EchoStudyController::class, 'edit'])->name('studies.edit');
                 Route::put('/studies/{study}', [EchoStudyController::class, 'update'])->name('studies.update');
                 Route::post('/studies/{study}/finalize', [EchoStudyController::class, 'finalize'])->name('studies.finalize');
+
+                // Procedures ported from heart (angiography, ...); authorized like echo studies.
+                Route::get('/procedures/{procedure}/{procedureStudy}', [ProcedureStudyController::class, 'show'])->name('procedures.show');
+                Route::delete('/procedures/{procedure}/{procedureStudy}', [ProcedureStudyController::class, 'destroy'])->name('procedures.destroy');
+                Route::get('/procedures/{procedure}/{procedureStudy}/edit', [ProcedureStudyController::class, 'edit'])->name('procedures.edit');
+                Route::put('/procedures/{procedure}/{procedureStudy}', [ProcedureStudyController::class, 'update'])->name('procedures.update');
+                Route::post('/procedures/{procedure}/{procedureStudy}/finalize', [ProcedureStudyController::class, 'finalize'])->name('procedures.finalize');
             });
 
             Route::middleware('permission:staff.manage')->prefix('staff')->name('staff.')->group(function () {

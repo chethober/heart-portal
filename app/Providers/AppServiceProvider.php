@@ -3,11 +3,17 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Policies\ProcedureStudyPolicy;
 use App\Support\Audit;
 use App\Support\CurrentHospital;
+use App\Support\Procedures;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Routing\Route as RouteDefinition;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +31,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Signed versions of every procedure share one table, keyed by procedure name.
+        Relation::morphMap(Procedures::MODELS);
+        foreach (Procedures::MODELS as $model) {
+            Gate::policy($model, ProcedureStudyPolicy::class);
+        }
+
+        // Procedure routes: {procedureStudy} is looked up in its own procedure's table (and
+        // hospital, by the model's scope). Registered here so it also applies with cached routes.
+        Route::pattern('procedure', implode('|', array_keys(Procedures::MODELS)));
+        Route::pattern('procedureStudy', '[0-9]+');
+        Route::bind('procedureStudy', fn (string $id, RouteDefinition $route) => Procedures::model($route->parameter('procedure'))::findOrFail($id));
+
         Event::listen(function (Login $event) {
             if ($event->user instanceof User) {
                 Audit::record('auth.login', null, [], $event->user);

@@ -40,4 +40,31 @@
             </table>
         </div>
     @endif
+
+    @if ($nationalID !== '')
+        {{-- Procedures ported from the heart system (angiography, ...). --}}
+        <div class="mt-8 space-y-6">
+            @foreach ($procedures as $key => $studies)
+                <section>
+                    <div class="mb-2 flex flex-wrap items-center gap-3">
+                        <h3 class="text-lg font-semibold">{{ App\Support\Procedures::label($key) }}</h3>
+                        @can('studies.create')
+                            <a href="{{ route('procedures.create', [$key, 'nationalID' => $nationalID]) }}" class="text-sm font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Record a new study') }}</a>
+                        @endcan
+                    </div>
+                    @if ($studies->isNotEmpty())
+                        <ul class="divide-y divide-gray-100 text-sm">
+                            @foreach ($studies as $study)
+                                <li class="flex flex-wrap items-center gap-3 py-2">
+                                    <span class="whitespace-nowrap">{{ $study->performedOn() ?? JalaliDate::format($study->created_at, 'yyyy/MM/dd') }}</span>
+                                    @include('dashboard.status-badge', ['status' => $study->status])
+                                    <a href="{{ route('procedures.show', [$key, $study]) }}" class="ms-auto font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('View report') }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </section>
+            @endforeach
+        </div>
+    @endif
 </x-dashboard-layout>
