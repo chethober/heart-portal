@@ -110,6 +110,35 @@ To add a language, add it to `available_locales` in [`config/app.php`](config/ap
 `pagination` and `validation` files under `lang/<code>/`. `tests/Feature/LocalizationTest.php` fails
 until every interface string is translated.
 
+## Importing from heart and the HIS
+
+Echo Portal replaces the legacy *heart* system (Mehr clinical information system). Its data is
+copied in with two re-runnable artisan commands; both take `--dry-run`, which reads and checks
+everything and then rolls back.
+
+```bash
+# heart's MySQL database (HEART_DB_* in .env): patients, admissions, echo and procedure studies.
+php artisan heart:import --hospital=<slug or id> [--only=patients,admissions,...] [--center=<id> | --all-centers] [--dry-run]
+
+# Admissions from the hospital information system's SQL Server view (HIS_DB_* in .env).
+php artisan his:import-admissions --hospital=<slug or id> [--since=1405/01/01] [--limit=500] [--dry-run]
+```
+
+- Rows are matched on `legacy_id` (heart's row id), admissions also on the HIS admission number, and
+  patients on national ID within the hospital. Running an import again only applies what changed.
+- Imported studies are signed history (status final, no signing user) with a version saying
+  "Imported from heart". Studies amended or deleted in Echo Portal are never overwritten.
+- heart's placeholder codes ("Missing", 9, -1) import as empty. heart's users are never imported:
+  invite staff instead.
+- A heart database holding several centers (`admit.centerId`) needs `--center` or `--all-centers`,
+  so that one hospital's patients never land in another.
+- Set `HIS_IMPORT_HOSPITAL` to run `his:import-admissions` from the scheduler (`HIS_IMPORT_CRON`,
+  every 30 minutes by default).
+- The app image includes `pdo_mysql`. The HIS needs the `pdo_sqlsrv` extension and Microsoft's
+  ODBC driver, which are not in the image. Install them where the HIS import runs.
+- Never reuse heart's connection settings files (`include/connect.php`, `hisConnect.php`): they
+  hold plain-text credentials.
+
 ## Architecture
 
 - **Laravel 13**, PHP 8.4, **PostgreSQL 16**, Blade + Tailwind (Breeze), Alpine.js.
