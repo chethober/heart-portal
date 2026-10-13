@@ -53,6 +53,11 @@ All notable changes to this project are documented here. The format follows
   help center. Heart's admission ICD codes are imported. Codes beyond heart's acute MI and angina
   items still need review by a clinician (config/diagnoses.php).
 
+- Patient search by national ID, HIS admission number or name (Persian or Arabic ی/ک, spaces
+  ignored), listing several matches with their latest admission. A national ID or admission number
+  not on record is looked up live in the hospital information system and imported, for the hospital
+  set in HIS_LOOKUP_HOSPITAL, as heart's search did.
+
 ### Changed
 - Cath-lab forms and their reports now look and work like the echo form and report: a section bar
   showing which sections are filled in, one section at a time, a live report preview beside the

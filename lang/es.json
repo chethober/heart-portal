@@ -486,5 +486,14 @@
     "Save access": "Guardar acceso",
     "Final diagnosis guide": "Guía del diagnóstico final",
     "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Elija el diagnóstico final en el resumen de alta y en los ingresos de esta lista, que incluye el código CIE-10. Si el diagnóstico no figura, escríbalo como lo indique el médico tratante.",
-    "Final diagnosis (ICD-10)": "Diagnóstico final (CIE-10)"
+    "Final diagnosis (ICD-10)": "Diagnóstico final (CIE-10)",
+    "Search patients": "Buscar pacientes",
+    "National ID, admission number or name": "DNI, número de ingreso o nombre",
+    "Not on record yet: found in the hospital information system and imported.": "Aún no registrado: se encontró en el sistema de información hospitalaria y se importó.",
+    "Enter at least two characters.": "Introduzca al menos dos caracteres.",
+    "No patients found.": "No se encontraron pacientes.",
+    "Latest admission": "Último ingreso",
+    "Search by national ID, HIS admission number or name to see a patient's studies.": "Busque por DNI, número de ingreso del HIS o nombre para ver los estudios del paciente.",
+    ":count patient found|:count patients found": ":count paciente encontrado|:count pacientes encontrados",
+    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "La búsqueda también acepta un número de ingreso del HIS o un nombre (basta una parte, con o sin espacios, en grafía persa o árabe). Si un DNI o número de ingreso no está registrado, se consulta el sistema de información hospitalaria y se importa el paciente, cuando está conectado."
 }

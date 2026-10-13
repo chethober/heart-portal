@@ -486,5 +486,14 @@
     "Save access": "Zugriff speichern",
     "Final diagnosis guide": "Leitfaden zur Enddiagnose",
     "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Wählen Sie die Enddiagnose im Entlassungsbericht und bei Aufnahmen aus dieser Liste, die den ICD-10-Code enthält. Steht die Diagnose nicht in der Liste, schreiben Sie sie so, wie der behandelnde Arzt sie angibt.",
-    "Final diagnosis (ICD-10)": "Enddiagnose (ICD-10)"
+    "Final diagnosis (ICD-10)": "Enddiagnose (ICD-10)",
+    "Search patients": "Patienten suchen",
+    "National ID, admission number or name": "Ausweis-Nr., Aufnahme-Nr. oder Name",
+    "Not on record yet: found in the hospital information system and imported.": "Noch nicht erfasst: im Krankenhausinformationssystem gefunden und importiert.",
+    "Enter at least two characters.": "Geben Sie mindestens zwei Zeichen ein.",
+    "No patients found.": "Keine Patienten gefunden.",
+    "Latest admission": "Letzte Aufnahme",
+    "Search by national ID, HIS admission number or name to see a patient's studies.": "Suchen Sie nach Ausweis-Nr., KIS-Aufnahme-Nr. oder Name, um die Untersuchungen des Patienten zu sehen.",
+    ":count patient found|:count patients found": ":count Patient gefunden|:count Patienten gefunden",
+    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "Die Suche akzeptiert auch eine KIS-Aufnahmenummer oder einen Namen (ein Teil genügt, mit oder ohne Leerzeichen, in persischer oder arabischer Schreibweise). Ist eine Ausweis- oder Aufnahmenummer nicht erfasst, wird das Krankenhausinformationssystem abgefragt und der Patient importiert, sofern es angebunden ist."
 }

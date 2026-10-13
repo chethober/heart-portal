@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Support\Audit;
 use App\Support\CurrentHospital;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -51,12 +52,7 @@ final class HisAdmissionImporter
         $this->summary->add('patients', 'read', 0);
         $this->summary->add('admissions', 'read', 0);
 
-        // Column names are the view's; the query builder quotes them (spaces included) and binds every value.
-        $query = $this->his->table($this->view)
-            ->select([
-                'Adm Code as AdmCode', 'NationalCode', 'Name', 'Family', 'Sex', 'Birth Date as BirthDate',
-                'MobileNo', 'Tel', 'Discharge_ward', 'physician', 'Date', 'DisDate',
-            ])
+        $query = $this->query()
             ->when($since !== null, fn ($q) => $q->where('Date', '>=', $since))
             ->when($limit > 0, fn ($q) => $q->limit($limit))
             ->orderByDesc('Date');
@@ -96,6 +92,66 @@ final class HisAdmissionImporter
         }
 
         return $this->summary;
+    }
+
+    /**
+     * Heart's search fallback (search_patient_his): when a patient is not on record, fetch their
+     * latest HIS admission by national ID or admission number and import it. Returns the patient,
+     * or null when the HIS has no such admission (or it could not be imported).
+     */
+    public function lookup(?string $nationalId = null, ?string $admissionCode = null): ?Patient
+    {
+        if ($nationalId === null && $admissionCode === null) {
+            return null;
+        }
+
+        try {
+            $record = $this->query()
+                ->when($nationalId !== null, fn ($q) => $q->where('NationalCode', $nationalId))
+                ->when($admissionCode !== null, fn ($q) => $q->where('Adm Code', $admissionCode))
+                ->orderByDesc('Date')
+                ->first();
+        } catch (Throwable $e) {
+            // The HIS being unreachable must not break the patient search.
+            report($e);
+
+            return null;
+        }
+
+        if ($record === null) {
+            return null;
+        }
+
+        $row = new LegacyRow($record);
+        $current = app(CurrentHospital::class);
+        $previous = $current->id();
+        $current->set($this->hospital->id);
+
+        try {
+            DB::transaction(fn () => $this->import($row, LegacyValue::code($row->get('AdmCode'))));
+            $patient = Patient::whereNationalId(Patient::normalizeNationalId((string) LegacyValue::text($row->get('NationalCode'))))->first();
+            Audit::record('his.lookup', $patient, ['found' => $patient !== null]);
+
+            return $patient;
+        } catch (Throwable $e) {
+            report($e);
+
+            return null;
+        } finally {
+            $current->set($previous);
+        }
+    }
+
+    /**
+     * The registry view, with its columns as the importer reads them. Column names are the view's;
+     * the query builder quotes them (spaces included) and binds every value.
+     */
+    private function query(): Builder
+    {
+        return $this->his->table($this->view)->select([
+            'Adm Code as AdmCode', 'NationalCode', 'Name', 'Family', 'Sex', 'Birth Date as BirthDate',
+            'MobileNo', 'Tel', 'Discharge_ward', 'physician', 'Date', 'DisDate',
+        ]);
     }
 
     private function import(LegacyRow $row, ?string $hisId): void

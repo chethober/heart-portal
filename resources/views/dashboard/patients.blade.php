@@ -3,12 +3,58 @@
 @endphp
 
 <x-dashboard-layout :title="__('Patient echos')">
-    {{-- The National ID search is in the dashboard header. --}}
+    {{-- Search by national ID, HIS admission number or name; the box is also in the dashboard header. --}}
+    <form method="GET" action="{{ route('patients.index') }}" role="search" class="mb-6 flex flex-wrap gap-2 lg:hidden">
+        <input name="nationalID" type="search" value="{{ $search }}" required placeholder="{{ __('National ID, admission number or name') }}" aria-label="{{ __('Search patients') }}"
+               class="no-voice block w-72 rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <x-primary-button>{{ __('Search') }}</x-primary-button>
+    </form>
+    @if ($fromHis && $patient)
+        <div class="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-900" role="status">{{ __('Not on record yet: found in the hospital information system and imported.') }}</div>
+    @endif
     @if ($patient)
         <p class="mb-4 text-sm"><a href="{{ route('patients.show', $patient) }}" class="font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Patient record and admissions') }}</a></p>
     @endif
-    @if ($nationalID === '')
-        <p class="py-8 text-center text-gray-500">{{ __("Enter the patient's National ID to see their recorded echocardiograms.") }}</p>
+    @if ($results !== null)
+        @if ($kind === 'too_short')
+            <p class="py-8 text-center text-gray-500">{{ __('Enter at least two characters.') }}</p>
+        @elseif ($results->isEmpty())
+            <p class="py-8 text-center text-gray-500">{{ __('No patients found.') }}</p>
+        @else
+            <h3 class="mb-2 text-lg font-semibold">{{ trans_choice(':count patient found|:count patients found', $results->count(), ['count' => $results->count()]) }}</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead>
+                        <tr class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <th class="px-3 py-2 text-start">{{ __('Name') }}</th>
+                            <th class="px-3 py-2 text-start">{{ __('National ID') }}</th>
+                            <th class="px-3 py-2 text-start">{{ __('Date of birth') }}</th>
+                            <th class="px-3 py-2 text-start">{{ __('Latest admission') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($results as $match)
+                            @php $latest = $match->admissions->first(); @endphp
+                            <tr>
+                                <td class="px-3 py-2"><a href="{{ route('patients.index', ['nationalID' => $match->national_id]) }}" class="font-medium text-indigo-600 underline hover:text-indigo-500">{{ $match->first_name }} {{ $match->last_name }}</a></td>
+                                <td class="px-3 py-2" dir="ltr">{{ $match->national_id }}</td>
+                                <td class="px-3 py-2">{{ $match->dob }}</td>
+                                <td class="px-3 py-2">
+                                    @if ($latest)
+                                        {{ $latest->summary() }}
+                                        @unless ($latest->isDischarged())
+                                            <span class="ms-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">{{ __('Admitted') }}</span>
+                                        @endunless
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    @elseif ($nationalID === '')
+        <p class="py-8 text-center text-gray-500">{{ __('Search by national ID, HIS admission number or name to see a patient\'s studies.') }}</p>
     @elseif ($echoReports->isEmpty())
         <div class="py-8 text-center text-gray-500">
             <p>{{ __('No echo reports found for this National ID.') }}</p>

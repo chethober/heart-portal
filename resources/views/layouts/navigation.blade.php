@@ -56,15 +56,15 @@
             <div class="hidden lg:flex lg:items-center lg:ms-6 gap-4">
                 @if ($navSearch)
                     <form method="GET" action="{{ route('patients.index') }}" class="relative" role="search">
-                        <label for="nav-national-id" class="sr-only">{{ __('National ID') }}</label>
+                        <label for="nav-national-id" class="sr-only">{{ __('Search patients') }}</label>
                         <svg class="pointer-events-none absolute inset-y-0 start-0 ms-3 h-full w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.08 3.08a.75.75 0 1 1-1.06 1.06l-3.08-3.08A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
                         </svg>
                         <input id="nav-national-id" name="nationalID" type="search" required
                                value="{{ $navNationalID }}"
                                @if (request()->routeIs('patients.index') && $navNationalID === '') autofocus @endif
-                               placeholder="{{ __('National ID') }}"
-                               class="no-voice block w-44 rounded-md border-gray-300 py-1.5 ps-9 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                               placeholder="{{ __('National ID, admission number or name') }}"
+                               class="no-voice block w-64 rounded-md border-gray-300 py-1.5 ps-9 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <button type="submit" class="sr-only">{{ __('Search') }}</button>
                     </form>
                 @endif

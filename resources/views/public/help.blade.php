@@ -144,6 +144,7 @@
             <section id="patients">
                 <h2>{{ __('Finding patients') }}</h2>
                 <p class="mt-4">{{ __('Use Patients or the quick search box with the patient\'s national ID to list all of their studies with status, a short summary and links to the full report.') }}</p>
+                <p class="mt-4">{{ __('The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.') }}</p>
                 <p class="mt-4">{{ __('Open the patient record to see their demographics, contact details and admissions. Staff who record studies can edit these details.') }}</p>
             </section>
 

@@ -486,5 +486,14 @@
     "Save access": "Erişimi kaydet",
     "Final diagnosis guide": "Kesin tanı kılavuzu",
     "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Taburcu özetinde ve yatışlarda kesin tanıyı ICD-10 kodunu içeren bu listeden seçin. Tanı listede yoksa, sorumlu hekimin belirttiği şekilde yazın.",
-    "Final diagnosis (ICD-10)": "Kesin tanı (ICD-10)"
+    "Final diagnosis (ICD-10)": "Kesin tanı (ICD-10)",
+    "Search patients": "Hasta ara",
+    "National ID, admission number or name": "Kimlik no, yatış no veya ad",
+    "Not on record yet: found in the hospital information system and imported.": "Henüz kayıtlı değildi: hastane bilgi sisteminde bulundu ve aktarıldı.",
+    "Enter at least two characters.": "En az iki karakter girin.",
+    "No patients found.": "Hasta bulunamadı.",
+    "Latest admission": "Son yatış",
+    "Search by national ID, HIS admission number or name to see a patient's studies.": "Hastanın çalışmalarını görmek için kimlik no, HBYS yatış no veya adla arayın.",
+    ":count patient found|:count patients found": ":count hasta bulundu|:count hasta bulundu",
+    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "Arama HBYS yatış numarası veya ad da kabul eder (adın bir kısmı yeterlidir, boşluklu ya da boşluksuz, Farsça veya Arapça yazımla). Kimlik veya yatış numarası kayıtlı değilse, bağlıysa hastane bilgi sistemi kontrol edilir ve hasta aktarılır."
 }
