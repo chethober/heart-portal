@@ -495,5 +495,14 @@
     "Latest admission": "آخرین پذیرش",
     "Search by national ID, HIS admission number or name to see a patient's studies.": "برای دیدن مطالعات بیمار، با کد ملی، شماره پذیرش HIS یا نام جستجو کنید.",
     ":count patient found|:count patients found": ":count بیمار یافت شد|:count بیمار یافت شد",
-    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "جستجو شماره پذیرش HIS یا نام را هم می‌پذیرد (بخشی از نام کافی است، با یا بدون فاصله، با املای فارسی یا عربی). اگر کد ملی یا شماره پذیرش ثبت نشده باشد، در صورت اتصال، سامانه اطلاعات بیمارستان بررسی و بیمار وارد می‌شود."
+    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "جستجو شماره پذیرش HIS یا نام را هم می‌پذیرد (بخشی از نام کافی است، با یا بدون فاصله، با املای فارسی یا عربی). اگر کد ملی یا شماره پذیرش ثبت نشده باشد، در صورت اتصال، سامانه اطلاعات بیمارستان بررسی و بیمار وارد می‌شود.",
+    "Export registry data": "خروجی داده‌های ثبت",
+    "Download a form's studies as a CSV file for a spreadsheet, with the patient and admission details. Exports are recorded in the audit log.": "مطالعات یک فرم را همراه با مشخصات بیمار و پذیرش به صورت فایل CSV برای صفحه‌گسترده دریافت کنید. خروجی‌ها در گزارش ممیزی ثبت می‌شوند.",
+    "Choose…": "انتخاب کنید…",
+    "Values": "مقادیر",
+    "As shown on the form": "همان‌طور که در فرم نمایش داده می‌شود",
+    "Stored codes": "کدهای ذخیره‌شده",
+    "Recorded from": "ثبت‌شده از",
+    "Download CSV": "دریافت CSV",
+    "Use a Jalali date such as 1405/01/01.": "از تاریخ شمسی مانند 1405/01/01 استفاده کنید."
 }

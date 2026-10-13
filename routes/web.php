@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HospitalPendingController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RegistryExportController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\Staff\InvitationController;
 use App\Http\Controllers\Staff\StaffController;
@@ -48,6 +49,7 @@ Route::prefix('dashboard')->group(function () {
             Route::get('/users/{user}/signature', [SignatureController::class, 'show'])->name('users.signature');
             Route::post('/profile/signature', [SignatureController::class, 'update'])->middleware('can:sign-reports')->name('profile.signature');
             Route::get('/audit', [AuditLogController::class, 'index'])->middleware('permission:audit.view')->name('audit.index');
+            Route::get('/exports/{form}', RegistryExportController::class)->middleware(['permission:registry.export', 'throttle:20,1'])->name('exports.show');
 
             Route::middleware('permission:echo.create')->group(function () {
                 Route::get('/studies/create', [EchoStudyController::class, 'create'])->name('studies.create');

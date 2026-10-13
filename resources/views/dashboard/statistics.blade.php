@@ -145,4 +145,51 @@
             @endforeach
         </div>
     </section>
+
+    @can('registry.export')
+        {{-- Heart's CSV export: one row per study, with the patient and admission. --}}
+        <section class="mt-10 rounded-lg border border-gray-200 p-4">
+            <h3 class="text-lg font-semibold">{{ __('Export registry data') }}</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ __('Download a form\'s studies as a CSV file for a spreadsheet, with the patient and admission details. Exports are recorded in the audit log.') }}</p>
+            <form method="GET" x-data="{ form: '' }" :action="form ? @js(url('/dashboard/exports')) + '/' + form : ''" class="mt-4 flex flex-wrap items-end gap-3 text-sm">
+                <label class="block">
+                    <span class="font-medium text-gray-700">{{ __('Form') }}</span>
+                    <select x-model="form" required class="mt-1 block rounded-md border-gray-300 text-sm shadow-sm">
+                        <option value="">{{ __('Choose…') }}</option>
+                        @foreach (['echo', ...array_keys(App\Support\Procedures::MODELS)] as $key)
+                            @can("{$key}.view")
+                                <option value="{{ $key }}">{{ App\Support\Forms::label($key) }}</option>
+                            @endcan
+                        @endforeach
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="font-medium text-gray-700">{{ __('Values') }}</span>
+                    <select name="format" class="mt-1 block rounded-md border-gray-300 text-sm shadow-sm">
+                        <option value="labels">{{ __('As shown on the form') }}</option>
+                        <option value="codes">{{ __('Stored codes') }}</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="font-medium text-gray-700">{{ __('Recorded from') }}</span>
+                    <input type="text" name="from" placeholder="1405/01/01" class="mt-1 block w-32 rounded-md border-gray-300 text-sm shadow-sm">
+                </label>
+                <label class="block">
+                    <span class="font-medium text-gray-700">{{ __('to') }}</span>
+                    <input type="text" name="to" placeholder="1405/12/29" class="mt-1 block w-32 rounded-md border-gray-300 text-sm shadow-sm">
+                </label>
+                <label class="block">
+                    <span class="font-medium text-gray-700">{{ __('Status') }}</span>
+                    <select name="status" class="mt-1 block rounded-md border-gray-300 text-sm shadow-sm">
+                        <option value="">{{ __('All') }}</option>
+                        @foreach (App\Enums\StudyStatus::cases() as $status)
+                            <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <x-primary-button>{{ __('Download CSV') }}</x-primary-button>
+            </form>
+            <x-input-error :messages="array_merge($errors->get('from'), $errors->get('to'))" class="mt-2" />
+        </section>
+    @endcan
 </x-dashboard-layout>

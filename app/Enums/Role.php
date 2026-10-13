@@ -48,10 +48,10 @@ enum Role: string
 
         return match ($this) {
             self::PlatformAdmin => ['hospitals.manage'],
-            self::HospitalAdmin => ['staff.manage', 'hospital.settings', 'audit.view', 'patients.view'],
+            self::HospitalAdmin => ['staff.manage', 'hospital.settings', 'audit.view', 'patients.view', 'registry.export'],
             self::Doctor => [...$clinical, 'prescriptions.sign'],
             self::Technician, self::Nurse => $clinical,
-            self::QualityControl => [...$clinical, 'audit.view'],
+            self::QualityControl => [...$clinical, 'audit.view', 'registry.export'],
         };
     }
 

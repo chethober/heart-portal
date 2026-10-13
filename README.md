@@ -152,6 +152,8 @@ php artisan his:import-admissions --hospital=<slug or id> [--since=1405/01/01] [
   so that one hospital's patients never land in another.
 - Set `HIS_IMPORT_HOSPITAL` to run `his:import-admissions` from the scheduler (`HIS_IMPORT_CRON`,
   every 30 minutes by default).
+- Set `HIS_LOOKUP_HOSPITAL` (defaults to `HIS_IMPORT_HOSPITAL`) to let that hospital's patient
+  search look up a national ID or admission number in the HIS when it is not on record, as heart did.
 - The app image includes `pdo_mysql`. The HIS needs the `pdo_sqlsrv` extension and Microsoft's
   ODBC driver, which are not in the image. Install them where the HIS import runs.
 - Never reuse heart's connection settings files (`include/connect.php`, `hisConnect.php`): they

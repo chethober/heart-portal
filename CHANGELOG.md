@@ -58,6 +58,10 @@ All notable changes to this project are documented here. The format follows
   not on record is looked up live in the hospital information system and imported, for the hospital
   set in HIS_LOOKUP_HOSPITAL, as heart's search did.
 
+- Registry CSV export on the Statistics page for hospital admins and quality control: one row per
+  study of a form with the patient and admission, every field as shown on the form or as stored
+  codes, filtered by date and status. Exports are recorded in the audit log.
+
 ### Changed
 - Cath-lab forms and their reports now look and work like the echo form and report: a section bar
   showing which sections are filled in, one section at a time, a live report preview beside the

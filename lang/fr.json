@@ -495,5 +495,14 @@
     "Latest admission": "Dernière admission",
     "Search by national ID, HIS admission number or name to see a patient's studies.": "Recherchez par n° national, n° d'admission du SIH ou nom pour voir les examens du patient.",
     ":count patient found|:count patients found": ":count patient trouvé|:count patients trouvés",
-    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "La recherche accepte aussi un n° d'admission du SIH ou un nom (une partie suffit, avec ou sans espaces, en graphie persane ou arabe). Si un n° national ou d'admission n'est pas enregistré, le système d'information hospitalier est consulté et le patient importé, lorsqu'il est connecté."
+    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "La recherche accepte aussi un n° d'admission du SIH ou un nom (une partie suffit, avec ou sans espaces, en graphie persane ou arabe). Si un n° national ou d'admission n'est pas enregistré, le système d'information hospitalier est consulté et le patient importé, lorsqu'il est connecté.",
+    "Export registry data": "Exporter les données du registre",
+    "Download a form's studies as a CSV file for a spreadsheet, with the patient and admission details. Exports are recorded in the audit log.": "Téléchargez les examens d'un formulaire en fichier CSV pour un tableur, avec les données du patient et de l'admission. Les exports sont consignés dans le journal d'audit.",
+    "Choose…": "Choisir…",
+    "Values": "Valeurs",
+    "As shown on the form": "Tels qu'affichés sur le formulaire",
+    "Stored codes": "Codes enregistrés",
+    "Recorded from": "Enregistré du",
+    "Download CSV": "Télécharger le CSV",
+    "Use a Jalali date such as 1405/01/01.": "Utilisez une date jalali telle que 1405/01/01."
 }

@@ -495,5 +495,14 @@
     "Latest admission": "آخر دخول",
     "Search by national ID, HIS admission number or name to see a patient's studies.": "ابحث بالرقم الوطني أو رقم الدخول في نظام المعلومات أو الاسم لعرض دراسات المريض.",
     ":count patient found|:count patients found": ":count مريض|:count مرضى",
-    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "يقبل البحث أيضًا رقم الدخول في نظام المعلومات أو الاسم (يكفي جزء منه، بمسافات أو بدونها، بالإملاء الفارسي أو العربي). إذا لم يكن الرقم الوطني أو رقم الدخول مسجلاً، يُفحص نظام معلومات المستشفى ويُستورد المريض حيثما يكون متصلاً."
+    "The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.": "يقبل البحث أيضًا رقم الدخول في نظام المعلومات أو الاسم (يكفي جزء منه، بمسافات أو بدونها، بالإملاء الفارسي أو العربي). إذا لم يكن الرقم الوطني أو رقم الدخول مسجلاً، يُفحص نظام معلومات المستشفى ويُستورد المريض حيثما يكون متصلاً.",
+    "Export registry data": "تصدير بيانات السجل",
+    "Download a form's studies as a CSV file for a spreadsheet, with the patient and admission details. Exports are recorded in the audit log.": "نزّل دراسات نموذج كملف CSV لجدول البيانات، مع بيانات المريض والدخول. تُسجَّل عمليات التصدير في سجل التدقيق.",
+    "Choose…": "اختر…",
+    "Values": "القيم",
+    "As shown on the form": "كما تظهر في النموذج",
+    "Stored codes": "الرموز المخزنة",
+    "Recorded from": "مسجل من",
+    "Download CSV": "تنزيل CSV",
+    "Use a Jalali date such as 1405/01/01.": "استخدم تاريخًا هجريًا شمسيًا مثل 1405/01/01."
 }
