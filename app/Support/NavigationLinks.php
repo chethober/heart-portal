@@ -43,13 +43,21 @@ final class NavigationLinks
             ];
         }
         if ($user->can('patients.view')) {
-            $links[] = self::link(__('Worklist'), 'worklist', EchoStudy::where('status', StudyStatus::Draft)->count());
-            $links[] = self::link(__('Patients'), 'patients.index');
+            $drafts = EchoStudy::where('status', StudyStatus::Draft)->count();
+            foreach (Procedures::MODELS as $model) {
+                $drafts += $model::where('status', StudyStatus::Draft)->count();
+            }
+            $links[] = self::link(__('Worklist'), 'worklist', $drafts);
+            $links[] = self::link(__('Patients'), ['patients.index', 'patients.show', 'patients.edit', 'admissions.*']);
+            $links[] = self::link(__('Ward patients'), 'ward-patients');
             $links[] = self::link(__('Statistics'), 'statistics');
             $links[] = self::link(__('Drugs'), 'drugs.index');
         }
         if ($user->can('staff.manage')) {
             $links[] = self::link(__('Staff'), 'staff.*', Invitation::pending()->count());
+        }
+        if ($user->can('hospital.settings')) {
+            $links[] = self::link(__('Wards'), 'wards.*');
         }
         if ($user->can('audit.view')) {
             $links[] = self::link(__('Audit log'), 'audit.*');

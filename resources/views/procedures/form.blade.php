@@ -71,7 +71,19 @@
                     </select>
                 </label>
             </div>
-            @if ($admission = $value('admission_id') ?? request('admission'))
+            @php $admission = $value('admission_id') ?? request('admission'); @endphp
+            @if (($admissions ?? collect())->isNotEmpty())
+                {{-- The patient's admissions (heart links each form to an admit record). --}}
+                <label class="mt-4 block text-sm sm:w-1/2">
+                    <span class="font-medium text-gray-700">Admission</span>
+                    <select name="admission_id" class="{{ $input }}">
+                        <option value="">Not linked to an admission</option>
+                        @foreach ($admissions as $option)
+                            <option value="{{ $option->id }}" @selected((string) $admission === (string) $option->id)>{{ $option->summary() }}{{ $option->isDischarged() ? ' (discharged '.$option->discharged_on.')' : '' }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            @elseif ($admission)
                 <input type="hidden" name="admission_id" value="{{ $admission }}">
             @endif
             @error('admission_id') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror

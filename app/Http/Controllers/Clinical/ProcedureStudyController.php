@@ -36,7 +36,7 @@ class ProcedureStudyController extends Controller
             Audit::record('patient.viewed', $patient);
         }
 
-        return $this->form($procedure, values: $patient?->toFormArray() ?? ['nationalID' => $nationalID]);
+        return $this->form($procedure, values: $patient?->toFormArray() ?? ['nationalID' => $nationalID], patient: $patient);
     }
 
     public function store(ProcedureStudyRequest $request, string $procedure): RedirectResponse
@@ -144,11 +144,15 @@ class ProcedureStudyController extends Controller
     /**
      * @param  array<string, mixed>  $values
      */
-    private function form(string $procedure, ?ProcedureStudy $study = null, array $values = []): View
+    private function form(string $procedure, ?ProcedureStudy $study = null, array $values = [], ?Patient $patient = null): View
     {
+        $patient = $study->patient ?? $patient;
+
         return view('procedures.form', [
             'procedure' => $procedure,
             'study' => $study,
+            // A known patient's admissions, to link the study to one of them.
+            'admissions' => $patient ? $patient->admissions()->with('wardRecord')->orderByDesc('admitted_on')->orderByDesc('id')->get() : collect(),
             'values' => $study ? [...$study->patient->toFormArray(), ...$study->only(['admission_id', ...array_keys($study->fields())])] : $values,
         ]);
     }

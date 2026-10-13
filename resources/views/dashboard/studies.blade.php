@@ -33,9 +33,9 @@
         </form>
     </div>
 
-    @if ($studies->isEmpty())
+    @if ($studies->isEmpty() && $procedureDrafts->isEmpty())
         <p class="py-8 text-center text-gray-500">{{ __('No studies found.') }}</p>
-    @else
+    @elseif ($studies->isNotEmpty())
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead>
@@ -61,5 +61,48 @@
             </table>
         </div>
         <div class="mt-4">{{ $studies->links() }}</div>
+    @endif
+
+    @if ($procedureDrafts->isNotEmpty())
+        {{-- Drafts of the procedures ported from heart (angiography, ...). --}}
+        <h3 class="mt-8 mb-2 text-lg font-semibold">{{ __('Procedure drafts') }}</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead>
+                    <tr class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <th class="px-3 py-2 text-start">{{ __('Date') }}</th>
+                        <th class="px-3 py-2 text-start">{{ __('Study') }}</th>
+                        <th class="px-3 py-2 text-start">{{ __('Patient') }}</th>
+                        <th class="px-3 py-2 text-start">{{ __('Recorded by') }}</th>
+                        <th class="px-3 py-2"><span class="sr-only">{{ __('Actions') }}</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach ($procedureDrafts as $draft)
+                        @php($key = $draft::PROCEDURE)
+                        <tr>
+                            <td class="whitespace-nowrap px-3 py-2">{{ $draft->performedOn() ?? JalaliDate::format($draft->created_at, 'yyyy/MM/dd') }}</td>
+                            <td class="px-3 py-2">{{ __(App\Support\Procedures::label($key)) }}</td>
+                            <td class="px-3 py-2">{{ $draft->patient?->first_name }} {{ $draft->patient?->last_name }}</td>
+                            <td class="px-3 py-2">{{ $draft->author?->name }}</td>
+                            <td class="px-3 py-2">
+                                <div class="flex flex-wrap items-center justify-end gap-2">
+                                    <a href="{{ route('procedures.show', [$key, $draft]) }}" class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500">{{ __('View report') }}</a>
+                                    @can('update', $draft)
+                                        <a href="{{ route('procedures.edit', [$key, $draft]) }}" class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
+                                    @endcan
+                                    @can('finalize', $draft)
+                                        <form method="POST" action="{{ route('procedures.finalize', [$key, $draft]) }}" onsubmit="return confirm(@js(__('Sign and finalize this report? It can only be changed by amendment afterwards.')))">
+                                            @csrf
+                                            <button type="submit" class="rounded-md bg-green-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-600">{{ __('Sign') }}</button>
+                                        </form>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
 </x-dashboard-layout>
