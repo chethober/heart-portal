@@ -1,4 +1,4 @@
-// Usage: node extract.js <heartDir> <form.htm>  -> JSON field spec on stdout
+// Usage: node extract.cjs <heartDir> <form.htm>  -> JSON field spec on stdout
 // Run from the repository root; see tools/heart/README.md.
 const fs = require('fs'), vm = require('vm'), path = require('path');
 const [heart, form] = process.argv.slice(2);

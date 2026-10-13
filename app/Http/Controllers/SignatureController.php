@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EchoStudyVersion;
+use App\Models\ProcedureStudyVersion;
 use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Http\RedirectResponse;
@@ -17,15 +18,19 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class SignatureController extends Controller
 {
     /**
-     * The user's current signature, or with ?version= the one a signed report version was signed with.
+     * The user's current signature, or with ?version= (echo) or ?procedure_version= the one a signed
+     * report version was signed with.
      */
     public function show(Request $request, User $user): StreamedResponse
     {
         abort_unless($user->hospital_id !== null && $user->hospital_id === $request->user()->hospital_id, 404);
 
-        $path = $request->filled('version')
-            ? EchoStudyVersion::where('signed_by', $user->id)->findOrFail($request->integer('version'))->signature_path
-            : $user->signature_path;
+        $path = match (true) {
+            $request->filled('version') => EchoStudyVersion::where('signed_by', $user->id)->findOrFail($request->integer('version'))->signature_path,
+            // Signed versions of the procedures ported from heart (angiography, ...).
+            $request->filled('procedure_version') => ProcedureStudyVersion::where('signed_by', $user->id)->findOrFail($request->integer('procedure_version'))->signature_path,
+            default => $user->signature_path,
+        };
 
         abort_unless($path && Storage::disk('local')->exists($path), 404);
 

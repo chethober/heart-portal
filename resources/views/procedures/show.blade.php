@@ -7,6 +7,8 @@
      * @var \App\Models\ProcedureStudy $study
      * @var \App\Models\ProcedureStudyVersion|null $version  Set when viewing an earlier signed version.
      * @var array<string, mixed> $report  Current values, or the version's snapshot.
+     * @var \App\Reports\ProcedureReport|null $narrative  The clinical narrative, for procedures that have one.
+     * @var \App\Models\Hospital|null $hospital
      */
     use App\Support\JalaliDate;
     use App\Support\Procedures;
@@ -37,7 +39,7 @@
 @endphp
 
 <x-dashboard-layout :title="Procedures::label($procedure)">
-    <div dir="ltr" lang="en">
+    <div dir="{{ Procedures::dir($procedure) }}" lang="{{ Procedures::dir($procedure) === 'rtl' ? 'fa' : 'en' }}">
         <div class="mb-6 flex flex-wrap items-center gap-3 print:hidden">
             <button type="button" onclick="window.print()" class="{{ $buttonPrimary }}">Print Report</button>
             <a href="{{ route('patients.index', ['nationalID' => $report['nationalID']]) }}" class="{{ $buttonSecondary }}">Back to Patient</a>
@@ -69,6 +71,9 @@
             </div>
         @endif
 
+        @if ($narrative ?? null)
+            @include('procedures.report', ['narrative' => $narrative])
+        @else
         <header class="mb-6 border-b border-gray-200 pb-4">
             <h1 class="text-2xl font-semibold">{{ Procedures::label($procedure) }} Report</h1>
             @unless (($version?->status ?? $study->status)->isSigned())
@@ -111,6 +116,10 @@
                 @endif
             </footer>
         @endif
+        @endif
+
+        {{-- Discharge medications come from the summary's prescription (e-prescription), under the report. --}}
+        @includeWhen($procedure === 'discharge', 'prescriptions.partials.discharge', ['study' => $study, 'report' => $report])
 
         @if ($study->versions->isNotEmpty())
             <section class="mt-8 print:hidden">

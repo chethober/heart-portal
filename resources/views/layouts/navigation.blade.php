@@ -23,6 +23,25 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-6 rtl:space-x-reverse lg:-my-px lg:ms-8 lg:flex">
                     @foreach ($navLinks as $link)
+                        @if (! empty($link['children']))
+                            {{-- A section with several forms (New Study): a menu of the forms. --}}
+                            <div @class(['inline-flex items-center border-b-2 text-sm font-medium leading-5', 'border-indigo-400 text-gray-900' => $link['active'], 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' => ! $link['active']])>
+                                <x-dropdown align="left" width="48">
+                                    <x-slot name="trigger">
+                                        <button type="button" class="inline-flex items-center gap-1 whitespace-nowrap py-2 focus:outline-none">
+                                            {{ $link['label'] }}
+                                            <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                        </button>
+                                    </x-slot>
+                                    <x-slot name="content">
+                                        @foreach ($link['children'] as $child)
+                                            <x-dropdown-link :href="$child['url']" @class(['font-semibold' => $child['active']]) :aria-current="$child['active'] ? 'page' : null">{{ $child['label'] }}</x-dropdown-link>
+                                        @endforeach
+                                    </x-slot>
+                                </x-dropdown>
+                            </div>
+                            @continue
+                        @endif
                         <x-nav-link :href="$link['url']" :active="$link['active']" class="gap-2 whitespace-nowrap" :aria-current="$link['active'] ? 'page' : null">
                             {{ $link['label'] }}
                             @if ($link['count'])
@@ -120,6 +139,13 @@
 
         <div class="pt-2 pb-3 space-y-1">
             @foreach ($navLinks as $link)
+                @if (! empty($link['children']))
+                    <div class="px-4 pt-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $link['label'] }}</div>
+                    @foreach ($link['children'] as $child)
+                        <x-responsive-nav-link :href="$child['url']" :active="$child['active']" class="ps-6">{{ $child['label'] }}</x-responsive-nav-link>
+                    @endforeach
+                    @continue
+                @endif
                 <x-responsive-nav-link :href="$link['url']" :active="$link['active']">
                     {{ $link['label'] }}
                     @if ($link['count'])

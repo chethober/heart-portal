@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\Role;
-use App\Models\AngiographyStudy;
+use App\Models\Admission;
 use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\User;
@@ -15,13 +15,15 @@ use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
- * Fictional patients, admissions and angiographies in the heart system's fields and codes, for
- * demos. Patients already present (by national ID) are skipped, so it is safe to run again.
+ * Fictional patients with admissions and studies in the heart system's fields and codes, for
+ * demos: angiographies for everyone, plus angioplasties and a discharge summary. Safe to run
+ * again: existing patients are reused and a study is only added when the patient has none of
+ * that procedure yet (so new demo studies reach databases seeded by an earlier version).
  */
 class HeartDemoSeeder extends Seeder
 {
     /**
-     * @return array{created: int, skipped: int}
+     * @return array{created: int, skipped: int} Studies added, and studies already there.
      */
     public function run(Hospital $hospital): array
     {
@@ -31,18 +33,17 @@ class HeartDemoSeeder extends Seeder
 
         try {
             $doctor = $this->staff($hospital, Role::Doctor);
-            $created = 0;
+            $counts = ['created' => 0, 'skipped' => 0];
 
             foreach (self::cases() as $case) {
-                if (Patient::whereNationalId($case['patient']['national_id'])->exists()) {
-                    continue;
-                }
-
-                DB::transaction(fn () => $this->seedCase($case, $hospital, $doctor));
-                $created++;
+                DB::transaction(function () use ($case, $hospital, $doctor, &$counts) {
+                    foreach ($this->seedCase($case, $hospital, $doctor) as $created) {
+                        $counts[$created ? 'created' : 'skipped']++;
+                    }
+                });
             }
 
-            return ['created' => $created, 'skipped' => count(self::cases()) - $created];
+            return $counts;
         } finally {
             $current->set($previous);
         }
@@ -50,60 +51,87 @@ class HeartDemoSeeder extends Seeder
 
     /**
      * @param  array<string, mixed>  $case
+     * @return list<bool> Per study of the case: whether it was created.
      */
-    private function seedCase(array $case, Hospital $hospital, ?User $doctor): void
+    private function seedCase(array $case, Hospital $hospital, ?User $doctor): array
     {
-        $patient = Patient::create($case['patient']);
-        Audit::record('patient.created', $patient);
+        $patient = Patient::whereNationalId($case['patient']['national_id'])->first();
 
-        $admission = $patient->admissions()->create([...$case['admission'], 'his_id' => 'DEMO-'.$case['patient']['national_id']]);
+        if (! $patient) {
+            $patient = Patient::create($case['patient']);
+            Audit::record('patient.created', $patient);
+        }
 
-        $author = $this->staff($hospital, ...$case['author']);
-        $study = AngiographyStudy::create([
-            ...$this->checked([...self::baseline(), ...$case['study']]),
+        $admission = $patient->admissions()->first()
+            ?? $patient->admissions()->create([...$case['admission'], 'his_id' => 'DEMO-'.$case['patient']['national_id']]);
+
+        $studies = [
+            ['procedure' => 'angiography', 'status' => $case['status'], 'values' => [...self::baseline(), ...$case['study']], 'amendment' => $case['amendment'] ?? null],
+            ...$case['more'] ?? [],
+        ];
+
+        return array_map(fn (array $study) => $this->seedStudy($study, $patient, $admission, $this->staff($hospital, ...$case['author']), $doctor), $studies);
+    }
+
+    /**
+     * @param  array{procedure: string, status: string, values: array<string, mixed>, amendment?: array{0: array<string, mixed>, 1: string}|null}  $spec
+     */
+    private function seedStudy(array $spec, Patient $patient, Admission $admission, ?User $author, ?User $doctor): bool
+    {
+        $procedure = $spec['procedure'];
+        $model = Procedures::model($procedure);
+
+        if ($model::where('patient_id', $patient->id)->exists()) {
+            return false;
+        }
+
+        $study = $model::create([
+            ...$this->checked($procedure, $spec['values']),
             'patient_id' => $patient->id,
             'admission_id' => $admission->id,
             'created_by' => $author?->id,
         ]);
-        Audit::record('angiography.created', $study, [], $author);
+        Audit::record("{$procedure}.created", $study, [], $author);
 
         // Signing needs a doctor; without one every demo study stays a draft.
-        if (! $doctor || $case['status'] === 'draft') {
-            return;
+        if (! $doctor || $spec['status'] === 'draft') {
+            return true;
         }
 
         $study->finalize($doctor);
-        Audit::record('angiography.finalized', $study, [], $doctor);
+        Audit::record("{$procedure}.finalized", $study, [], $doctor);
 
-        if ($case['status'] === 'amended') {
-            [$changes, $reason] = $case['amendment'];
-            $study->amend($this->checked([...$study->only(array_keys($study->fields())), ...$changes]), $doctor, $reason);
-            Audit::record('angiography.amended', $study, ['reason' => $reason], $doctor);
+        if ($spec['status'] === 'amended' && isset($spec['amendment'])) {
+            [$changes, $reason] = $spec['amendment'];
+            $study->amend($this->checked($procedure, [...$study->only(array_keys($study->fields())), ...$changes]), $doctor, $reason);
+            Audit::record("{$procedure}.amended", $study, ['reason' => $reason], $doctor);
         }
+
+        return true;
     }
 
     /**
-     * Fails on a field, code or condition the angiography form would not accept, rather than
+     * Fails on a field, code or condition the procedure's form would not accept, rather than
      * letting a typo be dropped silently.
      *
      * @param  array<string, mixed>  $values
      * @return array<string, mixed>
      */
-    private function checked(array $values): array
+    private function checked(string $procedure, array $values): array
     {
-        $fields = Procedures::fields('angiography');
+        $fields = Procedures::fields($procedure);
 
         foreach ($values as $name => $value) {
-            $field = $fields[$name] ?? throw new InvalidArgumentException("Unknown angiography field {$name}.");
+            $field = $fields[$name] ?? throw new InvalidArgumentException("Unknown {$procedure} field {$name}.");
 
             if ($value === null) {
                 continue;
             }
             if ($field['type'] === 'choice' && ! array_key_exists($value, $field['options'])) {
-                throw new InvalidArgumentException("{$name} has no code {$value}.");
+                throw new InvalidArgumentException("{$procedure}.{$name} has no code {$value}.");
             }
             if (isset($field['show_if']) && (string) ($values[$field['show_if'][0]] ?? '') !== $field['show_if'][1]) {
-                throw new InvalidArgumentException("{$name} is only recorded when {$field['show_if'][0]} = {$field['show_if'][1]}.");
+                throw new InvalidArgumentException("{$procedure}.{$name} is only recorded when {$field['show_if'][0]} = {$field['show_if'][1]}.");
             }
         }
 
@@ -204,6 +232,55 @@ class HeartDemoSeeder extends Seeder
                     'recommend_pci_lad' => true,
                     'resulttt' => 'Single-vessel disease: very severe proximal LAD stenosis.',
                 ],
+                'more' => [
+                    ['procedure' => 'angioplasty', 'status' => 'final', 'values' => [
+                        'PCI_for_elective_status' => '1',
+                        'DateOf_Date_Balloon_inflation' => '1405/06/12',
+                        'Time_Balloon_inflation' => '10:40',
+                        'contrast_agent_1' => '1',
+                        'contrast_volume' => 140,
+                        'arterial_Access_site' => '3',
+                        'aspirin' => '1',
+                        'heparin' => '1',
+                        'clopidogrel' => '1',
+                        't1_territory_of_intervention' => '2',
+                        't1_description_of_lesion' => '1',
+                        't1_lesion_length' => '2',
+                        't1_thrombosis' => '2',
+                        't1_calcification' => '1',
+                        't1_preprocedural' => '2',
+                        't1_postprocedural' => '3',
+                        't1_guiding_catheters_name1' => '3',
+                        't1_guide_wires_name1' => '1',
+                        't1_predilatation' => '1',
+                        't1_pre_BalloonName' => 'Sprinter',
+                        't1_pre_BalloonSize' => '2.5x15',
+                        't1_pre_BalloonPressure' => 12,
+                        't1_stentType1' => '2',
+                        't1_nameOfstent' => 'Xience',
+                        't1_stentSize' => '3.0x18',
+                        't1_stentPressure' => 14,
+                        't1_s1_proximal' => '1',
+                    ]],
+                    ['procedure' => 'discharge', 'status' => 'draft', 'values' => [
+                        'clinicalcomplaint_chestpaininactivity' => '1',
+                        'unstable_angina' => '1',
+                        'for_angioplasty' => '1',
+                        'ecg_normal' => '1',
+                        'ecg_sinus' => '1',
+                        'ecg_ecg_hr' => 78,
+                        'ecg_ischemic' => '1',
+                        'ecg_nssttc' => '1',
+                        'ef' => 50,
+                        'important_result_summary' => 'Anteroapical hypokinesia, LVEF 50%.',
+                        'medication_education' => true,
+                        'attend_phicition' => true,
+                        'date_attend_physician' => 14,
+                        'DateOf_disch_date' => '1405/06/14',
+                        'disch_time' => '12:00',
+                        'disch_status' => '1',
+                    ]],
+                ],
             ],
             [
                 'patient' => ['national_id' => '9990000003', 'first_name' => 'Reza', 'last_name' => 'Mohammadi', 'dob' => '1338/05/20', 'gender' => 'Male'],
@@ -253,6 +330,28 @@ class HeartDemoSeeder extends Seeder
                     'PCI' => '1',
                     'recommend_pci_rca' => true,
                     'resulttt' => 'Acute total occlusion of the RCA with thrombus.',
+                ],
+                'more' => [
+                    ['procedure' => 'angioplasty', 'status' => 'draft', 'values' => [
+                        'PCI_for_STEMI_unstable' => '1',
+                        'DateOf_Date_Balloon_inflation' => '1405/07/01',
+                        'Time_Balloon_inflation' => '02:50',
+                        'arterial_Access_site' => '1',
+                        'aspirin' => '1',
+                        'heparin' => '1',
+                        'ticagrelor' => '1',
+                        't1_territory_of_intervention' => '3',
+                        't1_description_of_lesion' => '2',
+                        't1_thrombosis' => '1',
+                        't1_preprocedural' => '0',
+                        't1_postprocedural' => '3',
+                        't1_aspiration_thrombectomy' => '1',
+                        't1_name_of_device' => 'Export catheter',
+                        't1_stentType1' => '2',
+                        't1_nameOfstent' => 'Resolute',
+                        't1_stentSize' => '3.5x24',
+                        't1_s1_proximal' => '1',
+                    ]],
                 ],
             ],
             [

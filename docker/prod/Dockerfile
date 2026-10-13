@@ -21,7 +21,7 @@ FROM php:8.4-fpm AS app
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev libicu-dev libzip-dev libpng-dev libfreetype6-dev libjpeg62-turbo-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_pgsql pgsql intl zip gd bcmath opcache \
+    && docker-php-ext-install pdo_pgsql pgsql pdo_mysql intl zip gd bcmath opcache \
     && pecl install redis && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/* \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

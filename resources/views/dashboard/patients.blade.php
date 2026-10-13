@@ -4,6 +4,9 @@
 
 <x-dashboard-layout :title="__('Patient echos')">
     {{-- The National ID search is in the dashboard header. --}}
+    @if ($patient)
+        <p class="mb-4 text-sm"><a href="{{ route('patients.show', $patient) }}" class="font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Patient record and admissions') }}</a></p>
+    @endif
     @if ($nationalID === '')
         <p class="py-8 text-center text-gray-500">{{ __("Enter the patient's National ID to see their recorded echocardiograms.") }}</p>
     @elseif ($echoReports->isEmpty())
@@ -65,6 +68,8 @@
                     @endif
                 </section>
             @endforeach
+
+            @includeWhen($patient, 'prescriptions.partials.patient', ['patient' => $patient])
         </div>
     @endif
 </x-dashboard-layout>

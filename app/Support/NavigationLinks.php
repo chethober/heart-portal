@@ -16,7 +16,7 @@ use App\Models\User;
 final class NavigationLinks
 {
     /**
-     * @return list<array{label: string, url: string, active: bool, count: int|null}>
+     * @return list<array{label: string, url: string, active: bool, count: int|null, children?: list<array{label: string, url: string, active: bool}>}>
      */
     public static function for(User $user): array
     {
@@ -29,15 +29,35 @@ final class NavigationLinks
         $links = [];
 
         if ($user->can('studies.create')) {
-            // The dashboard home is the echo form.
-            $links[] = self::link(__('New Study'), ['dashboard', 'studies.create']);
+            // The dashboard home is the echo form; the other forms come from the heart system.
+            $links[] = [
+                ...self::link(__('New Study'), ['dashboard', 'studies.create', 'procedures.create']),
+                'children' => [
+                    ['label' => __('Echocardiography'), 'url' => route('studies.create'), 'active' => request()->routeIs('dashboard', 'studies.create')],
+                    ...array_map(fn (string $key) => [
+                        'label' => __(Procedures::label($key)),
+                        'url' => route('procedures.create', $key),
+                        'active' => request()->routeIs('procedures.create') && request()->route('procedure') === $key,
+                    ], array_keys(Procedures::MODELS)),
+                ],
+            ];
         }
         if ($user->can('patients.view')) {
-            $links[] = self::link(__('Worklist'), 'worklist', EchoStudy::where('status', StudyStatus::Draft)->count());
-            $links[] = self::link(__('Patients'), 'patients.index');
+            $drafts = EchoStudy::where('status', StudyStatus::Draft)->count();
+            foreach (Procedures::MODELS as $model) {
+                $drafts += $model::where('status', StudyStatus::Draft)->count();
+            }
+            $links[] = self::link(__('Worklist'), 'worklist', $drafts);
+            $links[] = self::link(__('Patients'), ['patients.index', 'patients.show', 'patients.edit', 'admissions.*']);
+            $links[] = self::link(__('Ward patients'), 'ward-patients');
+            $links[] = self::link(__('Statistics'), 'statistics');
+            $links[] = self::link(__('Drugs'), 'drugs.index');
         }
         if ($user->can('staff.manage')) {
             $links[] = self::link(__('Staff'), 'staff.*', Invitation::pending()->count());
+        }
+        if ($user->can('hospital.settings')) {
+            $links[] = self::link(__('Wards'), 'wards.*');
         }
         if ($user->can('audit.view')) {
             $links[] = self::link(__('Audit log'), 'audit.*');

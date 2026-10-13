@@ -9,7 +9,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('app:seed-heart-demo')]
-#[Description('Add fictional patients, admissions and angiographies (heart system data) to the demo hospital')]
+#[Description('Add fictional patients, admissions and heart-system studies to the demo hospital')]
 class SeedHeartDemo extends Command
 {
     public function handle(): int
@@ -25,7 +25,7 @@ class SeedHeartDemo extends Command
 
         $result = (new HeartDemoSeeder)->run($hospital);
 
-        $this->components->info("Added {$result['created']} demo patients with admissions and angiographies; {$result['skipped']} were already there.");
+        $this->components->info("Added {$result['created']} demo studies (with their patients and admissions); {$result['skipped']} were already there.");
 
         return self::SUCCESS;
     }

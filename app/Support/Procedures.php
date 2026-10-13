@@ -3,8 +3,14 @@
 namespace App\Support;
 
 use App\Models\AngiographyStudy;
+use App\Models\AngioplastyStudy;
+use App\Models\DischargeStudy;
+use App\Models\InterventionStudy;
+use App\Models\PeripheralStudy;
 use App\Models\ProcedureStudy;
+use App\Models\RhcStudy;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Clinical procedures ported from the heart system. Each one has a model, a
@@ -17,6 +23,11 @@ final class Procedures
      */
     public const MODELS = [
         'angiography' => AngiographyStudy::class,
+        'angioplasty' => AngioplastyStudy::class,
+        'rhc' => RhcStudy::class,
+        'peripheral' => PeripheralStudy::class,
+        'intervention' => InterventionStudy::class,
+        'discharge' => DischargeStudy::class,
     ];
 
     /**
@@ -48,6 +59,45 @@ final class Procedures
     public static function fields(string $key): array
     {
         return array_merge(...array_column(self::sections($key), 'fields'));
+    }
+
+    /**
+     * Creates {key}_studies: the study workflow columns plus one column per field.
+     */
+    public static function createTable(string $key): void
+    {
+        Schema::create("{$key}_studies", function (Blueprint $table) use ($key) {
+            $table->id();
+            $table->foreignId('hospital_id')->constrained()->restrictOnDelete();
+            $table->foreignId('patient_id')->constrained()->restrictOnDelete();
+            $table->foreignId('admission_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('reported_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('status', 16)->default('draft');
+            $table->timestamp('finalized_at')->nullable();
+            $table->foreignId('amended_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('amended_at')->nullable();
+            $table->text('amendment_reason')->nullable();
+            // Row id in heart's table for this procedure, for imported studies.
+            $table->unsignedBigInteger('legacy_id')->nullable();
+
+            self::addColumns($table, $key);
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['hospital_id', 'patient_id', 'created_at']);
+            $table->index(['hospital_id', 'status']);
+            $table->unique(['hospital_id', 'legacy_id']);
+        });
+    }
+
+    /**
+     * Writing direction of the procedure's form and report (heart's Persian forms are rtl).
+     */
+    public static function dir(string $key): string
+    {
+        return config("procedures.{$key}.dir", 'ltr');
     }
 
     /**

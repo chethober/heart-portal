@@ -114,6 +114,34 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // The legacy heart system's MySQL database, read by heart:import (read only).
+        'heart' => [
+            'driver' => env('HEART_DB_DRIVER', 'mysql'),
+            'host' => env('HEART_DB_HOST', '127.0.0.1'),
+            'port' => env('HEART_DB_PORT', '3306'),
+            'database' => env('HEART_DB_DATABASE', 'heart'),
+            'username' => env('HEART_DB_USERNAME', ''),
+            'password' => env('HEART_DB_PASSWORD', ''),
+            'charset' => env('HEART_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('HEART_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'strict' => false,
+        ],
+
+        // The hospital information system (SQL Server), read by his:import-admissions (read only).
+        'his' => [
+            'driver' => env('HIS_DB_DRIVER', 'sqlsrv'),
+            'host' => env('HIS_DB_HOST', ''),
+            'port' => env('HIS_DB_PORT', '1433'),
+            'database' => env('HIS_DB_DATABASE', ''),
+            'username' => env('HIS_DB_USERNAME', ''),
+            'password' => env('HIS_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => env('HIS_DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('HIS_DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+
     ],
 
     /*

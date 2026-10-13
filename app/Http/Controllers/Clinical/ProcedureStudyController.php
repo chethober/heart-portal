@@ -7,6 +7,7 @@ use App\Http\Requests\ProcedureStudyRequest;
 use App\Models\Admission;
 use App\Models\Patient;
 use App\Models\ProcedureStudy;
+use App\Reports\ProcedureReport;
 use App\Support\Audit;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
@@ -35,7 +36,7 @@ class ProcedureStudyController extends Controller
             Audit::record('patient.viewed', $patient);
         }
 
-        return $this->form($procedure, values: $patient?->toFormArray() ?? ['nationalID' => $nationalID]);
+        return $this->form($procedure, values: $patient?->toFormArray() ?? ['nationalID' => $nationalID], patient: $patient);
     }
 
     public function store(ProcedureStudyRequest $request, string $procedure): RedirectResponse
@@ -71,11 +72,16 @@ class ProcedureStudyController extends Controller
 
         Audit::record("{$procedure}.viewed", $procedureStudy, $version ? ['version' => $version->version] : []);
 
+        $report = $version ? $version->data : $procedureStudy->toReportArray();
+
         return view('procedures.show', [
             'procedure' => $procedure,
             'study' => $procedureStudy,
             'version' => $version,
-            'report' => $version ? $version->data : $procedureStudy->toReportArray(),
+            'report' => $report,
+            // Clinical narrative for procedures that have one (app/Reports); the others list their fields.
+            'narrative' => ProcedureReport::for($procedure, $report),
+            'hospital' => $request->user()->hospital,
         ]);
     }
 
@@ -138,11 +144,15 @@ class ProcedureStudyController extends Controller
     /**
      * @param  array<string, mixed>  $values
      */
-    private function form(string $procedure, ?ProcedureStudy $study = null, array $values = []): View
+    private function form(string $procedure, ?ProcedureStudy $study = null, array $values = [], ?Patient $patient = null): View
     {
+        $patient = $study->patient ?? $patient;
+
         return view('procedures.form', [
             'procedure' => $procedure,
             'study' => $study,
+            // A known patient's admissions, to link the study to one of them.
+            'admissions' => $patient ? $patient->admissions()->with('wardRecord')->orderByDesc('admitted_on')->orderByDesc('id')->get() : collect(),
             'values' => $study ? [...$study->patient->toFormArray(), ...$study->only(['admission_id', ...array_keys($study->fields())])] : $values,
         ]);
     }
