@@ -60,6 +60,9 @@
                 ['Automatic grading', 'BSA, indexed volumes and sex-specific cut-offs grade LV/RV/LA/RA size, systolic and diastolic function, SPAP from TRG + RAP and aortic dilation — always overridable.', 'M4 19h16M7 15l3-4 3 2 4-6'],
                 ['Signed, versioned reports', 'Drafts become final only when a doctor signs. Changes to a signed report are amendments with a reason, and every signed version is kept.', 'M9 12l2 2 4-4m5 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
                 ['Built for many hospitals', 'Each hospital registers, invites its own doctors and technicians, brands its reports, and only ever sees its own patients.', 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6'],
+                ['Cath lab and discharge', 'Coronary angiography, angioplasty, right heart catheterization, peripheral and intervention reports and discharge summaries, signed and versioned like echo reports.', 'M3 12h4l3-8 4 16 3-8h4'],
+                ['Admissions and wards', 'Record admissions and discharges, see who is on each ward, and import admissions from the hospital information system.', 'M3 21h18M6 21V10h12v11M9 14h6M12 3v4m-2-2h4'],
+                ['E-prescriptions', 'Doctors sign prescriptions from a shared drug catalog; a QR code on the printout lets pharmacies verify it is genuine.', 'M9 3h6v4H9zM7 5H5v16h14V5h-2M9 12h6m-6 4h4'],
                 ['Audit trail', 'Logins, patient lookups, views, edits, signatures and staff changes are recorded in an append-only log that hospital admins can review.', 'M12 8v4l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
                 ['Open source', 'AGPL-3.0 licensed. Run it on your own servers, inspect every line, and contribute improvements back.', 'M10 20l4-16M6 16l-4-4 4-4m12 0 4 4-4 4'],
             ])

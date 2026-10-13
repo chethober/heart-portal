@@ -18,6 +18,24 @@ All notable changes to this project are documented here. The format follows
 - Public landing page and help center.
 - Interface translations for Persian, Arabic, Turkish, Spanish, French and German, with a
   language switcher, browser-language detection and right-to-left layout for Persian and Arabic.
+- Forms ported from the legacy *heart* system, under a New Study menu: coronary angiography,
+  coronary angioplasty (PCI), right heart catheterization, peripheral angiography, cardiac
+  intervention and discharge summary, with the same draft → signed → amended workflow as echo
+  studies. Angiography, angioplasty and discharge reports are generated as clinical narratives.
+- Nurse and quality-control roles. Quality control can also review the audit log.
+- Patient record with demographics and contact details; admissions with ward, admission type,
+  arrival, referrer and attending physician, discharge, and a Ward patients census. Hospital
+  admins manage their wards.
+- E-prescription: shared drug catalog (hospitals can add and withdraw drugs), prescriptions
+  drafted by clinical staff and signed or cancelled by doctors, discharge medications on the
+  discharge summary, and a QR code linking to a public verification page.
+- Registry statistics page: studies and patients per form and month, and charted findings.
+- `heart:import` and `his:import-admissions` artisan commands to copy data from heart's MySQL
+  database and admissions from the hospital information system (re-runnable, with `--dry-run`).
+- Production and public demo deployment (`compose.prod.yaml`, `compose.public.yaml`) and
+  `app:seed-demo` / `app:seed-heart-demo` for demo hospitals, accounts and patients.
+- Help center sections for the cath-lab forms, admissions and wards, e-prescriptions and
+  statistics.
 
 ### Changed
 - Every signed-in form, search and report now lives under `/dashboard`: the worklist, patient

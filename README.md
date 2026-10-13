@@ -2,12 +2,12 @@
 
 # Echo Portal
 
-**Open-source, multi-hospital echocardiography reporting.**
+**Open-source, multi-hospital cardiology reporting — echo lab, cath lab, admissions and e-prescriptions.**
 
 Technicians enter measurements once, the platform grades them against guideline cut-offs,
 doctors sign the report, and every step is audited.
 
-[![CI](https://github.com/chethober/echocardiography/actions/workflows/ci.yml/badge.svg)](https://github.com/chethober/echocardiography/actions/workflows/ci.yml)
+[![CI](https://github.com/chethober/echo-portal/actions/workflows/ci.yml/badge.svg)](https://github.com/chethober/echo-portal/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
 </div>
@@ -26,8 +26,20 @@ doctors sign the report, and every step is audited.
 - **Signed, versioned reports** — studies start as drafts; doctors sign them; signed reports can
   only be *amended* with a reason, and every signed version is preserved with the signature it
   was signed with. Bilingual printable report with the hospital's name and logo.
+- **Cath lab and discharge forms** — coronary angiography, coronary angioplasty (PCI), right heart
+  catheterization, peripheral angiography, cardiac intervention and discharge summary, ported from
+  the legacy *heart* system. They follow the same draft → signed → amended workflow as echo
+  studies; angiography, angioplasty and discharge reports are written up as clinical narratives.
+- **Admissions and wards** — patient record with demographics and contact details, admissions
+  (ward, type, arrival, referrer, attending physician) and discharge, a live ward census, and
+  import of admissions from the hospital information system.
+- **E-prescription** — a shared drug catalog that hospitals can extend; prescriptions drafted by
+  clinical staff and signed by a doctor, discharge medications on the discharge summary, and a
+  QR code on the printout that opens a public verification page (no patient data).
+- **Registry statistics** — studies and patients per form and per month, signed vs. draft, and
+  charted findings for a chosen period.
 - **Multi-hospital (multi-tenant)** — hospitals self-register, are approved by a platform admin,
-  and invite their own doctors and echo technicians. Every query is scoped to the user's hospital.
+  and invite their own doctors, echo technicians, nurses and quality-control staff. Every query is scoped to the user's hospital.
 - **Security** — encrypted national ID and phone number, authenticator-app 2FA (enforceable),
   role-based permissions, private signature storage, append-only audit log protected by a
   database trigger.
@@ -39,9 +51,10 @@ doctors sign the report, and every step is audited.
 
 | Role | Can |
 |---|---|
-| Echo technician | record studies, edit drafts, search patients, view/print reports |
-| Doctor | everything a technician can + sign and amend reports |
-| Hospital admin | invite/manage staff, reset 2FA, view reports and the audit log, delete drafts |
+| Echo technician / Nurse | record studies, admissions and patient details, draft prescriptions, search patients, view/print reports |
+| Quality control | everything a nurse can + view the audit log |
+| Doctor | everything a technician can + sign and amend reports, sign and cancel prescriptions |
+| Hospital admin | invite/manage staff, reset 2FA, manage wards and the drug catalog, view reports and the audit log, delete drafts |
 | Platform admin | approve, suspend and reactivate hospitals (no access to patient data) |
 
 ## Quick start (Docker)
@@ -49,8 +62,8 @@ doctors sign the report, and every step is audited.
 Requirements: Docker with Compose, Node.js 20+ (for building the front-end assets).
 
 ```sh
-git clone https://github.com/chethober/echocardiography.git
-cd echocardiography
+git clone https://github.com/chethober/echo-portal.git
+cd echo-portal
 cp .env.example .env
 
 docker compose up -d --build
@@ -153,6 +166,14 @@ php artisan his:import-admissions --hospital=<slug or id> [--since=1405/01/01] [
   `app/Support/ReportHtml.php` sanitizes report HTML built from free text.
 - **Workflow** — `EchoStudy::finalize()` / `amend()` and `EchoStudyPolicy`; signed snapshots in
   `echo_study_versions`.
+- **Procedures** — each heart form is a `ProcedureStudy` model listed in `app/Support/Procedures.php`,
+  with its fields in `config/procedures/<key>.php` and, where it has one, a narrative report in
+  `app/Reports`. Signed snapshots live in `procedure_study_versions`.
+- **E-prescription** — `routes/prescriptions.php`, `Prescription` / `PrescriptionPolicy` (drafted by
+  clinical staff, signed or cancelled by doctors; signed prescriptions are immutable) and
+  `app/Support/Prescribing.php`.
+- **Admissions and statistics** — `Admission`, `Ward` and `app/Support/RegistryStatistics.php`;
+  the importers are in `app/Support/HeartImport`.
 - **Audit** — `App\Support\Audit::record()`; `audit_logs` rejects UPDATE/DELETE at the database level.
 
 ## Development
