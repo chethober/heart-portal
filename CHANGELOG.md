@@ -40,6 +40,12 @@ All notable changes to this project are documented here. The format follows
 - Per-form access: hospital admins choose, for each staff member, which forms (echo, admissions,
   each cath-lab form) they may view, record, edit and sign, within what their role allows.
 
+- Every study form (echo and the cath-lab forms) shares the same patient details, including the
+  admission the study belongs to. Typing a registered patient's national ID fills in their details
+  and admissions; a new or mistyped ID (wrong check digit) is flagged.
+- Cath-lab forms keep several patients' unsaved drafts in tabs, saved in the browser as you type,
+  like the echo form, with a Jalali date picker for dates.
+
 ### Changed
 - Cath-lab forms and their reports now look and work like the echo form and report: a section bar
   showing which sections are filled in, one section at a time, a live report preview beside the

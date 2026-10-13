@@ -32,14 +32,45 @@
 @endphp
 
 <x-dashboard-layout :title="$title">
+    <link rel="stylesheet" href="/echo-form/persianDatepicker/css/persianDatepicker-default.css">
+    <script src="/echo-form/persianDatepicker/js/jquery-1.10.1.min.js"></script>
+    <script src="/echo-form/persianDatepicker/js/persianDatepicker.min.js"></script>
     @include('studies.partials.form-styles')
 
     <div id="echo-app" dir="{{ $rtl ? 'rtl' : 'ltr' }}" lang="{{ $rtl ? 'fa' : 'en' }}"
-         x-data="procedureForm(@js($watched), {{ $active }}, @js(route('procedures.preview', $procedure)))">
+         x-data="procedureForm({
+             watched: @js($watched),
+             section: {{ $active }},
+             previewUrl: @js(route('procedures.preview', $procedure)),
+             // Unsaved drafts are kept per patient tab in this browser, like the echo form's.
+             storageKey: @js($study ? null : 'procedureForm_patients_v1:'.$procedure.':'.auth()->user()->hospital_id.':'.auth()->id()),
+             // A form arriving with values (a patient link, or failed validation) opens them in a new tab.
+             arrivedWithValues: @js(! $study && (filled($value('nationalID')) || $errors->any())),
+         })">
     <div id="app-layout" :class="{ 'preview-active': preview }">
     <div id="form-container">
+        @unless ($study)
+            {{-- Multi-patient tabs: one unsaved draft per patient, saved in this browser as you type. --}}
+            <div class="patient-bar-wrapper">
+                <div id="patientTabsContainer" class="patient-tabs-container">
+                    <template x-for="(tab, index) in tabs" :key="tab.id">
+                        <div class="patient-tab" :class="{ 'active': tab.id === activeTab }">
+                            <span class="patient-tab-title" x-text="tabTitle(tab, index)" x-on:click="switchTab(tab.id)"></span>
+                            <button type="button" class="patient-tab-close" title="Remove patient draft" x-show="tabs.length > 1" x-on:click.stop="removeTab(tab.id)">&times;</button>
+                        </div>
+                    </template>
+                </div>
+                <button type="button" class="add-patient-btn" x-on:click="addTab()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>New Patient</span>
+                </button>
+            </div>
+        @endunless
         <form method="POST" id="procedureForm" x-ref="form" action="{{ $study ? route('procedures.update', [$procedure, $study]) : route('procedures.store', $procedure) }}"
-              autocomplete="off" x-on:input.debounce.400ms="refresh()" x-on:change="refresh(); mark()">
+              autocomplete="off" x-on:input.debounce.400ms="refresh(); autosave()" x-on:change="refresh(); autosave(); mark()" x-on:submit="submitted()">
             @csrf
             @if ($study)
                 <input type="hidden" name="_method" value="PUT" x-ref="method">
@@ -72,39 +103,7 @@
 
             <div class="form-section-header" style="border:0;margin-bottom:4px">{{ $title }}</div>
             <div class="row">
-                @foreach (['first_name' => 'First Name', 'last_name' => 'Last Name', 'nationalID' => 'National ID', 'dob' => 'Date of Birth', 'phone_number' => 'Phone Number'] as $name => $label)
-                    @php $required = in_array($name, ['nationalID', 'first_name', 'last_name'], true); @endphp
-                    <div class="field">
-                        <label for="{{ $name }}">{{ $label }} @if ($required)<span class="req">*</span>@endif</label>
-                        <input id="{{ $name }}" name="{{ $name }}" type="text" value="{{ $value($name) }}" @required($required) @if ($name === 'dob') placeholder="1370/01/01" @endif>
-                        @error($name) <span class="small" style="color:#dc2626">{{ $message }}</span> @enderror
-                    </div>
-                @endforeach
-                <div class="field">
-                    <label for="gender">Gender</label>
-                    <select id="gender" name="gender">
-                        <option value="">Select gender</option>
-                        @foreach (['Male', 'Female'] as $gender)
-                            <option value="{{ $gender }}" @selected($value('gender') === $gender)>{{ $gender }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                @php $admission = $value('admission_id') ?? request('admission'); @endphp
-                @if (($admissions ?? collect())->isNotEmpty())
-                    {{-- The patient's admissions (heart links each form to an admit record). --}}
-                    <div class="field">
-                        <label for="admission_id">Admission</label>
-                        <select id="admission_id" name="admission_id">
-                            <option value="">Not linked to an admission</option>
-                            @foreach ($admissions as $option)
-                                <option value="{{ $option->id }}" @selected((string) $admission === (string) $option->id)>{{ $option->summary() }}{{ $option->isDischarged() ? ' (discharged '.$option->discharged_on.')' : '' }}</option>
-                            @endforeach
-                        </select>
-                        @error('admission_id') <span class="small" style="color:#dc2626">{{ $message }}</span> @enderror
-                    </div>
-                @elseif ($admission)
-                    <input type="hidden" name="admission_id" value="{{ $admission }}">
-                @endif
+                @include('clinical.partials.patient-fields', ['values' => $values, 'admissions' => $admissions ?? collect(), 'admission' => $value('admission_id') ?? request('admission')])
             </div>
 
             {{-- One chip per section, green once something in it is filled in, red with an error. --}}
@@ -157,7 +156,7 @@
                                             <input id="f-{{ $name }}" type="number" step="any" name="{{ $name }}" value="{{ $value($name) }}" {!! $model($name) !!}>
                                             @break
                                         @case('date')
-                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="1405/01/01" {!! $model($name) !!}>
+                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="1405/01/01" class="no-voice" data-jalali {!! $model($name) !!}>
                                             @break
                                         @case('time')
                                             <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="HH:MM" {!! $model($name) !!}>
@@ -183,6 +182,9 @@
                 </button>
                 @if ($study)
                     <a href="{{ route('procedures.show', [$procedure, $study]) }}" class="ef-btn ef-btn-secondary">Cancel</a>
+                @else
+                    <button type="button" class="ef-btn ef-btn-secondary" x-on:click="clearForm()">Reset</button>
+                    <button type="button" class="ef-btn ef-btn-secondary" x-on:click="autosave(true)" x-text="savedFlash ? 'Saved' : 'Save Locally'">Save Locally</button>
                 @endif
                 <button type="submit" class="ef-btn ef-btn-primary">{{ $amending ? 'Save Amendment' : ($study ? 'Save Changes' : 'Save Draft') }}</button>
             </div>
@@ -223,26 +225,149 @@
     </div>
     </div>
 
+    @include('clinical.partials.patient-lookup')
     <script>
         /**
-         * The procedure form's behaviour: show_if values (v), the open section, which sections are
-         * filled in, and the live preview, which posts the form to the preview route into the iframe
-         * (as the echo form does), without the PUT override an edit form carries.
+         * The procedure form's behaviour, matching the echo form: show_if values (v), the open
+         * section and which sections are filled in, multi-patient tabs whose drafts are saved in
+         * this browser as you type (new studies only), and the live preview, which posts the form
+         * to the preview route into the iframe without the PUT override an edit form carries.
          */
-        function procedureForm(watched, firstSection, previewUrl) {
+        function procedureForm(options) {
             return {
-                v: watched,
-                section: firstSection,
+                v: options.watched,
+                section: options.section,
                 filled: [],
                 preview: false,
+                tabs: [],
+                activeTab: null,
+                savedFlash: false,
                 init() {
+                    this.loadTabs();
                     this.mark();
+                    this.datepickers();
                     try { this.toggle(localStorage.getItem('procedureForm_live_preview') === 'true'); } catch (e) {}
                 },
+                get form() { return this.$refs.form; },
+
+                // --- Multi-patient drafts -------------------------------------------------
+                store() {
+                    try { return JSON.parse(localStorage.getItem(options.storageKey)) || { tabs: [], active: null }; } catch (e) { return { tabs: [], active: null }; }
+                },
+                persist() {
+                    try { localStorage.setItem(options.storageKey, JSON.stringify({ tabs: this.tabs, active: this.activeTab })); } catch (e) {}
+                },
+                newTab(data = {}) {
+                    return { id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), data };
+                },
+                loadTabs() {
+                    if (! options.storageKey) return;
+                    const saved = this.store();
+                    this.tabs = saved.tabs.length ? saved.tabs : [this.newTab()];
+                    this.activeTab = this.tabs.some((tab) => tab.id === saved.active) ? saved.active : this.tabs[0].id;
+
+                    if (options.arrivedWithValues) {
+                        const current = this.tabs.find((tab) => tab.id === this.activeTab);
+                        if (Object.values(current.data).some((value) => value !== '')) {
+                            const tab = this.newTab();
+                            this.tabs.push(tab);
+                            this.activeTab = tab.id;
+                        }
+                        this.autosave();
+                    } else {
+                        this.fill(this.tabs.find((tab) => tab.id === this.activeTab).data);
+                    }
+                    this.persist();
+                },
+                tabTitle(tab, index) {
+                    const name = [tab.data.first_name, tab.data.last_name].filter(Boolean).join(' ');
+                    return name || 'Patient ' + (index + 1);
+                },
+                values() {
+                    const data = {};
+                    new FormData(this.form).forEach((value, key) => {
+                        if (! ['_token', '_method', 'amendment_reason'].includes(key)) data[key] = value;
+                    });
+                    return data;
+                },
+                autosave(flash = false) {
+                    if (! options.storageKey) return;
+                    const tab = this.tabs.find((tab) => tab.id === this.activeTab);
+                    if (! tab) return;
+                    tab.data = this.values();
+                    this.persist();
+                    if (flash === true) { this.savedFlash = true; setTimeout(() => this.savedFlash = false, 900); }
+                },
+                switchTab(id) {
+                    if (id === this.activeTab) return;
+                    this.autosave();
+                    this.activeTab = id;
+                    this.fill(this.tabs.find((tab) => tab.id === id).data);
+                    this.persist();
+                },
+                addTab() {
+                    this.autosave();
+                    const tab = this.newTab();
+                    this.tabs.push(tab);
+                    this.activeTab = tab.id;
+                    this.fill({});
+                    this.persist();
+                },
+                removeTab(id) {
+                    if (this.tabs.length <= 1) return;
+                    this.tabs = this.tabs.filter((tab) => tab.id !== id);
+                    if (this.activeTab === id) {
+                        this.activeTab = this.tabs[0].id;
+                        this.fill(this.tabs[0].data);
+                    }
+                    this.persist();
+                },
+                clearForm() {
+                    this.fill({});
+                    this.autosave();
+                },
+                // A saved study's draft is done with: the next visit starts from the remaining tabs.
+                submitted() {
+                    if (! options.storageKey) return;
+                    this.tabs = this.tabs.filter((tab) => tab.id !== this.activeTab);
+                    if (! this.tabs.length) this.tabs = [this.newTab()];
+                    this.activeTab = this.tabs[0].id;
+                    this.persist();
+                },
+                fill(data) {
+                    Array.from(this.form.elements).forEach((el) => {
+                        if (! el.name || ['_token', '_method', 'amendment_reason'].includes(el.name) || el.type === 'button' || el.type === 'submit') return;
+                        if (el.type === 'checkbox') { el.checked = !! data[el.name]; return; }
+                        if (el.tagName === 'SELECT' && el.name === 'admission_id') { el.dataset.selected = data[el.name] || ''; }
+                        el.value = data[el.name] ?? '';
+                    });
+                    Object.keys(this.v).forEach((name) => {
+                        const el = this.form.elements[name];
+                        this.v[name] = el ? (el.type === 'checkbox' ? (el.checked ? '1' : '') : el.value) : '';
+                    });
+                    this.section = 0;
+                    this.mark();
+                    this.refresh();
+                    window.patientLookup?.check(false, data.admission_id);
+                },
+
+                // --- Sections, dates and preview ------------------------------------------
                 mark() {
-                    this.filled = Array.from(this.$refs.form.querySelectorAll('[data-section]')).map((el) =>
+                    this.filled = Array.from(this.form.querySelectorAll('[data-section]')).map((el) =>
                         Array.from(el.querySelectorAll('input, select, textarea')).some((input) =>
                             input.type === 'checkbox' ? input.checked : input.value.trim() !== ''));
+                },
+                datepickers() {
+                    if (! window.jQuery || ! jQuery.fn.persianDatepicker) return;
+                    jQuery('#dob, [data-jalali]').each(function () {
+                        const el = this;
+                        jQuery(el).persianDatepicker({
+                            observer: true,
+                            format: 'YYYY/MM/DD',
+                            initialValue: false,
+                            onSelect: () => ['input', 'change'].forEach((type) => el.dispatchEvent(new Event(type, { bubbles: true }))),
+                        });
+                    });
                 },
                 toggle(on = ! this.preview) {
                     this.preview = on;
@@ -253,10 +378,10 @@
                     if (this.preview || force === true) this.submitPreview('procedure-preview');
                 },
                 submitPreview(target) {
-                    const form = this.$refs.form;
+                    const form = this.form;
                     const action = form.action;
                     if (this.$refs.method) this.$refs.method.disabled = true;
-                    form.action = previewUrl;
+                    form.action = options.previewUrl;
                     form.target = target;
                     form.noValidate = true;
                     form.submit();

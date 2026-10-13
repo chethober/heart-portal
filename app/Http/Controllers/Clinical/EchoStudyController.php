@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Clinical;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEchoStudyRequest;
 use App\Http\Requests\UpdateEchoStudyRequest;
+use App\Models\Admission;
 use App\Models\EchoStudy;
 use App\Models\EchoStudyVersion;
+use App\Models\Patient;
 use App\Services\EchoCalculations;
 use App\Support\Audit;
 use App\Support\PatientRecords;
@@ -15,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EchoStudyController extends Controller
@@ -30,7 +33,7 @@ class EchoStudyController extends Controller
             $patient = PatientRecords::resolve($request->patientAttributes());
 
             $study = $patient->studies()->create([
-                ...$request->studyAttributes(),
+                ...$this->attributesFor($request, $patient),
                 'created_by' => $request->user()->id,
             ]);
 
@@ -80,7 +83,7 @@ class EchoStudyController extends Controller
     {
         DB::transaction(function () use ($request, $study) {
             $patient = PatientRecords::resolve($request->patientAttributes());
-            $attributes = [...$request->studyAttributes(), 'patient_id' => $patient->id];
+            $attributes = [...$this->attributesFor($request, $patient), 'patient_id' => $patient->id];
 
             if ($study->isSigned()) {
                 $changes = Audit::diff((clone $study)->fill($attributes));
@@ -165,5 +168,21 @@ class EchoStudyController extends Controller
             'study' => $study,
             'version' => $version,
         ]);
+    }
+
+    /**
+     * The study's fields, after checking a linked admission is the same patient's.
+     *
+     * @return array<string, mixed>
+     */
+    private function attributesFor(StoreEchoStudyRequest $request, Patient $patient): array
+    {
+        $attributes = $request->studyAttributes();
+
+        if ($attributes['admission_id'] && Admission::find($attributes['admission_id'])?->patient_id !== $patient->id) {
+            throw ValidationException::withMessages(['admission_id' => __('The admission belongs to another patient.')]);
+        }
+
+        return $attributes;
     }
 }

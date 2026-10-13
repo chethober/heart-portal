@@ -59,41 +59,7 @@
       @endif
 
     <div class="row">
-      <div class="field">
-        <label for="first_name">First Name <span class="req">*</span></label>
-        <input id="first_name" name="first_name" type="text" required />
-      </div>
-
-      <div class="field">
-        <label for="last_name">Last Name <span class="req">*</span></label>
-        <input id="last_name" name="last_name" type="text" required />
-      </div>
-
-      <div class="field">
-        <label for="nationalID">National ID <span class="req">*</span></label>
-        <input id="nationalID" name="nationalID" type="text" required />
-      </div>
-      
-      <div class="field">
-        <label for="dob">Date of Birth</label>
-        <input id="dob" name="dob" type="text" class="no-voice" />
-        <span id="dob-display"></span>
-      </div>
-
-
-      <div class="field">
-        <label for="phone_number">Phone Number</label>
-        <input id="phone_number" name="phone_number" type="text" />
-      </div>
-
-      <div class="field">
-        <label for="gender">Gender</label>
-        <select id="gender" name="gender">
-          <option value="">Select gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-      </div>
+      @include('clinical.partials.patient-fields')
 
       <div class="field">
         <label for="Echo_indication">Echo indication</label>
@@ -961,4 +927,5 @@
     </div>
 
     @include('studies.partials.form-script')
+    @include('clinical.partials.patient-lookup')
 </x-dashboard-layout>
