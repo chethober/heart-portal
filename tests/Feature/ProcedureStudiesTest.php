@@ -2,7 +2,9 @@
 
 use App\Enums\Role;
 use App\Enums\StudyStatus;
+use App\Models\Admission;
 use App\Models\Hospital;
+use App\Models\Patient;
 use App\Models\Scopes\HospitalScope;
 use App\Models\User;
 use App\Support\Procedures;
@@ -87,4 +89,34 @@ test('staff who cannot record studies get no New Study menu', function () {
     $admin = User::factory()->for($this->hospital)->role(Role::HospitalAdmin)->create();
 
     $this->actingAs($admin)->get('/dashboard/patients')->assertOk()->assertDontSee(route('procedures.create', 'angiography'));
+});
+
+test('each heart form previews its report live without saving', function (string $procedure) {
+    [$payload, $label] = procedurePayload($procedure);
+
+    $this->actingAs($this->nurse)->get("/dashboard/procedures/{$procedure}/create")
+        ->assertOk()
+        ->assertSee(str_replace('/', '\\/', route('procedures.preview', $procedure)), false)
+        ->assertSee('Live Report Preview')
+        ->assertSee('class="section-nav-btn"', false);
+
+    $this->actingAs($this->nurse)->post("/dashboard/procedures/{$procedure}/preview", $payload)
+        ->assertOk()
+        ->assertSee('Rezaei')
+        ->assertSee($label)
+        ->assertSee('DRAFT');
+
+    expect(Procedures::model($procedure)::count())->toBe(0);
+})->with('procedures');
+
+test('the preview needs the form permission and never shows another hospital\'s admission', function () {
+    [$payload] = procedurePayload('angiography');
+    $foreign = Admission::factory()->for(Patient::factory()->for(Hospital::factory()))->create(['ward' => 'Elsewhere ward']);
+
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/angiography/preview', [...$payload, 'admission_id' => $foreign->id])
+        ->assertOk()
+        ->assertDontSee('Elsewhere ward');
+
+    $this->nurse->revokePermissionTo(['angiography.create', 'angiography.edit']);
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/angiography/preview', $payload)->assertForbidden();
 });

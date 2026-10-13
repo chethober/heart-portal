@@ -213,7 +213,7 @@ test('procedure forms offer the patient\'s admissions', function () {
 
     $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/create?nationalID=0012345678&admission={$admission->id}")
         ->assertOk()
-        ->assertSee('<select name="admission_id"', false)
+        ->assertSee('<select id="admission_id" name="admission_id"', false)
         ->assertSee('<option value="'.$admission->id.'" selected>1405/07/01 · CCU', false)
         ->assertDontSee('1399/01/01');
 

@@ -41,6 +41,9 @@ All notable changes to this project are documented here. The format follows
   each cath-lab form) they may view, record, edit and sign, within what their role allows.
 
 ### Changed
+- Cath-lab forms and their reports now look and work like the echo form and report: a section bar
+  showing which sections are filled in, one section at a time, a live report preview beside the
+  form, and the echo report's header, patient line, tables and signature.
 - Every signed-in form, search and report now lives under `/dashboard`: the worklist, patient
   echos, staff, audit log and (for platform admins) hospitals are tabs of one dashboard, and the
   echo form, reports, help and profile moved to `/dashboard/...`. Old URLs redirect permanently.

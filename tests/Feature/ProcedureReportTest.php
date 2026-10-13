@@ -83,7 +83,7 @@ test('the discharge summary prints right to left in Persian', function () {
 
     $this->actingAs($nurse)->get("/dashboard/procedures/discharge/{$study->id}")
         ->assertOk()
-        ->assertSee('class="procedure-report" dir="rtl" lang="fa"', false)
+        ->assertSee('<div class="report-container" dir="rtl" lang="fa"', false)
         ->assertSee('پیش نویس — امضا نشده');
 });
 
