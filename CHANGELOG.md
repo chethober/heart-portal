@@ -21,7 +21,9 @@ All notable changes to this project are documented here. The format follows
 - Forms ported from the legacy *heart* system, under a New Study menu: coronary angiography,
   coronary angioplasty (PCI), right heart catheterization, peripheral angiography, cardiac
   intervention and discharge summary, with the same draft → signed → amended workflow as echo
-  studies. Angiography, angioplasty and discharge reports are generated as clinical narratives.
+  studies. Every form's report is generated as a clinical narrative, as heart printed it: the right
+  heart catheterization report tabulates saturations and pressures by site and gives the
+  haemodynamics (PVR calculated from mean PA pressure, PCWP and cardiac output when not recorded).
 - Nurse and quality-control roles. Quality control can also review the audit log.
 - Patient record with demographics and contact details; admissions with ward, admission type,
   arrival, referrer and attending physician, discharge, and a Ward patients census. Hospital

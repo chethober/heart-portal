@@ -12,7 +12,8 @@ use LogicException;
  * templates (reports/templates/{procedure}.js). A builder only reads the report array (a study's
  * toReportArray() or a signed version's snapshot), so a signed version always reads as it was signed.
  *
- * Sections are lists of lines; a line is a sentence with an optional bold label. Text is plain and
+ * Sections are lists of lines (a line is a sentence with an optional bold label), optionally with a
+ * table above them (e.g. right heart pressures). Text is plain and
  * escaped by the view. Filled fields the narrative does not mention are listed in appendix(), so
  * nothing recorded on the form is silently left out of the printed report.
  */
@@ -32,6 +33,9 @@ abstract class ProcedureReport
         'angiography' => AngiographyReport::class,
         'angioplasty' => AngioplastyReport::class,
         'discharge' => DischargeReport::class,
+        'rhc' => RhcReport::class,
+        'peripheral' => PeripheralReport::class,
+        'intervention' => InterventionReport::class,
     ];
 
     /**
@@ -47,7 +51,7 @@ abstract class ProcedureReport
     private array $reported = [];
 
     /**
-     * @var list<array{title: string|null, lines: list<array{label: string|null, text: string}>}>|null
+     * @var list<array{title: string|null, lines: list<array{label: string|null, text: string}>, table?: list<list<string>>}>|null
      */
     private ?array $sections = null;
 
@@ -110,18 +114,18 @@ abstract class ProcedureReport
     }
 
     /**
-     * @return list<array{title: string|null, lines: list<array{label: string|null, text: string}>}>
+     * @return list<array{title: string|null, lines: list<array{label: string|null, text: string}>, table?: list<list<string>>}>
      */
     abstract protected function build(): array;
 
     /**
-     * @return list<array{title: string|null, lines: list<array{label: string|null, text: string}>}>
+     * @return list<array{title: string|null, lines: list<array{label: string|null, text: string}>, table?: list<list<string>>}>
      */
     final public function sections(): array
     {
         return $this->sections ??= array_values(array_filter(
             $this->build(),
-            fn (array $section) => $section['lines'] !== [],
+            fn (array $section) => $section['lines'] !== [] || ! empty($section['table']),
         ));
     }
 
@@ -312,12 +316,18 @@ abstract class ProcedureReport
     }
 
     /**
-     * @param  list<array{label: string|null, text: string}>  $lines
-     * @return array{title: string|null, lines: list<array{label: string|null, text: string}>}
+     * @param  list<array{label: string|null, text: string}|null>  $lines
+     * @param  list<list<string>>  $table  Rows of a table printed above the lines; the first row is the header.
+     * @return array{title: string|null, lines: list<array{label: string|null, text: string}>, table?: list<list<string>>}
      */
-    protected static function section(?string $title, array $lines): array
+    protected static function section(?string $title, array $lines, array $table = []): array
     {
-        return ['title' => $title, 'lines' => array_values(array_filter($lines, fn (?array $line) => $line !== null && trim($line['text']) !== ''))];
+        $section = ['title' => $title, 'lines' => array_values(array_filter($lines, fn (?array $line) => $line !== null && trim($line['text']) !== ''))];
+
+        // Empty rows are dropped; a table with only its header row has nothing to show.
+        $rows = array_values(array_filter(array_slice($table, 1), fn (array $row) => implode('', $row) !== ''));
+
+        return $rows !== [] ? [...$section, 'table' => [$table[0], ...$rows]] : $section;
     }
 
     /**

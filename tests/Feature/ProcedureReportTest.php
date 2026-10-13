@@ -9,7 +9,7 @@ use App\Support\Procedures;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-dataset('narrative procedures', ['angiography', 'angioplasty', 'discharge']);
+dataset('narrative procedures', array_keys(Procedures::MODELS));
 
 /**
  * Every field of the procedure filled in; choices take their $pass-th option, so a few passes
@@ -36,7 +36,7 @@ function filledReport(string $procedure, int $pass): array
 }
 
 test('a narrative is built from every field and every option', function (string $procedure) {
-    $passes = max(array_map(fn (array $field) => count($field['options'] ?? []), Procedures::fields($procedure)));
+    $passes = max([1, ...array_values(array_map(fn (array $field) => count($field['options'] ?? []), Procedures::fields($procedure)))]);
 
     for ($pass = 0; $pass < $passes; $pass++) {
         $data = filledReport($procedure, $pass);
@@ -61,10 +61,41 @@ test('an empty study still builds a report', function (string $procedure) {
         ->and($report->appendix())->toBe([]);
 })->with('narrative procedures');
 
-test('only angiography, angioplasty and discharge have a narrative', function () {
+test('every procedure has a narrative report', function () {
     expect(array_filter(array_keys(Procedures::MODELS), ProcedureReport::supports(...)))
-        ->toBe(['angiography', 'angioplasty', 5 => 'discharge']);
+        ->toBe(array_keys(Procedures::MODELS));
 });
+
+test('the RHC report tabulates pressures by site and gives the haemodynamics', function () {
+    $report = ProcedureReport::for('rhc', [
+        'Access' => 'femoral', 'catheter' => 'Swan-Ganz', 'mpa_o2' => 70, 'mpa_mean' => 35, 'mpa_systolic' => 50, 'mpa_diastolic' => 20,
+        'pcwp_mean' => 15, 'ra_o2' => 0, 'cardiac_output' => 4, 'right_heart_result' => 'Pulmonary hypertension',
+    ]);
+    $sections = collect($report->sections());
+    $text = $sections->flatMap(fn ($section) => array_map(fn ($line) => ($line['label'] ? $line['label'].': ' : '').$line['text'], $section['lines']))->implode("\n");
+
+    expect($sections->first()['table'])->toBe([
+        ['Site', 'O2 saturation %', 'Mean pressure (mmHg)', 'Systolic pressure (mmHg)', 'Diastolic pressure (mmHg)'],
+        ['PCWP', '', '15', '', ''],
+        ['MPA', '70', '35', '50', '20'],
+    ])
+        ->and($text)->toContain('Right heart catheterization was done via femoral vein and with Swan-Ganz catheter')
+        ->and($text)->toContain('Pulmonary vascular resistance: 5 Wood units (calculated)')
+        ->and($text)->toContain('Result: Pulmonary hypertension.')
+        ->and($report->appendix())->toBe([]);
+
+    // A recorded PVR is printed as recorded.
+    expect(collect(ProcedureReport::for('rhc', ['pvr' => 3.2, 'mpa_mean' => 35, 'pcwp_mean' => 15, 'cardiac_output' => 4])->sections())
+        ->flatMap(fn ($section) => array_column($section['lines'], 'text'))->all())->toContain('3.2 Wood units');
+});
+
+test('peripheral and intervention reports list technical details in a table', function (string $procedure, string $field) {
+    $report = ProcedureReport::for($procedure, ['Access' => 'Radial', 'Indication_procedure' => 'Claudication', $field => 'Note']);
+
+    expect($report->sections()[0]['table'][1])->toContain('Radial')
+        ->and(collect($report->sections())->flatMap(fn ($section) => array_column($section['lines'], 'text'))->all())->toContain('Claudication')
+        ->and($report->appendix())->toBe([]);
+})->with([['peripheral', 'Recommendation'], ['intervention', 'Complications']]);
 
 test('fields the narrative leaves out are listed, not dropped', function () {
     $report = ProcedureReport::for('angiography', ['lad_Vessel_patency' => '3', 'lad_proximal_part_segment' => '2', 'lad_prox_Stenotic' => '3']);
