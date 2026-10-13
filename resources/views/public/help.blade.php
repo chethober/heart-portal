@@ -31,7 +31,7 @@
                 <p class="mt-3 text-lg text-gray-600">{{ __('Everything you need to run your echo lab and cath lab on :app.', ['app' => config('app.name')]) }}</p>
                 @auth
                     <p class="mt-3 flex flex-wrap gap-x-4 text-sm">
-                        @can('studies.create')
+                        @can('echo.create')
                             <a href="{{ route('studies.create') }}">{{ __('New Study') }}</a>
                         @endcan
                         @can('patients.view')

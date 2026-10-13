@@ -24,7 +24,7 @@
             <div class="flex flex-wrap items-center gap-3">
                 <h2 class="text-xl font-semibold">{{ $patient->first_name }} {{ $patient->last_name }}</h2>
                 <a href="{{ route('patients.index', ['nationalID' => $patient->national_id]) }}" class="text-sm font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Studies') }}</a>
-                @can('studies.edit')
+                @can('patients.edit')
                     <a href="{{ route('patients.edit', $patient) }}" class="ms-auto inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">{{ __('Edit details') }}</a>
                 @endcan
             </div>
@@ -41,7 +41,7 @@
         <section>
             <div class="mb-2 flex flex-wrap items-center gap-3">
                 <h3 class="text-lg font-semibold">{{ __('Admissions') }}</h3>
-                @can('studies.edit')
+                @can('admission.create')
                     <a href="{{ route('admissions.create', $patient) }}" class="ms-auto rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500">{{ __('New admission') }}</a>
                 @endcan
             </div>

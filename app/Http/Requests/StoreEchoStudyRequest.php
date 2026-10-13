@@ -16,7 +16,7 @@ class StoreEchoStudyRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->can('studies.create');
+        return $this->user()->can('echo.create');
     }
 
     protected function prepareForValidation(): void

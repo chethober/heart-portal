@@ -478,5 +478,10 @@
     "The printed prescription carries a QR code. Scanning it opens a public verification page that shows whether the prescription is genuine and still valid, without any patient details.": "La receta impresa lleva un código QR. Al escanearlo se abre una página pública de verificación que indica si la receta es auténtica y sigue vigente, sin mostrar datos del paciente.",
     "Drugs lists the shared catalog. Hospital admins can add their own drugs and withdraw ones they no longer use.": "Medicamentos muestra el catálogo compartido. Los administradores del hospital pueden añadir sus propios medicamentos y retirar los que ya no usan.",
     "Statistics counts your hospital's studies and patients per form and per month, signed and draft, and charts key findings. Choose a period to narrow it down.": "Estadísticas cuenta los estudios y pacientes de su hospital por formulario y por mes, firmados y en borrador, y representa en gráficos los hallazgos clave. Elija un período para acotarlo.",
-    "Enter the patient's national ID in the quick search box at the top of the page, or open Patients.": "Introduzca el documento nacional del paciente en el cuadro de búsqueda rápida de la parte superior de la página, o abra Pacientes."
+    "Enter the patient's national ID in the quick search box at the top of the page, or open Patients.": "Introduzca el documento nacional del paciente en el cuadro de búsqueda rápida de la parte superior de la página, o abra Pacientes.",
+    "That access is beyond the member's role.": "Ese acceso supera el rol del miembro.",
+    "Form access": "Acceso a formularios",
+    "View": "Ver",
+    "Record": "Registrar",
+    "Save access": "Guardar acceso"
 }

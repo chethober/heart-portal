@@ -37,6 +37,9 @@ All notable changes to this project are documented here. The format follows
 - Help center sections for the cath-lab forms, admissions and wards, e-prescriptions and
   statistics.
 
+- Per-form access: hospital admins choose, for each staff member, which forms (echo, admissions,
+  each cath-lab form) they may view, record, edit and sign, within what their role allows.
+
 ### Changed
 - Every signed-in form, search and report now lives under `/dashboard`: the worklist, patient
   echos, staff, audit log and (for platform admins) hospitals are tabs of one dashboard, and the

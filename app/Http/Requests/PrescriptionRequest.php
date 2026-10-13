@@ -21,7 +21,7 @@ class PrescriptionRequest extends FormRequest
 
         return $prescription instanceof Prescription
             ? $this->user()->can('update', $prescription)
-            : $this->user()->can('studies.create');
+            : $this->user()->can('prescriptions.create');
     }
 
     protected function prepareForValidation(): void

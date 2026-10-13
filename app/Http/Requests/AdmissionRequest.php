@@ -21,7 +21,7 @@ class AdmissionRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->can('studies.edit');
+        return $this->user()->can($this->route('admission') ? 'admission.edit' : 'admission.create');
     }
 
     protected function prepareForValidation(): void

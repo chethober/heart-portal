@@ -478,5 +478,10 @@
     "The printed prescription carries a QR code. Scanning it opens a public verification page that shows whether the prescription is genuine and still valid, without any patient details.": "نسخه چاپی یک کد QR دارد. اسکن آن صفحه تأیید عمومی را باز می‌کند که بدون نمایش هیچ اطلاعاتی از بیمار نشان می‌دهد نسخه معتبر و همچنان قابل استفاده است یا خیر.",
     "Drugs lists the shared catalog. Hospital admins can add their own drugs and withdraw ones they no longer use.": "«داروها» فهرست مشترک داروها را نشان می‌دهد. مدیران بیمارستان می‌توانند داروهای خود را اضافه و داروهایی را که دیگر استفاده نمی‌کنند کنار بگذارند.",
     "Statistics counts your hospital's studies and patients per form and per month, signed and draft, and charts key findings. Choose a period to narrow it down.": "«آمار» مطالعات و بیماران بیمارستان شما را به تفکیک فرم و ماه، امضاشده و پیش‌نویس، می‌شمارد و یافته‌های کلیدی را نمودار می‌کند. برای محدودکردن نتایج، یک بازه زمانی انتخاب کنید.",
-    "Enter the patient's national ID in the quick search box at the top of the page, or open Patients.": "کد ملی بیمار را در کادر جستجوی سریع بالای صفحه وارد کنید یا «بیماران» را باز کنید."
+    "Enter the patient's national ID in the quick search box at the top of the page, or open Patients.": "کد ملی بیمار را در کادر جستجوی سریع بالای صفحه وارد کنید یا «بیماران» را باز کنید.",
+    "That access is beyond the member's role.": "این دسترسی بیش از نقش این عضو است.",
+    "Form access": "دسترسی به فرم‌ها",
+    "View": "مشاهده",
+    "Record": "ثبت",
+    "Save access": "ذخیره دسترسی"
 }

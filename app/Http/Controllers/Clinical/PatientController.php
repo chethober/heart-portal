@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EchoStudy;
 use App\Models\Patient;
 use App\Support\Audit;
+use App\Support\Forms;
 use App\Support\Procedures;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -24,18 +25,21 @@ class PatientController extends Controller
         $procedures = [];
 
         if ($nationalID !== '') {
-            $procedures = array_map(fn () => new Collection, Procedures::MODELS);
+            // Only the forms this member may view (per-form permissions).
+            $procedures = array_fill_keys(Forms::procedures($request->user(), 'view'), new Collection);
             $patient = Patient::whereNationalId($nationalID)->first();
 
             // The searched ID itself is not logged; a miss is recorded without it.
             Audit::record($patient ? 'patient.viewed' : 'patient.search_no_match', $patient);
 
-            if ($patient) {
+            if ($patient && Forms::allows($request->user(), 'echo', 'view')) {
                 $echoReports = $patient->studies()->with('author')->latest()->get()
                     ->each(fn (EchoStudy $study) => $study->setRelation('patient', $patient));
 
-                foreach (Procedures::MODELS as $key => $model) {
-                    $procedures[$key] = $model::where('patient_id', $patient->id)->latest()->get();
+            }
+            if ($patient) {
+                foreach (array_keys($procedures) as $key) {
+                    $procedures[$key] = Procedures::model($key)::where('patient_id', $patient->id)->latest()->get();
                 }
             }
         }

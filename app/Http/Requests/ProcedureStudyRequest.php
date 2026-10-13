@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\HasPatientFields;
 use App\Models\ProcedureStudy;
+use App\Support\Forms;
 use App\Support\Procedures;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class ProcedureStudyRequest extends FormRequest
     {
         $study = $this->study();
 
-        return $study ? $this->user()->can('update', $study) : $this->user()->can('studies.create');
+        return $study ? $this->user()->can('update', $study) : Forms::allows($this->user(), $this->route('procedure'), 'create');
     }
 
     protected function prepareForValidation(): void

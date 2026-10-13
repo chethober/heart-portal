@@ -46,14 +46,17 @@ Route::prefix('dashboard')->group(function () {
         // Everything below requires an active member of an approved hospital.
         Route::middleware(['hospital.active', 'two-factor'])->group(function () {
             Route::get('/users/{user}/signature', [SignatureController::class, 'show'])->name('users.signature');
-            Route::post('/profile/signature', [SignatureController::class, 'update'])->middleware('permission:studies.finalize')->name('profile.signature');
+            Route::post('/profile/signature', [SignatureController::class, 'update'])->middleware('can:sign-reports')->name('profile.signature');
             Route::get('/audit', [AuditLogController::class, 'index'])->middleware('permission:audit.view')->name('audit.index');
 
-            Route::middleware('permission:studies.create')->group(function () {
+            Route::middleware('permission:echo.create')->group(function () {
                 Route::get('/studies/create', [EchoStudyController::class, 'create'])->name('studies.create');
                 Route::post('/studies', [EchoStudyController::class, 'store'])->name('studies.store');
                 Route::post('/studies/preview', [EchoStudyController::class, 'preview'])->name('studies.preview');
-                Route::get('/doctors', DoctorController::class)->name('doctors.index');
+            });
+            Route::get('/doctors', DoctorController::class)->middleware('can:record-studies')->name('doctors.index');
+            // Each procedure has its own "{procedure}.create" permission, checked by the controller.
+            Route::middleware('can:record-studies')->group(function () {
                 Route::get('/procedures/{procedure}/create', [ProcedureStudyController::class, 'create'])->name('procedures.create');
                 Route::post('/procedures/{procedure}', [ProcedureStudyController::class, 'store'])->name('procedures.store');
             });
@@ -81,13 +84,17 @@ Route::prefix('dashboard')->group(function () {
             Route::middleware('permission:patients.view')->group(function () {
                 Route::get('/ward-patients', WardPatientsController::class)->name('ward-patients');
                 Route::get('/patients/{patient}', [PatientRecordController::class, 'show'])->whereNumber('patient')->name('patients.show');
-                Route::get('/patients/{patient}/admissions/{admission}', [AdmissionController::class, 'show'])->whereNumber(['patient', 'admission'])->scopeBindings()->name('admissions.show');
+                Route::get('/patients/{patient}/admissions/{admission}', [AdmissionController::class, 'show'])->middleware('permission:admission.view')->whereNumber(['patient', 'admission'])->scopeBindings()->name('admissions.show');
             });
-            Route::middleware('permission:studies.edit')->whereNumber(['patient', 'admission'])->group(function () {
+            Route::middleware('permission:patients.edit')->whereNumber('patient')->group(function () {
                 Route::get('/patients/{patient}/edit', [PatientRecordController::class, 'edit'])->name('patients.edit');
                 Route::put('/patients/{patient}', [PatientRecordController::class, 'update'])->name('patients.update');
+            });
+            Route::middleware('permission:admission.create')->whereNumber('patient')->group(function () {
                 Route::get('/patients/{patient}/admissions/create', [AdmissionController::class, 'create'])->name('admissions.create');
                 Route::post('/patients/{patient}/admissions', [AdmissionController::class, 'store'])->name('admissions.store');
+            });
+            Route::middleware('permission:admission.edit')->whereNumber(['patient', 'admission'])->group(function () {
                 Route::scopeBindings()->group(function () {
                     Route::get('/patients/{patient}/admissions/{admission}/edit', [AdmissionController::class, 'edit'])->name('admissions.edit');
                     Route::put('/patients/{patient}/admissions/{admission}', [AdmissionController::class, 'update'])->name('admissions.update');
@@ -103,6 +110,7 @@ Route::prefix('dashboard')->group(function () {
             Route::middleware('permission:staff.manage')->prefix('staff')->name('staff.')->group(function () {
                 Route::get('/', [StaffController::class, 'index'])->name('index');
                 Route::patch('/{user}', [StaffController::class, 'update'])->name('update');
+                Route::put('/{user}/access', [StaffController::class, 'updateAccess'])->name('access.update');
                 Route::delete('/{user}/two-factor', [StaffController::class, 'resetTwoFactor'])->name('two-factor.reset');
                 Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
                 Route::delete('/invitations/{invitation}', [InvitationController::class, 'destroy'])->name('invitations.destroy');

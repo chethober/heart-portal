@@ -30,10 +30,10 @@
                     <span class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">{{ __('Admitted') }}</span>
                 @endif
                 <div class="ms-auto flex flex-wrap items-center gap-2">
-                    @can('studies.create')
+                    @can('record-studies')
                         @include('admissions.record-links', ['admission' => $admission])
                     @endcan
-                    @can('studies.edit')
+                    @can('admission.edit')
                         <a href="{{ route('admissions.edit', [$patient, $admission]) }}" class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
                     @endcan
                 </div>
@@ -49,7 +49,7 @@
             </dl>
 
             @if (! $admission->isDischarged())
-                @can('studies.edit')
+                @can('admission.edit')
                     <form method="POST" action="{{ route('admissions.discharge', [$patient, $admission]) }}" class="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 p-4">
                         @csrf
                         <div>
@@ -71,6 +71,7 @@
         <section class="space-y-6">
             <h3 class="text-lg font-semibold">{{ __('Studies during this admission') }}</h3>
 
+            @if ($echoStudies !== null)
             <div>
                 <h4 class="mb-1 font-semibold">{{ __('Echocardiography') }}</h4>
                 @forelse ($echoStudies as $study)
@@ -83,12 +84,13 @@
                     <p class="text-sm text-gray-500">{{ __('None recorded.') }}</p>
                 @endforelse
             </div>
+            @endif
 
             @foreach ($procedures as $key => $studies)
                 <div>
                     <div class="mb-1 flex flex-wrap items-center gap-3">
                         <h4 class="font-semibold">{{ __(Procedures::label($key)) }}</h4>
-                        @can('studies.create')
+                        @can("{$key}.create")
                             <a href="{{ route('procedures.create', [$key, 'nationalID' => $patient->national_id, 'admission' => $admission->id]) }}" class="text-sm font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Record for this admission') }}</a>
                         @endcan
                     </div>

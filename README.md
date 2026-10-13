@@ -57,6 +57,11 @@ doctors sign the report, and every step is audited.
 | Hospital admin | invite/manage staff, reset 2FA, manage wards and the drug catalog, view reports and the audit log, delete drafts |
 | Platform admin | approve, suspend and reactivate hospitals (no access to patient data) |
 
+Access to each clinical form (echo, admissions and every cath-lab form) is also set per staff
+member, like heart's per-form access flags: on the Staff page, **Form access** lets a hospital
+admin choose what each member may view, record, edit and sign. A new member starts with
+everything their role allows, and the role caps what can be granted (only doctors sign).
+
 ## Quick start (Docker)
 
 Requirements: Docker with Compose, Node.js 20+ (for building the front-end assets).

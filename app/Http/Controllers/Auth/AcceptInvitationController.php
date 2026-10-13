@@ -43,7 +43,7 @@ class AcceptInvitationController extends Controller
             ]);
             // The invite link was delivered to this address, which proves ownership.
             $user->forceFill(['email_verified_at' => now()])->save();
-            $user->assignRole($invitation->role->value);
+            $user->assignStaffRole($invitation->role);
 
             $invitation->update(['accepted_at' => now()]);
             Audit::record('staff.joined', $user, ['role' => $invitation->role->value], $user);

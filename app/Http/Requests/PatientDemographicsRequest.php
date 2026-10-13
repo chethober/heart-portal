@@ -15,7 +15,7 @@ class PatientDemographicsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('studies.edit');
+        return $this->user()->can('patients.edit');
     }
 
     protected function prepareForValidation(): void

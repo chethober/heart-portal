@@ -28,7 +28,7 @@ class DashboardController extends Controller
             if ($request->query('tab') === 'patients') {
                 return redirect()->route('patients.index', $request->only('nationalID'));
             }
-            if ($request->hasAny(['status', 'search']) || ! $user->can('studies.create')) {
+            if ($request->hasAny(['status', 'search']) || ! $user->can('echo.create')) {
                 return redirect()->route('worklist', $request->only(['status', 'search', 'page']));
             }
 

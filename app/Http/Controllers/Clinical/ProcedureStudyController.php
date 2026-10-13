@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\ProcedureStudy;
 use App\Reports\ProcedureReport;
 use App\Support\Audit;
+use App\Support\Forms;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,8 @@ class ProcedureStudyController extends Controller
      */
     public function create(Request $request, string $procedure): View
     {
+        abort_unless(Forms::allows($request->user(), $procedure, 'create'), 403);
+
         $nationalID = trim((string) $request->query('nationalID', ''));
         $patient = $nationalID !== '' ? Patient::whereNationalId($nationalID)->first() : null;
 

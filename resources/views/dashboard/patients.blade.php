@@ -12,7 +12,7 @@
     @elseif ($echoReports->isEmpty())
         <div class="py-8 text-center text-gray-500">
             <p>{{ __('No echo reports found for this National ID.') }}</p>
-            @can('studies.create')
+            @can('echo.create')
                 <a href="{{ route('studies.create') }}" class="mt-3 inline-block text-sm font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Record a new echo study') }}</a>
             @endcan
         </div>
@@ -51,7 +51,7 @@
                 <section>
                     <div class="mb-2 flex flex-wrap items-center gap-3">
                         <h3 class="text-lg font-semibold">{{ App\Support\Procedures::label($key) }}</h3>
-                        @can('studies.create')
+                        @can("{$key}.create")
                             <a href="{{ route('procedures.create', [$key, 'nationalID' => $nationalID]) }}" class="text-sm font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Record a new study') }}</a>
                         @endcan
                     </div>

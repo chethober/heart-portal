@@ -478,5 +478,10 @@
     "The printed prescription carries a QR code. Scanning it opens a public verification page that shows whether the prescription is genuine and still valid, without any patient details.": "تحمل الوصفة المطبوعة رمز QR. يفتح مسحه صفحة تحقق عامة توضح ما إذا كانت الوصفة أصلية وما زالت سارية، دون أي بيانات عن المريض.",
     "Drugs lists the shared catalog. Hospital admins can add their own drugs and withdraw ones they no longer use.": "تعرض «الأدوية» الدليل المشترك. يمكن لمديري المستشفى إضافة أدويتهم الخاصة وسحب ما لم يعودوا يستخدمونه.",
     "Statistics counts your hospital's studies and patients per form and per month, signed and draft, and charts key findings. Choose a period to narrow it down.": "تحصي «الإحصاءات» دراسات مستشفاك ومرضاه حسب النموذج والشهر، الموقعة والمسودات، وتعرض أهم النتائج في رسوم بيانية. اختر فترة لتضييق النتائج.",
-    "Enter the patient's national ID in the quick search box at the top of the page, or open Patients.": "أدخل رقم الهوية الوطنية للمريض في مربع البحث السريع أعلى الصفحة، أو افتح «المرضى»."
+    "Enter the patient's national ID in the quick search box at the top of the page, or open Patients.": "أدخل رقم الهوية الوطنية للمريض في مربع البحث السريع أعلى الصفحة، أو افتح «المرضى».",
+    "That access is beyond the member's role.": "هذه الصلاحية تتجاوز دور العضو.",
+    "Form access": "الوصول إلى النماذج",
+    "View": "عرض",
+    "Record": "تسجيل",
+    "Save access": "حفظ الصلاحيات"
 }
