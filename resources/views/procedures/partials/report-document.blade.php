@@ -64,6 +64,7 @@
             'boolean' => $t['yes'],
             'choice' => $field['options'][$value] ?? (string) $value,
             'number' => is_float($value) && floor($value) === $value ? (string) (int) $value : (string) $value,
+            'diagnoses' => is_array($value) ? (implode('; ', App\Support\Diagnoses::labels($value)) ?: null) : (string) $value,
             default => (string) $value,
         };
     };

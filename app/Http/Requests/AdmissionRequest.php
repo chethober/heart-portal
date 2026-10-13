@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Admission;
+use App\Support\Diagnoses;
 use App\Support\JalaliCalendar;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
@@ -65,6 +66,9 @@ class AdmissionRequest extends FormRequest
             'discharged_at' => $time,
             'his_id' => ['nullable', 'string', 'max:64', Rule::unique('admissions', 'his_id')->where('hospital_id', $hospitalId)->ignore($this->route('admission'))],
             'his_codes' => ['nullable', 'array:'.implode(',', Admission::HIS_CODES)],
+            // Final diagnoses from heart's ICD guide (heart's admit.ICDCodes).
+            'icd_codes' => ['nullable', 'array', 'max:20'],
+            'icd_codes.*' => ['string', 'distinct', Rule::in(Diagnoses::keys())],
         ];
 
         foreach (Admission::HIS_CODES as $code) {
@@ -108,6 +112,8 @@ class AdmissionRequest extends FormRequest
             // Heart asks for the referring hospital only for transfers in.
             'referred_from' => (int) ($attributes['arrival_mode'] ?? 0) === 3 ? ($attributes['referred_from'] ?? null) : null,
             'his_codes' => $codes ?: null,
+            // An unticked list is not posted: clear the diagnoses then.
+            'icd_codes' => $this->validated('icd_codes') ?: null,
         ];
     }
 

@@ -483,5 +483,8 @@
     "Form access": "Form erişimi",
     "View": "Görüntüle",
     "Record": "Kaydet",
-    "Save access": "Erişimi kaydet"
+    "Save access": "Erişimi kaydet",
+    "Final diagnosis guide": "Kesin tanı kılavuzu",
+    "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Taburcu özetinde ve yatışlarda kesin tanıyı ICD-10 kodunu içeren bu listeden seçin. Tanı listede yoksa, sorumlu hekimin belirttiği şekilde yazın.",
+    "Final diagnosis (ICD-10)": "Kesin tanı (ICD-10)"
 }

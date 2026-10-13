@@ -483,5 +483,8 @@
     "Form access": "Formularzugriff",
     "View": "Ansehen",
     "Record": "Erfassen",
-    "Save access": "Zugriff speichern"
+    "Save access": "Zugriff speichern",
+    "Final diagnosis guide": "Leitfaden zur Enddiagnose",
+    "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Wählen Sie die Enddiagnose im Entlassungsbericht und bei Aufnahmen aus dieser Liste, die den ICD-10-Code enthält. Steht die Diagnose nicht in der Liste, schreiben Sie sie so, wie der behandelnde Arzt sie angibt.",
+    "Final diagnosis (ICD-10)": "Enddiagnose (ICD-10)"
 }

@@ -34,7 +34,7 @@ test('every show_if depends on an earlier field and one of its values', function
 
 test('every field has a known type and choices have options', function (string $procedure) {
     foreach (Procedures::fields($procedure) as $name => $field) {
-        expect(in_array($field['type'], ['choice', 'boolean', 'number', 'text', 'multiline', 'date', 'time'], true))->toBeTrue("{$name} has unknown type {$field['type']}");
+        expect(in_array($field['type'], ['choice', 'boolean', 'number', 'text', 'multiline', 'date', 'time', 'diagnoses'], true))->toBeTrue("{$name} has unknown type {$field['type']}");
 
         if ($field['type'] === 'choice') {
             expect($field['options'])->not->toBeEmpty($name);

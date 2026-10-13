@@ -14,6 +14,7 @@
         __('Discharged') => trim($admission->discharged_on.' '.$admission->discharged_at),
         __('Length of stay') => $stay !== null ? __(':count days', ['count' => $stay]) : null,
         __('HIS admission number') => $admission->his_id,
+        __('Final diagnosis (ICD-10)') => implode('; ', App\Support\Diagnoses::labels($admission->icd_codes)),
     ];
     foreach ($admission->his_codes ?? [] as $code => $hisValue) {
         $details[$code] = $hisValue;

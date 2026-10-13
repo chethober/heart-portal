@@ -2,6 +2,7 @@
 
 namespace App\Reports;
 
+use App\Support\Diagnoses;
 use App\Support\JalaliDate;
 use App\Support\Procedures;
 use Illuminate\Support\Carbon;
@@ -172,7 +173,7 @@ abstract class ProcedureReport
 
         $value = $this->data[$name] ?? null;
 
-        return $value === '' || $value === false && $this->fields[$name]['type'] !== 'boolean' ? null : $value;
+        return $value === '' || $value === [] || $value === false && $this->fields[$name]['type'] !== 'boolean' ? null : $value;
     }
 
     protected function has(string $name): bool
@@ -283,6 +284,7 @@ abstract class ProcedureReport
             'boolean' => $value ? 'Yes' : null,
             'choice' => $field['options'][$this->code($value)] ?? (string) $value,
             'number' => self::number($value),
+            'diagnoses' => is_array($value) ? implode('; ', Diagnoses::labels($value)) : (string) $value,
             default => trim((string) $value) === '' ? null : trim((string) $value),
         };
     }

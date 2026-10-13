@@ -483,5 +483,8 @@
     "Form access": "الوصول إلى النماذج",
     "View": "عرض",
     "Record": "تسجيل",
-    "Save access": "حفظ الصلاحيات"
+    "Save access": "حفظ الصلاحيات",
+    "Final diagnosis guide": "دليل التشخيص النهائي",
+    "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "اختر التشخيص النهائي في ملخص الخروج وفي حالات الدخول من هذه القائمة التي تتضمن رمز ICD-10. إذا لم يكن التشخيص مدرجًا، فاكتبه كما يذكره الطبيب المعالج.",
+    "Final diagnosis (ICD-10)": "التشخيص النهائي (ICD-10)"
 }

@@ -48,6 +48,11 @@ All notable changes to this project are documented here. The format follows
 - Cath-lab forms keep several patients' unsaved drafts in tabs, saved in the browser as you type,
   like the echo form, with a Jalali date picker for dates.
 
+- Final diagnosis picker from heart's ICD guide on the discharge summary and on admissions, with
+  ICD-10 codes and criteria, printed on the discharge report, and a Final diagnosis guide in the
+  help center. Heart's admission ICD codes are imported. Codes beyond heart's acute MI and angina
+  items still need review by a clinician (config/diagnoses.php).
+
 ### Changed
 - Cath-lab forms and their reports now look and work like the echo form and report: a section bar
   showing which sections are filled in, one section at a time, a live report preview beside the

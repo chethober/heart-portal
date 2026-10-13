@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\ProcedureStudy;
 use App\Reports\ProcedureReport;
 use App\Support\Audit;
+use App\Support\Diagnoses;
 use App\Support\Forms;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
@@ -105,6 +106,7 @@ class ProcedureStudyController extends Controller
                 'boolean' => (bool) $value ?: null,
                 'number' => is_numeric($value) ? $value : null,
                 'choice' => is_scalar($value) && array_key_exists((string) $value, $field['options']) ? (string) $value : null,
+                'diagnoses' => is_array($value) ? (array_values(array_intersect($value, Diagnoses::keys())) ?: null) : null,
                 default => is_string($value) && trim($value) !== '' ? $value : null,
             };
 

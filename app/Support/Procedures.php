@@ -111,6 +111,7 @@ final class Procedures
                 'boolean' => $table->boolean($column)->nullable(),
                 'date' => $table->string($column, 10)->nullable(),
                 'time' => $table->string($column, 5)->nullable(),
+                'diagnoses' => $table->jsonb($column)->nullable(),
                 default => $table->text($column)->nullable(),
             };
         }
@@ -124,6 +125,7 @@ final class Procedures
         return match ($type) {
             'number' => 'float',
             'boolean' => 'boolean',
+            'diagnoses' => 'array',
             default => 'string',
         };
     }

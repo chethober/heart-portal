@@ -10,6 +10,7 @@ use App\Models\Patient;
 use App\Models\ProcedureStudy;
 use App\Support\Audit;
 use App\Support\CurrentHospital;
+use App\Support\Diagnoses;
 use App\Support\Procedures;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
@@ -226,6 +227,8 @@ final class HeartImporter
             'admitted_on' => $this->date('admissions', $id, $row->get('DateOf_admitdate')),
             // Heart's admit table names the discharge date three ways across versions.
             'discharged_on' => $this->date('admissions', $id, $row->first('DateOf_dischargedate', 'DateOf_disch_date', 'DateOf_DisDate')),
+            // Heart's ICD-10 codes, as far as they match the final-diagnosis list.
+            'icd_codes' => Diagnoses::fromIcdCodes(LegacyValue::string($row->get('ICDCodes'))) ?: null,
         ], fn ($v) => $v !== null);
 
         $admission = Admission::withTrashed()->where('legacy_id', $id)->first()

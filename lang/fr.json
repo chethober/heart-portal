@@ -483,5 +483,8 @@
     "Form access": "Accès aux formulaires",
     "View": "Voir",
     "Record": "Saisir",
-    "Save access": "Enregistrer l'accès"
+    "Save access": "Enregistrer l'accès",
+    "Final diagnosis guide": "Guide du diagnostic final",
+    "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Choisissez le diagnostic final sur le résumé de sortie et sur les admissions dans cette liste, qui indique le code CIM-10. Si le diagnostic n'y figure pas, écrivez-le tel que l'énonce le médecin traitant.",
+    "Final diagnosis (ICD-10)": "Diagnostic final (CIM-10)"
 }

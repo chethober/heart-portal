@@ -120,6 +120,27 @@
                 </ul>
             </section>
 
+            <section id="diagnoses">
+                <h2>{{ __('Final diagnosis guide') }}</h2>
+                <p class="mt-4">{{ __('Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.') }}</p>
+                @foreach (App\Support\Diagnoses::groups() as $group => $entries)
+                    <h3 dir="ltr">{{ $group }}</h3>
+                    <div class="mt-2 overflow-x-auto" dir="ltr">
+                        <table class="min-w-full text-sm border border-gray-200">
+                            <tbody class="divide-y divide-gray-200">
+                                @foreach ($entries as $entry)
+                                    <tr>
+                                        <td class="p-2 font-medium">{{ $entry['label'] }}</td>
+                                        <td class="p-2 whitespace-nowrap">{{ $entry['icd10'] }}</td>
+                                        <td class="p-2" dir="auto">{{ $entry['criteria'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endforeach
+            </section>
+
             <section id="patients">
                 <h2>{{ __('Finding patients') }}</h2>
                 <p class="mt-4">{{ __('Use Patients or the quick search box with the patient\'s national ID to list all of their studies with status, a short summary and links to the full report.') }}</p>

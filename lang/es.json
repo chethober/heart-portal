@@ -483,5 +483,8 @@
     "Form access": "Acceso a formularios",
     "View": "Ver",
     "Record": "Registrar",
-    "Save access": "Guardar acceso"
+    "Save access": "Guardar acceso",
+    "Final diagnosis guide": "Guía del diagnóstico final",
+    "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "Elija el diagnóstico final en el resumen de alta y en los ingresos de esta lista, que incluye el código CIE-10. Si el diagnóstico no figura, escríbalo como lo indique el médico tratante.",
+    "Final diagnosis (ICD-10)": "Diagnóstico final (CIE-10)"
 }

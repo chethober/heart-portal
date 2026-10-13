@@ -483,5 +483,8 @@
     "Form access": "دسترسی به فرم‌ها",
     "View": "مشاهده",
     "Record": "ثبت",
-    "Save access": "ذخیره دسترسی"
+    "Save access": "ذخیره دسترسی",
+    "Final diagnosis guide": "راهنمای تشخیص نهایی",
+    "Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.": "تشخیص نهایی را در خلاصه پرونده و پذیرش از این فهرست انتخاب کنید که کد ICD-10 آن را دارد. اگر تشخیص در فهرست نیست، آن را طبق نظر پزشک معالج بنویسید.",
+    "Final diagnosis (ICD-10)": "تشخیص نهایی (ICD-10)"
 }

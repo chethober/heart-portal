@@ -131,8 +131,11 @@
                             @php $previousGroup = $field['group'] ?? null; @endphp
 
                             <div class="field" @if ($visible($field)) x-show="{{ $visible($field) }}" x-cloak @endif
-                                 @if ($field['type'] === 'multiline') style="flex: 1 1 100%" @endif>
-                                @if ($field['type'] === 'boolean')
+                                 @if (in_array($field['type'], ['multiline', 'diagnoses'], true)) style="flex: 1 1 100%" @endif>
+                                @if ($field['type'] === 'diagnoses')
+                                    <label>{{ $field['label'] }}</label>
+                                    @include('clinical.partials.diagnosis-picker', ['name' => $name, 'selected' => old($name, $values[$name] ?? [])])
+                                @elseif ($field['type'] === 'boolean')
                                     <label style="display:flex;align-items:center;gap:8px;margin-top:22px">
                                         <input type="checkbox" name="{{ $name }}" value="1" @checked((bool) $value($name))
                                                @if ($watched->has($name)) x-on:change="v['{{ $name }}'] = $event.target.checked ? '1' : ''" @endif>
@@ -286,7 +289,9 @@
                 values() {
                     const data = {};
                     new FormData(this.form).forEach((value, key) => {
-                        if (! ['_token', '_method', 'amendment_reason'].includes(key)) data[key] = value;
+                        if (['_token', '_method', 'amendment_reason'].includes(key)) return;
+                        // Multi-value fields (e.g. diagnoses[]) are kept as lists.
+                        if (key.endsWith('[]')) (data[key] ??= []).push(value); else data[key] = value;
                     });
                     return data;
                 },
@@ -337,6 +342,11 @@
                 fill(data) {
                     Array.from(this.form.elements).forEach((el) => {
                         if (! el.name || ['_token', '_method', 'amendment_reason'].includes(el.name) || el.type === 'button' || el.type === 'submit') return;
+                        if (el.type === 'checkbox' && el.name.endsWith('[]')) {
+                            el.checked = (data[el.name] || []).includes(el.value);
+                            el.dispatchEvent(new Event('change'));
+                            return;
+                        }
                         if (el.type === 'checkbox') { el.checked = !! data[el.name]; return; }
                         if (el.tagName === 'SELECT' && el.name === 'admission_id') { el.dataset.selected = data[el.name] || ''; }
                         el.value = data[el.name] ?? '';
