@@ -14,12 +14,54 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property string $national_id
  * @property string|null $phone_number
+ * @property string|null $father_name
+ * @property string|null $nationality
+ * @property string|null $nationality_other
+ * @property int|null $marital_status
+ * @property string|null $occupation
+ * @property string|null $home_phone
+ * @property string|null $emergency_phone
+ * @property string|null $email
+ * @property string|null $address
  */
-#[Fillable(['hospital_id', 'national_id', 'first_name', 'last_name', 'dob', 'gender', 'phone_number'])]
+#[Fillable([
+    'hospital_id', 'national_id', 'first_name', 'last_name', 'dob', 'gender', 'phone_number',
+    'father_name', 'nationality', 'nationality_other', 'marital_status', 'occupation',
+    'home_phone', 'emergency_phone', 'email', 'address',
+])]
 class Patient extends Model
 {
     /** @use HasFactory<PatientFactory> */
     use BelongsToHospital, HasFactory, SoftDeletes;
+
+    /**
+     * Heart's nationality codes (99999: another, named in nationality_other; PHP makes that key an int).
+     *
+     * @return array<int|string, string>
+     */
+    public static function nationalities(): array
+    {
+        return ['ir' => __('Iranian'), 'af' => __('Afghan'), 'iq' => __('Iraqi'), '99999' => __('Other nationality')];
+    }
+
+    /**
+     * Heart's marital status codes.
+     *
+     * @return array<int, string>
+     */
+    public static function maritalStatuses(): array
+    {
+        return [1 => __('Single'), 2 => __('Married'), 3 => __('Widowed or divorced'), 4 => __('Without a guardian'), 9 => __('Unknown')];
+    }
+
+    public function nationalityLabel(): ?string
+    {
+        if ($this->nationality === '99999') {
+            return $this->nationality_other ?: __('Other nationality');
+        }
+
+        return $this->nationality ? (self::nationalities()[$this->nationality] ?? $this->nationality) : null;
+    }
 
     protected static function booted(): void
     {
@@ -35,6 +77,11 @@ class Patient extends Model
         return [
             'national_id' => 'encrypted',
             'phone_number' => 'encrypted',
+            'home_phone' => 'encrypted',
+            'emergency_phone' => 'encrypted',
+            'email' => 'encrypted',
+            'address' => 'encrypted',
+            'marital_status' => 'integer',
         ];
     }
 

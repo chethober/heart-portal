@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\Clinical\AdmissionController;
 use App\Http\Controllers\Clinical\DoctorController;
 use App\Http\Controllers\Clinical\EchoStudyController;
 use App\Http\Controllers\Clinical\PatientController;
+use App\Http\Controllers\Clinical\PatientRecordController;
 use App\Http\Controllers\Clinical\ProcedureStudyController;
+use App\Http\Controllers\Clinical\WardController;
+use App\Http\Controllers\Clinical\WardPatientsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HospitalPendingController;
 use App\Http\Controllers\LocaleController;
@@ -71,6 +75,29 @@ Route::prefix('dashboard')->group(function () {
                 Route::get('/procedures/{procedure}/{procedureStudy}/edit', [ProcedureStudyController::class, 'edit'])->name('procedures.edit');
                 Route::put('/procedures/{procedure}/{procedureStudy}', [ProcedureStudyController::class, 'update'])->name('procedures.update');
                 Route::post('/procedures/{procedure}/{procedureStudy}/finalize', [ProcedureStudyController::class, 'finalize'])->name('procedures.finalize');
+            });
+
+            // Heart's patient record, admissions, wards and ward patient list.
+            Route::middleware('permission:patients.view')->group(function () {
+                Route::get('/ward-patients', WardPatientsController::class)->name('ward-patients');
+                Route::get('/patients/{patient}', [PatientRecordController::class, 'show'])->whereNumber('patient')->name('patients.show');
+                Route::get('/patients/{patient}/admissions/{admission}', [AdmissionController::class, 'show'])->whereNumber(['patient', 'admission'])->scopeBindings()->name('admissions.show');
+            });
+            Route::middleware('permission:studies.edit')->whereNumber(['patient', 'admission'])->group(function () {
+                Route::get('/patients/{patient}/edit', [PatientRecordController::class, 'edit'])->name('patients.edit');
+                Route::put('/patients/{patient}', [PatientRecordController::class, 'update'])->name('patients.update');
+                Route::get('/patients/{patient}/admissions/create', [AdmissionController::class, 'create'])->name('admissions.create');
+                Route::post('/patients/{patient}/admissions', [AdmissionController::class, 'store'])->name('admissions.store');
+                Route::scopeBindings()->group(function () {
+                    Route::get('/patients/{patient}/admissions/{admission}/edit', [AdmissionController::class, 'edit'])->name('admissions.edit');
+                    Route::put('/patients/{patient}/admissions/{admission}', [AdmissionController::class, 'update'])->name('admissions.update');
+                    Route::post('/patients/{patient}/admissions/{admission}/discharge', [AdmissionController::class, 'discharge'])->name('admissions.discharge');
+                });
+            });
+            Route::middleware('permission:hospital.settings')->prefix('wards')->name('wards.')->group(function () {
+                Route::get('/', [WardController::class, 'index'])->name('index');
+                Route::post('/', [WardController::class, 'store'])->name('store');
+                Route::patch('/{ward}', [WardController::class, 'update'])->whereNumber('ward')->name('update');
             });
 
             Route::middleware('permission:staff.manage')->prefix('staff')->name('staff.')->group(function () {

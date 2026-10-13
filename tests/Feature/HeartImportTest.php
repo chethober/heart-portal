@@ -122,6 +122,9 @@ test('heart patients, admissions and studies are imported into the chosen hospit
     $admission = Admission::where('legacy_id', 1)->sole();
     expect($admission->patient_id)->toBe($ali->id)
         ->and($admission->ward)->toBe('CCU')
+        // Linked to the hospital's ward of that name, created when missing.
+        ->and($admission->wardRecord?->name)->toBe('CCU')
+        ->and($admission->wardRecord?->hospital_id)->toBe($this->hospital->id)
         ->and($admission->admitted_on)->toBe('1405/07/01')
         ->and($admission->discharged_on)->toBe('1405/07/05')
         ->and($admission->his_id)->toBe('5001');
