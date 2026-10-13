@@ -99,8 +99,8 @@ class EchoStudy extends Model
      */
     public function toFormArray(): array
     {
-        $values = collect($this->toReportArray())
-            ->only([...config('echo.patient_fields'), ...config('echo.meta_fields'), ...array_keys(config('echo.fields'))])
+        $values = collect([...$this->toReportArray(), 'admission_id' => $this->admission_id])
+            ->only([...config('echo.patient_fields'), ...config('echo.meta_fields'), 'admission_id', ...array_keys(config('echo.fields'))])
             ->map(fn ($value) => match (true) {
                 $value === true => '1',
                 $value === false, $value === null => '',

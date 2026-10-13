@@ -28,24 +28,27 @@ final class NavigationLinks
 
         $links = [];
 
-        if ($user->can('studies.create')) {
+        $echo = Forms::allows($user, 'echo', 'create');
+        $procedures = Forms::procedures($user, 'create');
+        if ($echo || $procedures !== []) {
             // The dashboard home is the echo form; the other forms come from the heart system.
             $links[] = [
-                ...self::link(__('New Study'), ['dashboard', 'studies.create', 'procedures.create']),
+                ...self::link(__('New Study'), [$echo ? 'dashboard' : 'procedures.create', 'studies.create', 'procedures.create'], routeParameters: $echo ? [] : [$procedures[0]]),
                 'children' => [
-                    ['label' => __('Echocardiography'), 'url' => route('studies.create'), 'active' => request()->routeIs('dashboard', 'studies.create')],
+                    ...($echo ? [['label' => __('Echocardiography'), 'url' => route('studies.create'), 'active' => request()->routeIs('dashboard', 'studies.create')]] : []),
                     ...array_map(fn (string $key) => [
                         'label' => __(Procedures::label($key)),
                         'url' => route('procedures.create', $key),
                         'active' => request()->routeIs('procedures.create') && request()->route('procedure') === $key,
-                    ], array_keys(Procedures::MODELS)),
+                    ], $procedures),
                 ],
             ];
         }
         if ($user->can('patients.view')) {
-            $drafts = EchoStudy::where('status', StudyStatus::Draft)->count();
-            foreach (Procedures::MODELS as $model) {
-                $drafts += $model::where('status', StudyStatus::Draft)->count();
+            // Drafts of the forms this member may open.
+            $drafts = Forms::allows($user, 'echo', 'view') ? EchoStudy::where('status', StudyStatus::Draft)->count() : 0;
+            foreach (Forms::procedures($user, 'view') as $key) {
+                $drafts += Procedures::model($key)::where('status', StudyStatus::Draft)->count();
             }
             $links[] = self::link(__('Worklist'), 'worklist', $drafts);
             $links[] = self::link(__('Patients'), ['patients.index', 'patients.show', 'patients.edit', 'admissions.*']);
@@ -68,15 +71,16 @@ final class NavigationLinks
 
     /**
      * @param  string|list<string>  $routes  The first route is the link target; any of them marks it active.
+     * @param  array<int|string, mixed>  $routeParameters  For the link target.
      * @return array{label: string, url: string, active: bool, count: int|null}
      */
-    private static function link(string $label, string|array $routes, ?int $count = null): array
+    private static function link(string $label, string|array $routes, ?int $count = null, array $routeParameters = []): array
     {
         $routes = (array) $routes;
 
         return [
             'label' => $label,
-            'url' => route(str_replace('.*', '.index', $routes[0])),
+            'url' => route(str_replace('.*', '.index', $routes[0]), $routeParameters),
             'active' => request()->routeIs(...$routes),
             'count' => $count ?: null,
         ];

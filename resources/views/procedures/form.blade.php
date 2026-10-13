@@ -1,8 +1,11 @@
 @php
     /**
-     * Create or edit a procedure study, built from config/procedures/{procedure}.php. Like the
-     * echo form it stays in English whatever the interface language. Fields with "show_if" are
-     * shown only while the field they depend on has that value; the server clears them otherwise.
+     * Create or edit a procedure study, built from config/procedures/{procedure}.php. Laid out like
+     * the echo form (studies/form.blade.php) and styled by its stylesheet, which is scoped to
+     * #echo-app: patient details, a section bar showing which sections are filled in, one section
+     * at a time, and a live report preview beside the form. Like the echo form it stays in its
+     * clinical language whatever the interface language. Fields with "show_if" are shown only while
+     * the field they depend on has that value; the server clears them otherwise.
      *
      * @var string $procedure
      * @var \App\Models\ProcedureStudy|null $study
@@ -10,9 +13,10 @@
      */
     use App\Support\Procedures;
 
-    $sections = Procedures::sections($procedure);
+    $sections = array_values(Procedures::sections($procedure));
     $fields = Procedures::fields($procedure);
     $value = fn (string $name) => old($name, $values[$name] ?? null);
+    $rtl = Procedures::dir($procedure) === 'rtl';
 
     // Only the fields others depend on need to be tracked in the browser.
     $watched = collect($fields)->pluck('show_if.0')->filter()->unique()
@@ -20,103 +24,128 @@
     $visible = fn (array $field) => isset($field['show_if']) ? "v['{$field['show_if'][0]}'] === '{$field['show_if'][1]}'" : null;
     $model = fn (string $name) => $watched->has($name) ? "x-model=\"v['{$name}']\"" : '';
 
-    $input = 'mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+    // The section to open first: the first with an error, else the first.
+    $firstError = collect($sections)->search(fn (array $section) => collect($section['fields'])->keys()->contains(fn ($name) => $errors->has($name)));
+    $active = $firstError === false ? 0 : $firstError;
     $title = Procedures::label($procedure);
+    $amending = $study?->isSigned() ?? false;
 @endphp
 
 <x-dashboard-layout :title="$title">
-    <form method="POST" action="{{ $study ? route('procedures.update', [$procedure, $study]) : route('procedures.store', $procedure) }}"
-          dir="{{ Procedures::dir($procedure) }}" lang="{{ Procedures::dir($procedure) === 'rtl' ? 'fa' : 'en' }}" x-data="{ v: @js($watched) }" class="space-y-4">
-        @csrf
-        @if ($study)
-            @method('PUT')
-        @endif
+    <link rel="stylesheet" href="/echo-form/persianDatepicker/css/persianDatepicker-default.css">
+    <script src="/echo-form/persianDatepicker/js/jquery-1.10.1.min.js"></script>
+    <script src="/echo-form/persianDatepicker/js/persianDatepicker.min.js"></script>
+    @include('studies.partials.form-styles')
 
-        <div class="flex flex-wrap items-center gap-3">
-            <h2 class="text-xl font-semibold">{{ $title }}</h2>
+    <div id="echo-app" dir="{{ $rtl ? 'rtl' : 'ltr' }}" lang="{{ $rtl ? 'fa' : 'en' }}"
+         x-data="procedureForm({
+             watched: @js($watched),
+             section: {{ $active }},
+             previewUrl: @js(route('procedures.preview', $procedure)),
+             // Unsaved drafts are kept per patient tab in this browser, like the echo form's.
+             storageKey: @js($study ? null : 'procedureForm_patients_v1:'.$procedure.':'.auth()->user()->hospital_id.':'.auth()->id()),
+             // A form arriving with values (a patient link, or failed validation) opens them in a new tab.
+             arrivedWithValues: @js(! $study && (filled($value('nationalID')) || $errors->any())),
+         })">
+    <div id="app-layout" :class="{ 'preview-active': preview }">
+    <div id="form-container">
+        @unless ($study)
+            {{-- Multi-patient tabs: one unsaved draft per patient, saved in this browser as you type. --}}
+            <div class="patient-bar-wrapper">
+                <div id="patientTabsContainer" class="patient-tabs-container">
+                    <template x-for="(tab, index) in tabs" :key="tab.id">
+                        <div class="patient-tab" :class="{ 'active': tab.id === activeTab }">
+                            <span class="patient-tab-title" x-text="tabTitle(tab, index)" x-on:click="switchTab(tab.id)"></span>
+                            <button type="button" class="patient-tab-close" title="Remove patient draft" x-show="tabs.length > 1" x-on:click.stop="removeTab(tab.id)">&times;</button>
+                        </div>
+                    </template>
+                </div>
+                <button type="button" class="add-patient-btn" x-on:click="addTab()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>New Patient</span>
+                </button>
+            </div>
+        @endunless
+        <form method="POST" id="procedureForm" x-ref="form" action="{{ $study ? route('procedures.update', [$procedure, $study]) : route('procedures.store', $procedure) }}"
+              autocomplete="off" x-on:input.debounce.400ms="refresh(); autosave()" x-on:change="refresh(); autosave(); mark()" x-on:submit="submitted()">
+            @csrf
             @if ($study)
-                <span class="text-sm text-gray-500">{{ $study->isSigned() ? 'Amending signed report' : 'Editing draft' }}</span>
-                <span class="ms-auto">@include('dashboard.status-badge', ['status' => $study->status])</span>
+                <input type="hidden" name="_method" value="PUT" x-ref="method">
             @endif
-        </div>
 
-        @if ($errors->any())
-            <div class="rounded-md bg-red-50 p-4 text-sm text-red-800" role="alert">
-                Please correct the {{ $errors->count() }} highlighted {{ Str::plural('field', $errors->count()) }}.
-                <ul class="mt-1 list-disc ps-5">
-                    @foreach ($errors->all() as $message)
-                        <li>{{ $message }}</li>
+            @if ($study)
+                <div class="edit-banner {{ $amending ? 'is-amending' : '' }}">
+                    <div class="edit-banner-head">
+                        <p class="edit-banner-title">
+                            {{ $amending ? 'Amending signed report' : 'Editing draft' }} #{{ $study->id }}
+                            — {{ $study->patient->first_name.' '.$study->patient->last_name }}
+                        </p>
+                        <a href="{{ route('procedures.show', [$procedure, $study]) }}" class="ef-btn ef-btn-secondary">{{ __('Back to report') }}</a>
+                    </div>
+                    @if ($amending)
+                        <div class="field">
+                            <label for="amendment_reason">Reason for amendment <span class="req">*</span></label>
+                            <textarea id="amendment_reason" name="amendment_reason" required style="min-height:40px">{{ old('amendment_reason') }}</textarea>
+                            @error('amendment_reason') <span class="small" style="color:#dc2626">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="edit-banner is-amending" role="alert">
+                    <p class="edit-banner-title">Please correct the {{ $errors->count() }} highlighted {{ Str::plural('field', $errors->count()) }}.</p>
+                </div>
+            @endif
+
+            <div class="form-section-header" style="border:0;margin-bottom:4px">{{ $title }}</div>
+            <div class="row">
+                @include('clinical.partials.patient-fields', ['values' => $values, 'admissions' => $admissions ?? collect(), 'admission' => $value('admission_id') ?? request('admission')])
+            </div>
+
+            {{-- One chip per section, green once something in it is filled in, red with an error. --}}
+            <div class="section-nav-wrapper">
+                <div class="section-nav-container" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
+                    @foreach ($sections as $index => $section)
+                        @php $hasErrors = collect($section['fields'])->keys()->contains(fn ($name) => $errors->has($name)); @endphp
+                        <button type="button" class="section-nav-btn" title="{{ $section['title'] }}"
+                                :class="{ 'active': section === {{ $index }}, 'status-filled': filled[{{ $index }}] && ! {{ $hasErrors ? 'true' : 'false' }}, 'status-unfilled': {{ $hasErrors ? 'true' : 'false' }} }"
+                                x-on:click="section = {{ $index }}">
+                            <span class="btn-abbr">{{ Str::limit($section['title'], 28) }}</span>
+                        </button>
                     @endforeach
-                </ul>
+                </div>
             </div>
-        @endif
 
-        <fieldset class="rounded-lg border border-gray-200 p-4">
-            <legend class="px-1 font-semibold">Patient</legend>
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach (['nationalID' => 'National ID', 'first_name' => 'First name', 'last_name' => 'Last name', 'dob' => 'Date of birth (YYYY/MM/DD)', 'phone_number' => 'Phone number'] as $name => $label)
-                    <label class="block text-sm">
-                        <span class="font-medium text-gray-700">{{ $label }}</span>
-                        <input type="text" name="{{ $name }}" value="{{ $value($name) }}" class="{{ $input }}" @required(in_array($name, ['nationalID', 'first_name', 'last_name']))>
-                        @error($name) <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                    </label>
-                @endforeach
-                <label class="block text-sm">
-                    <span class="font-medium text-gray-700">Gender</span>
-                    <select name="gender" class="{{ $input }}">
-                        <option value=""></option>
-                        @foreach (['Male', 'Female'] as $gender)
-                            <option value="{{ $gender }}" @selected($value('gender') === $gender)>{{ $gender }}</option>
-                        @endforeach
-                    </select>
-                </label>
-            </div>
-            @php $admission = $value('admission_id') ?? request('admission'); @endphp
-            @if (($admissions ?? collect())->isNotEmpty())
-                {{-- The patient's admissions (heart links each form to an admit record). --}}
-                <label class="mt-4 block text-sm sm:w-1/2">
-                    <span class="font-medium text-gray-700">Admission</span>
-                    <select name="admission_id" class="{{ $input }}">
-                        <option value="">Not linked to an admission</option>
-                        @foreach ($admissions as $option)
-                            <option value="{{ $option->id }}" @selected((string) $admission === (string) $option->id)>{{ $option->summary() }}{{ $option->isDischarged() ? ' (discharged '.$option->discharged_on.')' : '' }}</option>
-                        @endforeach
-                    </select>
-                </label>
-            @elseif ($admission)
-                <input type="hidden" name="admission_id" value="{{ $admission }}">
-            @endif
-            @error('admission_id') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
-        </fieldset>
+            @foreach ($sections as $index => $section)
+                <div id="sec-{{ $index }}" class="form-section {{ $index === $active ? 'active' : '' }}" data-section="{{ $index }}" :class="{ 'active': section === {{ $index }} }">
+                    <div class="form-section-header">{{ $section['title'] }}</div>
+                    <div class="row">
+                        @foreach ($section['fields'] as $name => $field)
+                            @if (($field['group'] ?? null) !== null && ($field['group'] !== ($previousGroup ?? null)))
+                                <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $field['group'] }}</div>
+                            @endif
+                            @php $previousGroup = $field['group'] ?? null; @endphp
 
-        @foreach ($sections as $section)
-            @php
-                $hasValues = collect($section['fields'])->keys()->contains(fn ($name) => filled($value($name)));
-                $hasErrors = collect($section['fields'])->keys()->contains(fn ($name) => $errors->has($name));
-            @endphp
-            <details class="rounded-lg border border-gray-200" @if ($loop->index < 4 || $hasValues || $hasErrors) open @endif>
-                <summary class="cursor-pointer select-none px-4 py-2 font-semibold">{{ $section['title'] }}</summary>
-                <div class="grid gap-4 border-t border-gray-100 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($section['fields'] as $name => $field)
-                        @if (($field['group'] ?? null) !== null && ($field['group'] !== ($previousGroup ?? null)))
-                            <h4 class="col-span-full mt-2 text-sm font-semibold uppercase tracking-wide text-gray-500">{{ $field['group'] }}</h4>
-                        @endif
-                        @php $previousGroup = $field['group'] ?? null; @endphp
-
-                        <div @if ($visible($field)) x-show="{{ $visible($field) }}" x-cloak @endif
-                             @class(['col-span-full' => $field['type'] === 'multiline'])>
-                            @if ($field['type'] === 'boolean')
-                                <label class="inline-flex items-center gap-2 pt-6 text-sm">
-                                    <input type="checkbox" name="{{ $name }}" value="1" @checked((bool) $value($name))
-                                           @if ($watched->has($name)) x-on:change="v['{{ $name }}'] = $event.target.checked ? '1' : ''" @endif class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                    <span class="font-medium text-gray-700">{{ $field['label'] }}</span>
-                                </label>
-                            @else
-                                <label class="block text-sm">
-                                    <span class="font-medium text-gray-700">{{ $field['label'] }}</span>
+                            <div class="field" @if ($visible($field)) x-show="{{ $visible($field) }}" x-cloak @endif
+                                 @if (in_array($field['type'], ['multiline', 'diagnoses'], true)) style="flex: 1 1 100%" @endif>
+                                @if ($field['type'] === 'diagnoses')
+                                    <label>{{ $field['label'] }}</label>
+                                    @include('clinical.partials.diagnosis-picker', ['name' => $name, 'selected' => old($name, $values[$name] ?? [])])
+                                @elseif ($field['type'] === 'boolean')
+                                    <label style="display:flex;align-items:center;gap:8px;margin-top:22px">
+                                        <input type="checkbox" name="{{ $name }}" value="1" @checked((bool) $value($name))
+                                               @if ($watched->has($name)) x-on:change="v['{{ $name }}'] = $event.target.checked ? '1' : ''" @endif>
+                                        <span>{{ $field['label'] }}</span>
+                                    </label>
+                                @else
+                                    <label for="f-{{ $name }}">{{ $field['label'] }}</label>
                                     @switch($field['type'])
                                         @case('choice')
-                                            <select name="{{ $name }}" class="{{ $input }}" {!! $model($name) !!}>
+                                            <select id="f-{{ $name }}" name="{{ $name }}" {!! $model($name) !!}>
                                                 <option value=""></option>
                                                 @foreach ($field['options'] as $code => $label)
                                                     <option value="{{ $code }}" @selected((string) $value($name) === (string) $code)>{{ $label }}</option>
@@ -124,44 +153,254 @@
                                             </select>
                                             @break
                                         @case('multiline')
-                                            <textarea name="{{ $name }}" rows="3" class="{{ $input }}">{{ $value($name) }}</textarea>
+                                            <textarea id="f-{{ $name }}" name="{{ $name }}" style="min-height: 60px">{{ $value($name) }}</textarea>
                                             @break
                                         @case('number')
-                                            <input type="number" step="any" name="{{ $name }}" value="{{ $value($name) }}" class="{{ $input }}" {!! $model($name) !!}>
+                                            <input id="f-{{ $name }}" type="number" step="any" name="{{ $name }}" value="{{ $value($name) }}" {!! $model($name) !!}>
                                             @break
                                         @case('date')
-                                            <input type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="1405/01/01" class="{{ $input }}" {!! $model($name) !!}>
+                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="1405/01/01" class="no-voice" data-jalali {!! $model($name) !!}>
                                             @break
                                         @case('time')
-                                            <input type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="HH:MM" class="{{ $input }}" {!! $model($name) !!}>
+                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="HH:MM" {!! $model($name) !!}>
                                             @break
                                         @default
-                                            <input type="text" name="{{ $name }}" value="{{ $value($name) }}" class="{{ $input }}" {!! $model($name) !!}>
+                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" {!! $model($name) !!}>
                                     @endswitch
-                                </label>
-                            @endif
-                            @error($name) <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-                        </div>
-                    @endforeach
+                                @endif
+                                @error($name) <span class="small" style="color:#dc2626">{{ $message }}</span> @enderror
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-            </details>
-        @endforeach
+            @endforeach
 
-        @if ($study?->isSigned())
-            <label class="block text-sm">
-                <span class="font-medium text-gray-700">Reason for amendment</span>
-                <textarea name="amendment_reason" rows="2" required class="{{ $input }}">{{ old('amendment_reason') }}</textarea>
-                @error('amendment_reason') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
-            </label>
-        @endif
+            <div class="controls">
+                <button type="button" class="ef-btn ef-btn-secondary preview-toggle" :class="{ 'active': preview }" :aria-pressed="preview" x-on:click="toggle()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>Live Preview</span>
+                </button>
+                @if ($study)
+                    <a href="{{ route('procedures.show', [$procedure, $study]) }}" class="ef-btn ef-btn-secondary">Cancel</a>
+                @else
+                    <button type="button" class="ef-btn ef-btn-secondary" x-on:click="clearForm()">Reset</button>
+                    <button type="button" class="ef-btn ef-btn-secondary" x-on:click="autosave(true)" x-text="savedFlash ? 'Saved' : 'Save Locally'">Save Locally</button>
+                @endif
+                <button type="submit" class="ef-btn ef-btn-primary">{{ $amending ? 'Save Amendment' : ($study ? 'Save Changes' : 'Save Draft') }}</button>
+            </div>
+        </form>
+    </div>
 
-        <div class="flex gap-3">
-            <button type="submit" class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700">
-                {{ $study?->isSigned() ? 'Amend and re-sign' : 'Save draft' }}
-            </button>
-            @if ($study)
-                <a href="{{ route('procedures.show', [$procedure, $study]) }}" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm hover:bg-gray-50">Cancel</a>
-            @endif
+    <div id="preview-container" x-show="preview" x-cloak>
+        <div class="preview-header no-print">
+            <div class="preview-title-group">
+                <svg class="preview-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span class="preview-title">Live Report Preview</span>
+                <span class="preview-status-pill"><span class="preview-status-dot"></span> Live Sync</span>
+            </div>
+            <div class="preview-actions">
+                <button type="button" class="preview-btn" title="Force Refresh" x-on:click="refresh(true)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                </button>
+                <button type="button" class="preview-btn" title="Open Report in New Tab" x-on:click="submitPreview('_blank')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                    </svg>
+                </button>
+                <button type="button" class="preview-btn close-btn" title="Close Preview" x-on:click="toggle(false)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
-    </form>
+        <iframe id="preview-iframe" name="procedure-preview" title="Live Report Preview"></iframe>
+    </div>
+    </div>
+    </div>
+
+    @include('clinical.partials.patient-lookup')
+    <script>
+        /**
+         * The procedure form's behaviour, matching the echo form: show_if values (v), the open
+         * section and which sections are filled in, multi-patient tabs whose drafts are saved in
+         * this browser as you type (new studies only), and the live preview, which posts the form
+         * to the preview route into the iframe without the PUT override an edit form carries.
+         */
+        function procedureForm(options) {
+            return {
+                v: options.watched,
+                section: options.section,
+                filled: [],
+                preview: false,
+                tabs: [],
+                activeTab: null,
+                savedFlash: false,
+                init() {
+                    this.loadTabs();
+                    this.mark();
+                    this.datepickers();
+                    try { this.toggle(localStorage.getItem('procedureForm_live_preview') === 'true'); } catch (e) {}
+                },
+                get form() { return this.$refs.form; },
+
+                // --- Multi-patient drafts -------------------------------------------------
+                store() {
+                    try { return JSON.parse(localStorage.getItem(options.storageKey)) || { tabs: [], active: null }; } catch (e) { return { tabs: [], active: null }; }
+                },
+                persist() {
+                    try { localStorage.setItem(options.storageKey, JSON.stringify({ tabs: this.tabs, active: this.activeTab })); } catch (e) {}
+                },
+                newTab(data = {}) {
+                    return { id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), data };
+                },
+                loadTabs() {
+                    if (! options.storageKey) return;
+                    const saved = this.store();
+                    this.tabs = saved.tabs.length ? saved.tabs : [this.newTab()];
+                    this.activeTab = this.tabs.some((tab) => tab.id === saved.active) ? saved.active : this.tabs[0].id;
+
+                    if (options.arrivedWithValues) {
+                        const current = this.tabs.find((tab) => tab.id === this.activeTab);
+                        if (Object.values(current.data).some((value) => value !== '')) {
+                            const tab = this.newTab();
+                            this.tabs.push(tab);
+                            this.activeTab = tab.id;
+                        }
+                        this.autosave();
+                    } else {
+                        this.fill(this.tabs.find((tab) => tab.id === this.activeTab).data);
+                    }
+                    this.persist();
+                },
+                tabTitle(tab, index) {
+                    const name = [tab.data.first_name, tab.data.last_name].filter(Boolean).join(' ');
+                    return name || 'Patient ' + (index + 1);
+                },
+                values() {
+                    const data = {};
+                    new FormData(this.form).forEach((value, key) => {
+                        if (['_token', '_method', 'amendment_reason'].includes(key)) return;
+                        // Multi-value fields (e.g. diagnoses[]) are kept as lists.
+                        if (key.endsWith('[]')) (data[key] ??= []).push(value); else data[key] = value;
+                    });
+                    return data;
+                },
+                autosave(flash = false) {
+                    if (! options.storageKey) return;
+                    const tab = this.tabs.find((tab) => tab.id === this.activeTab);
+                    if (! tab) return;
+                    tab.data = this.values();
+                    this.persist();
+                    if (flash === true) { this.savedFlash = true; setTimeout(() => this.savedFlash = false, 900); }
+                },
+                switchTab(id) {
+                    if (id === this.activeTab) return;
+                    this.autosave();
+                    this.activeTab = id;
+                    this.fill(this.tabs.find((tab) => tab.id === id).data);
+                    this.persist();
+                },
+                addTab() {
+                    this.autosave();
+                    const tab = this.newTab();
+                    this.tabs.push(tab);
+                    this.activeTab = tab.id;
+                    this.fill({});
+                    this.persist();
+                },
+                removeTab(id) {
+                    if (this.tabs.length <= 1) return;
+                    this.tabs = this.tabs.filter((tab) => tab.id !== id);
+                    if (this.activeTab === id) {
+                        this.activeTab = this.tabs[0].id;
+                        this.fill(this.tabs[0].data);
+                    }
+                    this.persist();
+                },
+                clearForm() {
+                    this.fill({});
+                    this.autosave();
+                },
+                // A saved study's draft is done with: the next visit starts from the remaining tabs.
+                submitted() {
+                    if (! options.storageKey) return;
+                    this.tabs = this.tabs.filter((tab) => tab.id !== this.activeTab);
+                    if (! this.tabs.length) this.tabs = [this.newTab()];
+                    this.activeTab = this.tabs[0].id;
+                    this.persist();
+                },
+                fill(data) {
+                    Array.from(this.form.elements).forEach((el) => {
+                        if (! el.name || ['_token', '_method', 'amendment_reason'].includes(el.name) || el.type === 'button' || el.type === 'submit') return;
+                        if (el.type === 'checkbox' && el.name.endsWith('[]')) {
+                            el.checked = (data[el.name] || []).includes(el.value);
+                            el.dispatchEvent(new Event('change'));
+                            return;
+                        }
+                        if (el.type === 'checkbox') { el.checked = !! data[el.name]; return; }
+                        if (el.tagName === 'SELECT' && el.name === 'admission_id') { el.dataset.selected = data[el.name] || ''; }
+                        el.value = data[el.name] ?? '';
+                    });
+                    Object.keys(this.v).forEach((name) => {
+                        const el = this.form.elements[name];
+                        this.v[name] = el ? (el.type === 'checkbox' ? (el.checked ? '1' : '') : el.value) : '';
+                    });
+                    this.section = 0;
+                    this.mark();
+                    this.refresh();
+                    window.patientLookup?.check(false, data.admission_id);
+                },
+
+                // --- Sections, dates and preview ------------------------------------------
+                mark() {
+                    this.filled = Array.from(this.form.querySelectorAll('[data-section]')).map((el) =>
+                        Array.from(el.querySelectorAll('input, select, textarea')).some((input) =>
+                            input.type === 'checkbox' ? input.checked : input.value.trim() !== ''));
+                },
+                datepickers() {
+                    if (! window.jQuery || ! jQuery.fn.persianDatepicker) return;
+                    jQuery('#dob, [data-jalali]').each(function () {
+                        const el = this;
+                        jQuery(el).persianDatepicker({
+                            observer: true,
+                            format: 'YYYY/MM/DD',
+                            initialValue: false,
+                            onSelect: () => ['input', 'change'].forEach((type) => el.dispatchEvent(new Event(type, { bubbles: true }))),
+                        });
+                    });
+                },
+                toggle(on = ! this.preview) {
+                    this.preview = on;
+                    try { localStorage.setItem('procedureForm_live_preview', on ? 'true' : 'false'); } catch (e) {}
+                    if (on) this.$nextTick(() => this.refresh(true));
+                },
+                refresh(force = false) {
+                    if (this.preview || force === true) this.submitPreview('procedure-preview');
+                },
+                submitPreview(target) {
+                    const form = this.form;
+                    const action = form.action;
+                    if (this.$refs.method) this.$refs.method.disabled = true;
+                    form.action = options.previewUrl;
+                    form.target = target;
+                    form.noValidate = true;
+                    form.submit();
+                    form.action = action;
+                    form.target = '';
+                    form.noValidate = false;
+                    if (this.$refs.method) this.$refs.method.disabled = false;
+                },
+            };
+        }
+    </script>
 </x-dashboard-layout>

@@ -29,7 +29,7 @@ class CreatePlatformAdmin extends Command
 
         $user = User::create(['name' => $name, 'email' => strtolower($email), 'password' => $password]);
         $user->forceFill(['email_verified_at' => now()])->save();
-        $user->assignRole(Role::PlatformAdmin->value);
+        $user->assignStaffRole(Role::PlatformAdmin);
 
         $this->components->info("Platform admin {$user->email} created.");
 

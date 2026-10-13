@@ -47,7 +47,7 @@ class SeedDemo extends Command
                 'is_active' => true,
             ]);
             $user->forceFill(['email_verified_at' => $user->email_verified_at ?? now()])->save();
-            $user->syncRoles([$role->value]);
+            $user->assignStaffRole($role);
 
             $rows[] = [$email, $password, $role->label()];
         }

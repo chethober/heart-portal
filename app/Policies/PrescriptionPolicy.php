@@ -9,7 +9,7 @@ use App\Models\User;
 /**
  * As in heart, staff who fill in the clinical forms (nurses, technicians, quality control) may
  * draft a prescription, e.g. the discharge drugs on a discharge summary, but only a doctor
- * (studies.finalize) signs it or cancels a signed one.
+ * (prescriptions.sign) signs it or cancels a signed one.
  */
 class PrescriptionPolicy
 {
@@ -20,17 +20,17 @@ class PrescriptionPolicy
 
     public function update(User $user, Prescription $prescription): bool
     {
-        return $this->sameHospital($user, $prescription) && $prescription->isDraft() && $user->can('studies.edit');
+        return $this->sameHospital($user, $prescription) && $prescription->isDraft() && $user->can('prescriptions.edit');
     }
 
     public function sign(User $user, Prescription $prescription): bool
     {
-        return $this->sameHospital($user, $prescription) && $prescription->isDraft() && $user->can('studies.finalize');
+        return $this->sameHospital($user, $prescription) && $prescription->isDraft() && $user->can('prescriptions.sign');
     }
 
     public function cancel(User $user, Prescription $prescription): bool
     {
-        return $this->sameHospital($user, $prescription) && $prescription->isSigned() && $user->can('studies.finalize');
+        return $this->sameHospital($user, $prescription) && $prescription->isSigned() && $user->can('prescriptions.sign');
     }
 
     /**
@@ -42,7 +42,7 @@ class PrescriptionPolicy
             return false;
         }
 
-        return ($prescription->created_by === $user->id && $user->can('studies.create'))
+        return ($prescription->created_by === $user->id && $user->can('prescriptions.create'))
             || $user->hasRole(Role::HospitalAdmin->value);
     }
 

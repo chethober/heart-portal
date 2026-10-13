@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            @if ($user->hospital_id && $user->can('studies.finalize'))
+            @if ($user->hospital_id && $user->can('sign-reports'))
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <div class="max-w-xl">
                         @include('profile.partials.signature-form')

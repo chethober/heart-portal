@@ -16,7 +16,7 @@ Route::get('/prescriptions/verify/{token}', PrescriptionVerificationController::
     ->name('prescriptions.verify');
 
 Route::prefix('dashboard')->middleware(['auth', 'verified', 'hospital.active', 'two-factor'])->group(function () {
-    Route::middleware('permission:studies.create')->group(function () {
+    Route::middleware('permission:prescriptions.create')->group(function () {
         Route::get('/drugs/search', [DrugController::class, 'search'])->middleware('throttle:60,1')->name('drugs.search');
         Route::get('/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
         Route::post('/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');

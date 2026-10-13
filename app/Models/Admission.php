@@ -35,11 +35,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $physician
  * @property string|null $his_id
  * @property array<string, string>|null $his_codes
+ * @property list<string>|null $icd_codes Final diagnoses (keys of config/diagnoses.php).
  * @property-read Ward|null $wardRecord
  */
 #[Fillable([
     'hospital_id', 'patient_id', 'ward_id', 'ward', 'admitted_on', 'admitted_at', 'admission_type', 'arrival_mode',
-    'referred_from', 'discharged_on', 'discharged_at', 'physician', 'his_id', 'his_codes', 'legacy_id',
+    'referred_from', 'discharged_on', 'discharged_at', 'physician', 'his_id', 'his_codes', 'icd_codes', 'legacy_id',
 ])]
 class Admission extends Model
 {
@@ -97,6 +98,7 @@ class Admission extends Model
             'admission_type' => 'integer',
             'arrival_mode' => 'integer',
             'his_codes' => 'array',
+            'icd_codes' => 'array',
         ];
     }
 

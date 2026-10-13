@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Policies\ProcedureStudyPolicy;
 use App\Support\Audit;
 use App\Support\CurrentHospital;
+use App\Support\Forms;
 use App\Support\Procedures;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -42,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
         Route::pattern('procedure', implode('|', array_keys(Procedures::MODELS)));
         Route::pattern('procedureStudy', '[0-9]+');
         Route::bind('procedureStudy', fn (string $id, RouteDefinition $route) => Procedures::model($route->parameter('procedure'))::findOrFail($id));
+
+        // Per-form permissions (App\Support\Forms): menus and shared pages need "any form" checks.
+        Gate::define('record-studies', fn (User $user) => Forms::canRecordAny($user));
+        Gate::define('sign-reports', fn (User $user) => Forms::canSignAny($user) || $user->can('prescriptions.sign'));
 
         Event::listen(function (Login $event) {
             if ($event->user instanceof User) {

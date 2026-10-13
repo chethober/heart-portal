@@ -64,6 +64,28 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasRole(Role::PlatformAdmin->value);
     }
 
+    /**
+     * Gives the member this role (replacing any other) and resets their form access to the
+     * role's defaults. Use this rather than assignRole()/syncRoles() for staff.
+     */
+    public function assignStaffRole(Role $role): void
+    {
+        $this->syncRoles([$role->value]);
+        $this->syncPermissions($role->defaultFormPermissions());
+    }
+
+    /**
+     * The form permissions this member may be granted, given their roles.
+     *
+     * @return list<string>
+     */
+    public function formCeiling(): array
+    {
+        return $this->getRoleNames()
+            ->flatMap(fn (string $name) => Role::from($name)->formCeiling())
+            ->unique()->values()->all();
+    }
+
     public function primaryRole(): ?Role
     {
         $name = $this->getRoleNames()->first();

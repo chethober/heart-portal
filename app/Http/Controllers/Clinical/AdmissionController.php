@@ -8,6 +8,7 @@ use App\Models\Admission;
 use App\Models\Patient;
 use App\Models\Ward;
 use App\Support\Audit;
+use App\Support\Forms;
 use App\Support\JalaliCalendar;
 use App\Support\Procedures;
 use Illuminate\Http\RedirectResponse;
@@ -33,20 +34,21 @@ class AdmissionController extends Controller
         return redirect()->route('admissions.show', [$patient, $admission])->with('status', __('Admission saved.'));
     }
 
-    public function show(Patient $patient, Admission $admission): View
+    public function show(Request $request, Patient $patient, Admission $admission): View
     {
         $admission->setRelation('patient', $patient)->load('wardRecord');
         Audit::record('admission.viewed', $admission);
 
+        // Only the forms this member may view (per-form permissions).
         $procedures = [];
-        foreach (Procedures::MODELS as $key => $model) {
-            $procedures[$key] = $model::where('admission_id', $admission->id)->latest()->get();
+        foreach (Forms::procedures($request->user(), 'view') as $key) {
+            $procedures[$key] = Procedures::model($key)::where('admission_id', $admission->id)->latest()->get();
         }
 
         return view('admissions.show', [
             'patient' => $patient,
             'admission' => $admission,
-            'echoStudies' => $admission->echoStudies()->with('author')->latest()->get(),
+            'echoStudies' => Forms::allows($request->user(), 'echo', 'view') ? $admission->echoStudies()->with('author')->latest()->get() : null,
             'procedures' => $procedures,
         ]);
     }

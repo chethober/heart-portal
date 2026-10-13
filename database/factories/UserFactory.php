@@ -48,7 +48,7 @@ class UserFactory extends Factory
 
     public function role(Role $role): static
     {
-        return $this->afterCreating(fn (User $user) => $user->assignRole($role->value));
+        return $this->afterCreating(fn (User $user) => $user->assignStaffRole($role));
     }
 
     public function platformAdmin(): static

@@ -213,13 +213,13 @@ test('procedure forms offer the patient\'s admissions', function () {
 
     $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/create?nationalID=0012345678&admission={$admission->id}")
         ->assertOk()
-        ->assertSee('<select name="admission_id"', false)
+        ->assertSee('<select id="admission_id" name="admission_id"', false)
         ->assertSee('<option value="'.$admission->id.'" selected>1405/07/01 · CCU', false)
         ->assertDontSee('1399/01/01');
 
     // Unknown patient: the ?admission= link is still carried.
     $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/create?admission={$admission->id}")
-        ->assertSee('<input type="hidden" name="admission_id" value="'.$admission->id.'">', false);
+        ->assertSee('<option value="'.$admission->id.'" selected>Admission #'.$admission->id.'</option>', false);
 
     $study = AngiographyStudy::create(['hospital_id' => $this->hospital->id, 'patient_id' => $this->patient->id, 'admission_id' => $admission->id]);
     $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/{$study->id}/edit")

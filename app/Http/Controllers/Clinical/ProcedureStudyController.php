@@ -9,6 +9,8 @@ use App\Models\Patient;
 use App\Models\ProcedureStudy;
 use App\Reports\ProcedureReport;
 use App\Support\Audit;
+use App\Support\Diagnoses;
+use App\Support\Forms;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +31,8 @@ class ProcedureStudyController extends Controller
      */
     public function create(Request $request, string $procedure): View
     {
+        abort_unless(Forms::allows($request->user(), $procedure, 'create'), 403);
+
         $nationalID = trim((string) $request->query('nationalID', ''));
         $patient = $nationalID !== '' ? Patient::whereNationalId($nationalID)->first() : null;
 
@@ -82,6 +86,52 @@ class ProcedureStudyController extends Controller
             // Clinical narrative for procedures that have one (app/Reports); the others list their fields.
             'narrative' => ProcedureReport::for($procedure, $report),
             'hospital' => $request->user()->hospital,
+        ]);
+    }
+
+    /**
+     * The report for unsaved form data, for the form's live preview pane. Values are filtered like
+     * the saved form (only the procedure's fields, known choice codes, show_if) but not validated.
+     */
+    public function preview(Request $request, string $procedure): View
+    {
+        abort_unless(Forms::allows($request->user(), $procedure, 'create') || Forms::allows($request->user(), $procedure, 'edit'), 403);
+
+        $study = new (Procedures::model($procedure));
+        $values = [];
+
+        foreach (Procedures::fields($procedure) as $name => $field) {
+            $value = $request->input($name);
+            $value = match ($field['type']) {
+                'boolean' => (bool) $value ?: null,
+                'number' => is_numeric($value) ? $value : null,
+                'choice' => is_scalar($value) && array_key_exists((string) $value, $field['options']) ? (string) $value : null,
+                'diagnoses' => is_array($value) ? (array_values(array_intersect($value, Diagnoses::keys())) ?: null) : null,
+                default => is_string($value) && trim($value) !== '' ? $value : null,
+            };
+
+            if (isset($field['show_if']) && (string) ($values[$field['show_if'][0]] ?? '') !== $field['show_if'][1]) {
+                $value = null;
+            }
+
+            $values[$name] = $value;
+        }
+
+        $study->forceFill($values);
+        $report = ['id' => null, 'created_at' => now()->toDateTimeString()];
+        foreach (array_keys($values) as $name) {
+            $report[$name] = $study->getAttribute($name);
+        }
+        foreach (['first_name', 'last_name', 'nationalID', 'dob', 'phone_number', 'gender'] as $name) {
+            $report[$name] = is_string($request->input($name)) ? $request->input($name) : null;
+        }
+
+        return view('procedures.preview', [
+            'procedure' => $procedure,
+            'report' => $report,
+            'narrative' => ProcedureReport::for($procedure, $report),
+            'hospital' => $request->user()->hospital,
+            'admission' => $request->filled('admission_id') ? Admission::find((int) $request->input('admission_id')) : null,
         ]);
     }
 

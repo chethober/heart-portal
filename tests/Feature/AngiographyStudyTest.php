@@ -137,7 +137,7 @@ test('only doctors sign, and signed studies are only amended by a doctor with a 
 
     $this->actingAs($this->tech)->get("/dashboard/procedures/angiography/{$study->id}?version=1")
         ->assertOk()
-        ->assertSee('Viewing signed version 1 of 2')
+        ->assertSee('Showing signed version 1 of 2')
         ->assertSee('Severe stenosis(70-89%) at proximal part segment');
 });
 

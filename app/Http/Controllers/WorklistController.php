@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\StudyStatus;
 use App\Models\EchoStudy;
 use App\Models\ProcedureStudy;
+use App\Support\Forms;
 use App\Support\Procedures;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,8 +33,13 @@ class WorklistController extends Controller
                 ->orWhere('last_name', 'ilike', $like));
         });
 
+        // Each list holds only the forms this member may view (per-form permissions).
+        $user = $request->user();
+        $echo = Forms::allows($user, 'echo', 'view');
+
         $studies = EchoStudy::query()
             ->with(['patient', 'author'])
+            ->unless($echo, fn (Builder $query) => $query->whereRaw('false'))
             ->when($status, fn (Builder $query) => $query->where('status', $status))
             ->when($search !== '', $searchPatient)
             ->latest()
@@ -44,23 +50,24 @@ class WorklistController extends Controller
             'studies' => $studies,
             'status' => $status->value ?? '',
             'search' => $search,
-            'counts' => EchoStudy::query()->toBase()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
-            'procedureDrafts' => $status === null || $status === StudyStatus::Draft ? $this->procedureDrafts($search !== '' ? $searchPatient : null) : collect(),
+            'counts' => $echo ? EchoStudy::query()->toBase()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status') : collect(),
+            'procedureDrafts' => $status === null || $status === StudyStatus::Draft ? $this->procedureDrafts(Forms::procedures($user, 'view'), $search !== '' ? $searchPatient : null) : collect(),
         ]);
     }
 
     /**
      * Drafts of the procedures ported from heart, newest first (each knows its key as ::PROCEDURE).
      *
+     * @param  list<string>  $procedures  Keys of the procedures to list.
      * @param  (Closure(Builder<covariant ProcedureStudy>): mixed)|null  $search
      * @return Collection<int, ProcedureStudy>
      */
-    private function procedureDrafts(?Closure $search): Collection
+    private function procedureDrafts(array $procedures, ?Closure $search): Collection
     {
         $drafts = new Collection;
 
-        foreach (Procedures::MODELS as $model) {
-            $drafts = $drafts->concat($model::query()
+        foreach ($procedures as $key) {
+            $drafts = $drafts->concat(Procedures::model($key)::query()
                 ->with(['patient', 'author'])
                 ->where('status', StudyStatus::Draft)
                 ->when($search, $search)

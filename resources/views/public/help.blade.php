@@ -31,7 +31,7 @@
                 <p class="mt-3 text-lg text-gray-600">{{ __('Everything you need to run your echo lab and cath lab on :app.', ['app' => config('app.name')]) }}</p>
                 @auth
                     <p class="mt-3 flex flex-wrap gap-x-4 text-sm">
-                        @can('studies.create')
+                        @can('echo.create')
                             <a href="{{ route('studies.create') }}">{{ __('New Study') }}</a>
                         @endcan
                         @can('patients.view')
@@ -120,9 +120,31 @@
                 </ul>
             </section>
 
+            <section id="diagnoses">
+                <h2>{{ __('Final diagnosis guide') }}</h2>
+                <p class="mt-4">{{ __('Choose the final diagnosis on the discharge summary and on admissions from this list, which carries the ICD-10 code. If the diagnosis is not listed, write it as the attending physician states it.') }}</p>
+                @foreach (App\Support\Diagnoses::groups() as $group => $entries)
+                    <h3 dir="ltr">{{ $group }}</h3>
+                    <div class="mt-2 overflow-x-auto" dir="ltr">
+                        <table class="min-w-full text-sm border border-gray-200">
+                            <tbody class="divide-y divide-gray-200">
+                                @foreach ($entries as $entry)
+                                    <tr>
+                                        <td class="p-2 font-medium">{{ $entry['label'] }}</td>
+                                        <td class="p-2 whitespace-nowrap">{{ $entry['icd10'] }}</td>
+                                        <td class="p-2" dir="auto">{{ $entry['criteria'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endforeach
+            </section>
+
             <section id="patients">
                 <h2>{{ __('Finding patients') }}</h2>
                 <p class="mt-4">{{ __('Use Patients or the quick search box with the patient\'s national ID to list all of their studies with status, a short summary and links to the full report.') }}</p>
+                <p class="mt-4">{{ __('The search also takes an HIS admission number or a name (part of it is enough, with or without spaces, in Persian or Arabic spelling). If a national ID or admission number is not on record, the hospital information system is checked and the patient imported, where it is connected.') }}</p>
                 <p class="mt-4">{{ __('Open the patient record to see their demographics, contact details and admissions. Staff who record studies can edit these details.') }}</p>
             </section>
 

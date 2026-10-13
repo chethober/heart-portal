@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\HasPatientFields;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Validates the JSON the echo form posts. Only fields listed in
@@ -16,7 +17,7 @@ class StoreEchoStudyRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->can('studies.create');
+        return $this->user()->can('echo.create');
     }
 
     protected function prepareForValidation(): void
@@ -33,6 +34,10 @@ class StoreEchoStudyRequest extends FormRequest
             ...$this->patientRules(),
             'echo_date' => ['nullable', 'string', self::JALALI_DATE],
             'doctor' => ['nullable', 'string', 'max:255'],
+            // The admission the study belongs to, like the cath-lab forms (checked against the patient on save).
+            'admission_id' => ['nullable', 'integer', Rule::exists('admissions', 'id')
+                ->where('hospital_id', $this->user()->hospital_id)
+                ->whereNull('deleted_at')],
         ];
 
         foreach (config('echo.fields') as $field => $type) {
@@ -51,6 +56,9 @@ class StoreEchoStudyRequest extends FormRequest
      */
     public function studyAttributes(): array
     {
-        return $this->safe()->only([...config('echo.meta_fields'), ...array_keys(config('echo.fields'))]);
+        return [
+            ...$this->safe()->only([...config('echo.meta_fields'), ...array_keys(config('echo.fields'))]),
+            'admission_id' => $this->validated('admission_id'),
+        ];
     }
 }

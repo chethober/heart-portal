@@ -18,7 +18,7 @@
             @if ($dischargePrescription)
                 <a href="{{ route('prescriptions.show', $dischargePrescription) }}" class="text-sm font-medium text-indigo-600 underline print:hidden">Open prescription</a>
             @else
-                @can('studies.create')
+                @can('prescriptions.create')
                     <a href="{{ route('prescriptions.create', ['discharge' => $study->id]) }}" class="text-sm font-medium text-indigo-600 underline print:hidden">Write discharge prescription</a>
                 @endcan
             @endif

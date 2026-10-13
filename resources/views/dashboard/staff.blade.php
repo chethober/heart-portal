@@ -1,6 +1,7 @@
 <x-dashboard-layout :title="__('Staff')">
     <div class="space-y-8">
         <x-input-error :messages="$errors->get('staff')" />
+        <x-input-error :messages="collect($errors->get('permissions.*'))->flatten()->unique()->all()" />
 
         <section>
             <h3 class="font-semibold text-gray-900">{{ __('Invite a staff member') }}</h3>
@@ -87,6 +88,50 @@
                                     @endif
                                 </td>
                             </tr>
+                            @php
+                                $ceiling = $member->formCeiling();
+                                $granted = $member->permissions->pluck('name')->all();
+                            @endphp
+                            @if ($ceiling !== [])
+                                <tr>
+                                    <td colspan="5" class="px-3 pb-3">
+                                        {{-- Heart's per-form access: what this member may view, record, edit and sign. --}}
+                                        <details class="text-sm">
+                                            <summary class="cursor-pointer text-xs font-medium text-indigo-600">{{ __('Form access') }} ({{ count($granted) }}/{{ count($ceiling) }})</summary>
+                                            <form method="POST" action="{{ route('staff.access.update', $member) }}" class="mt-2">
+                                                @csrf
+                                                @method('PUT')
+                                                <table class="text-xs">
+                                                    <thead class="text-gray-500">
+                                                        <tr>
+                                                            <th class="px-2 py-1 text-start">{{ __('Form') }}</th>
+                                                            @foreach (App\Support\Forms::ABILITIES as $ability)
+                                                                <th class="px-2 py-1">{{ ['view' => __('View'), 'create' => __('Record'), 'edit' => __('Edit'), 'finalize' => __('Sign')][$ability] }}</th>
+                                                            @endforeach
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (App\Support\Forms::keys() as $form)
+                                                            <tr>
+                                                                <td class="px-2 py-1 text-gray-700">{{ App\Support\Forms::label($form) }}</td>
+                                                                @foreach (App\Support\Forms::ABILITIES as $ability)
+                                                                    @php $permission = App\Support\Forms::permission($form, $ability); @endphp
+                                                                    <td class="px-2 py-1 text-center">
+                                                                        @if (in_array($permission, $ceiling, true))
+                                                                            <input type="checkbox" name="permissions[]" value="{{ $permission }}" aria-label="{{ App\Support\Forms::label($form) }} {{ $ability }}" class="rounded border-gray-300" @checked(in_array($permission, $granted, true))>
+                                                                        @endif
+                                                                    </td>
+                                                                @endforeach
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                                <x-secondary-button type="submit" class="mt-2">{{ __('Save access') }}</x-secondary-button>
+                                            </form>
+                                        </details>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

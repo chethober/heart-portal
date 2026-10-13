@@ -50,7 +50,7 @@
                             <td class="px-3 py-2">
                                 <div class="flex flex-wrap items-center justify-end gap-2">
                                     <a href="{{ route('admissions.show', [$admission->patient_id, $admission]) }}" class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500">{{ __('Admission') }}</a>
-                                    @can('studies.create')
+                                    @can('record-studies')
                                         @include('admissions.record-links', ['admission' => $admission])
                                     @endcan
                                 </div>

@@ -21,7 +21,9 @@ All notable changes to this project are documented here. The format follows
 - Forms ported from the legacy *heart* system, under a New Study menu: coronary angiography,
   coronary angioplasty (PCI), right heart catheterization, peripheral angiography, cardiac
   intervention and discharge summary, with the same draft → signed → amended workflow as echo
-  studies. Angiography, angioplasty and discharge reports are generated as clinical narratives.
+  studies. Every form's report is generated as a clinical narrative, as heart printed it: the right
+  heart catheterization report tabulates saturations and pressures by site and gives the
+  haemodynamics (PVR calculated from mean PA pressure, PCWP and cardiac output when not recorded).
 - Nurse and quality-control roles. Quality control can also review the audit log.
 - Patient record with demographics and contact details; admissions with ward, admission type,
   arrival, referrer and attending physician, discharge, and a Ward patients census. Hospital
@@ -37,7 +39,33 @@ All notable changes to this project are documented here. The format follows
 - Help center sections for the cath-lab forms, admissions and wards, e-prescriptions and
   statistics.
 
+- Per-form access: hospital admins choose, for each staff member, which forms (echo, admissions,
+  each cath-lab form) they may view, record, edit and sign, within what their role allows.
+
+- Every study form (echo and the cath-lab forms) shares the same patient details, including the
+  admission the study belongs to. Typing a registered patient's national ID fills in their details
+  and admissions; a new or mistyped ID (wrong check digit) is flagged.
+- Cath-lab forms keep several patients' unsaved drafts in tabs, saved in the browser as you type,
+  like the echo form, with a Jalali date picker for dates.
+
+- Final diagnosis picker from heart's ICD guide on the discharge summary and on admissions, with
+  ICD-10 codes and criteria, printed on the discharge report, and a Final diagnosis guide in the
+  help center. Heart's admission ICD codes are imported. Codes beyond heart's acute MI and angina
+  items still need review by a clinician (config/diagnoses.php).
+
+- Patient search by national ID, HIS admission number or name (Persian or Arabic ی/ک, spaces
+  ignored), listing several matches with their latest admission. A national ID or admission number
+  not on record is looked up live in the hospital information system and imported, for the hospital
+  set in HIS_LOOKUP_HOSPITAL, as heart's search did.
+
+- Registry CSV export on the Statistics page for hospital admins and quality control: one row per
+  study of a form with the patient and admission, every field as shown on the form or as stored
+  codes, filtered by date and status. Exports are recorded in the audit log.
+
 ### Changed
+- Cath-lab forms and their reports now look and work like the echo form and report: a section bar
+  showing which sections are filled in, one section at a time, a live report preview beside the
+  form, and the echo report's header, patient line, tables and signature.
 - Every signed-in form, search and report now lives under `/dashboard`: the worklist, patient
   echos, staff, audit log and (for platform admins) hospitals are tabs of one dashboard, and the
   echo form, reports, help and profile moved to `/dashboard/...`. Old URLs redirect permanently.

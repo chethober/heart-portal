@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\HasPatientFields;
 use App\Models\ProcedureStudy;
+use App\Support\Diagnoses;
+use App\Support\Forms;
 use App\Support\Procedures;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,7 +22,7 @@ class ProcedureStudyRequest extends FormRequest
     {
         $study = $this->study();
 
-        return $study ? $this->user()->can('update', $study) : $this->user()->can('studies.create');
+        return $study ? $this->user()->can('update', $study) : Forms::allows($this->user(), $this->route('procedure'), 'create');
     }
 
     protected function prepareForValidation(): void
@@ -49,8 +51,15 @@ class ProcedureStudyRequest extends FormRequest
                 'boolean' => ['nullable', 'boolean'],
                 'date' => ['nullable', 'string', self::JALALI_DATE],
                 'time' => ['nullable', 'string', 'regex:/^\d{1,2}:\d{2}$/'],
+                'diagnoses' => ['nullable', 'array', 'max:20'],
                 default => ['nullable', 'string', 'max:5000'],
             };
+        }
+
+        foreach ($this->fields() as $name => $field) {
+            if ($field['type'] === 'diagnoses') {
+                $rules["{$name}.*"] = ['string', 'distinct', Rule::in(Diagnoses::keys())];
+            }
         }
 
         $rules['amendment_reason'] = $this->study()?->isSigned()
@@ -77,7 +86,7 @@ class ProcedureStudyRequest extends FormRequest
                 $value = null;
             }
 
-            $values[$name] = $value === '' ? null : $value;
+            $values[$name] = $value === '' || $value === [] ? null : $value;
         }
 
         return ['admission_id' => $this->validated('admission_id'), ...$values];

@@ -12,7 +12,7 @@
 <section>
     <div class="mb-2 flex flex-wrap items-center gap-3">
         <h3 class="text-lg font-semibold">{{ __('Prescriptions') }}</h3>
-        @can('studies.create')
+        @can('prescriptions.create')
             <a href="{{ route('prescriptions.create', ['patient' => $patient->id]) }}" class="text-sm font-medium text-indigo-600 underline hover:text-indigo-500">{{ __('Write a prescription') }}</a>
         @endcan
     </div>

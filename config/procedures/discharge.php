@@ -161,6 +161,8 @@ return [
         [
             'title' => 'final diagnosis',
             'fields' => [
+                // Chosen from heart's final-diagnosis guide (config/diagnoses.php), with ICD-10 codes.
+                'final_diagnosis_codes' => ['type' => 'diagnoses', 'label' => 'تشخیص نهایی (ICD-10)'],
                 'finalDiagnosis' => ['type' => 'multiline', 'label' => 'تشخیص نهایی'],
             ],
         ],

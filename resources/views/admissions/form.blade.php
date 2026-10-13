@@ -96,6 +96,12 @@
             <p class="mt-2 text-xs text-gray-500">{{ __('Leave empty while the patient is in hospital. The discharge outcome is recorded on the Discharge Summary form.') }}</p>
         </fieldset>
 
+        <fieldset class="rounded-lg border border-gray-200 p-4">
+            <legend class="px-1 font-semibold">{{ __('Final diagnosis (ICD-10)') }}</legend>
+            @include('clinical.partials.diagnosis-picker', ['name' => 'icd_codes', 'selected' => old('icd_codes', $admission->icd_codes ?? [])])
+            <x-input-error :messages="collect($errors->get('icd_codes*'))->flatten()->all()" class="mt-1" />
+        </fieldset>
+
         <details class="rounded-lg border border-gray-200" @if ($errors->has('his_*') || filled($value('his_id')) || filled($value('his_codes'))) open @endif>
             <summary class="cursor-pointer select-none px-4 py-2 font-semibold">{{ __('Hospital information system') }}</summary>
             <div class="grid gap-4 border-t border-gray-100 p-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -57,6 +57,11 @@ doctors sign the report, and every step is audited.
 | Hospital admin | invite/manage staff, reset 2FA, manage wards and the drug catalog, view reports and the audit log, delete drafts |
 | Platform admin | approve, suspend and reactivate hospitals (no access to patient data) |
 
+Access to each clinical form (echo, admissions and every cath-lab form) is also set per staff
+member, like heart's per-form access flags: on the Staff page, **Form access** lets a hospital
+admin choose what each member may view, record, edit and sign. A new member starts with
+everything their role allows, and the role caps what can be granted (only doctors sign).
+
 ## Quick start (Docker)
 
 Requirements: Docker with Compose, Node.js 20+ (for building the front-end assets).
@@ -147,6 +152,8 @@ php artisan his:import-admissions --hospital=<slug or id> [--since=1405/01/01] [
   so that one hospital's patients never land in another.
 - Set `HIS_IMPORT_HOSPITAL` to run `his:import-admissions` from the scheduler (`HIS_IMPORT_CRON`,
   every 30 minutes by default).
+- Set `HIS_LOOKUP_HOSPITAL` (defaults to `HIS_IMPORT_HOSPITAL`) to let that hospital's patient
+  search look up a national ID or admission number in the HIS when it is not on record, as heart did.
 - The app image includes `pdo_mysql`. The HIS needs the `pdo_sqlsrv` extension and Microsoft's
   ODBC driver, which are not in the image. Install them where the HIS import runs.
 - Never reuse heart's connection settings files (`include/connect.php`, `hisConnect.php`): they

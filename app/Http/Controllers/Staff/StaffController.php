@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StaffFormPermissionsRequest;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Support\Audit;
@@ -18,7 +19,7 @@ class StaffController extends Controller
     public function index(Request $request): View
     {
         return view('dashboard.staff', [
-            'staff' => $request->user()->hospital->users()->with('roles')->orderBy('name')->get(),
+            'staff' => $request->user()->hospital->users()->with(['roles', 'permissions'])->orderBy('name')->get(),
             'invitations' => Invitation::pending()->latest()->get(),
             'roles' => Role::assignableByHospital(),
         ]);
@@ -41,13 +42,34 @@ class StaffController extends Controller
         $user->fill(['is_active' => $validated['is_active']]);
         $changes = Audit::diff($user);
         $user->save();
-        $user->syncRoles([$validated['role']]);
 
+        // A new role starts from that role's form access; the access grid is saved separately.
         if ($previousRole !== $validated['role']) {
+            $user->assignStaffRole(Role::from($validated['role']));
             $changes['role'] = [$previousRole, $validated['role']];
         }
         if ($changes) {
             Audit::record('staff.updated', $user, $changes);
+        }
+
+        return back()->with('status', __('Updated :name.', ['name' => $user->name]));
+    }
+
+    /**
+     * Which clinical forms the member may view, record, edit and sign (heart's per-form access).
+     */
+    public function updateAccess(StaffFormPermissionsRequest $request, User $user): RedirectResponse
+    {
+        abort_unless($user->hospital_id === $request->user()->hospital_id, 404);
+
+        $previous = $user->getDirectPermissions()->pluck('name')->sort()->values()->all();
+        $granted = $request->granted();
+        $user->syncPermissions($granted);
+
+        $added = array_values(array_diff($granted, $previous));
+        $removed = array_values(array_diff($previous, $granted));
+        if ($added || $removed) {
+            Audit::record('staff.access_updated', $user, ['granted' => $added, 'revoked' => $removed]);
         }
 
         return back()->with('status', __('Updated :name.', ['name' => $user->name]));

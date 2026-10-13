@@ -399,6 +399,8 @@ $study ??= null;
       applyLinks();
       updateNavButtonStates();
       queueLivePreviewUpdate();
+      if (form.elements.admission_id) form.elements.admission_id.dataset.selected = obj.admission_id || '';
+      window.patientLookup?.check(false, obj.admission_id);
     }
 
     function loadSaved() {
@@ -440,6 +442,8 @@ $study ??= null;
       applyLinks();
       updateNavButtonStates();
       queueLivePreviewUpdate();
+      if (form.elements.admission_id) form.elements.admission_id.dataset.selected = obj.admission_id || '';
+      window.patientLookup?.check(false, obj.admission_id);
     }
 
     // export JSON

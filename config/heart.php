@@ -207,5 +207,8 @@ return [
         // Run his:import-admissions from the scheduler for this hospital (slug); empty = off.
         'schedule_hospital' => env('HIS_IMPORT_HOSPITAL'),
         'schedule_cron' => env('HIS_IMPORT_CRON', '*/30 * * * *'),
+        // The hospital (slug) whose patient search falls back to a live HIS lookup, as heart's
+        // search did; defaults to the scheduled import's hospital. Empty = no live lookup.
+        'lookup_hospital' => env('HIS_LOOKUP_HOSPITAL', env('HIS_IMPORT_HOSPITAL')),
     ],
 ];
