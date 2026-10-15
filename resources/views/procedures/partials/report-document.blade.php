@@ -25,8 +25,8 @@
     $admission ??= $study?->admission;
     $rtl = $narrative ? $narrative->language() === 'fa' : Procedures::dir($procedure) === 'rtl';
     $t = $rtl
-        ? ['patient' => 'نام بیمار', 'nationalID' => 'کد ملی', 'dob' => 'تاریخ تولد', 'gender' => 'جنسیت', 'phone' => 'شماره تماس', 'date' => 'تاریخ', 'admission' => 'پذیرش', 'physician' => 'پزشک معالج', 'draft' => 'پیش نویس — امضا نشده (DRAFT — NOT SIGNED)', 'other' => 'سایر داده های ثبت شده', 'none' => 'هنوز یافته ای ثبت نشده است.', 'amended' => 'اصلاح شده', 'license' => 'نظام پزشکی', 'signedOn' => 'تاریخ امضا', 'reporter' => 'پزشک گزارش دهنده', 'male' => 'مرد', 'female' => 'زن', 'yes' => 'بله']
-        : ['patient' => 'Patient', 'nationalID' => 'National ID', 'dob' => 'Date of birth', 'gender' => 'Gender', 'phone' => 'Phone', 'date' => 'Procedure date', 'admission' => 'Admission', 'physician' => 'Physician', 'draft' => 'DRAFT — NOT SIGNED', 'other' => 'Other recorded findings', 'none' => 'No findings recorded yet.', 'amended' => 'Amended', 'license' => 'License', 'signedOn' => 'Signed', 'reporter' => 'Reporting physician', 'male' => 'Male', 'female' => 'Female', 'yes' => 'Yes'];
+        ? ['patient' => 'نام بیمار', 'nationalID' => 'کد ملی', 'dob' => 'تاریخ تولد', 'gender' => 'جنسیت', 'phone' => 'شماره تماس', 'date' => 'تاریخ', 'admission' => 'پذیرش', 'physician' => 'پزشک معالج', 'draft' => 'پیش نویس — امضا نشده (DRAFT — NOT SIGNED)', 'awaiting' => 'پیش نویس — در انتظار امضا (DRAFT — AWAITING SIGNATURES)', 'other' => 'سایر داده های ثبت شده', 'none' => 'هنوز یافته ای ثبت نشده است.', 'amended' => 'اصلاح شده', 'license' => 'نظام پزشکی', 'signedOn' => 'تاریخ امضا', 'reporter' => 'پزشک گزارش دهنده', 'male' => 'مرد', 'female' => 'زن', 'yes' => 'بله']
+        : ['patient' => 'Patient', 'nationalID' => 'National ID', 'dob' => 'Date of birth', 'gender' => 'Gender', 'phone' => 'Phone', 'date' => 'Procedure date', 'admission' => 'Admission', 'physician' => 'Physician', 'draft' => 'DRAFT — NOT SIGNED', 'awaiting' => 'DRAFT — AWAITING SIGNATURES', 'other' => 'Other recorded findings', 'none' => 'No findings recorded yet.', 'amended' => 'Amended', 'license' => 'License', 'signedOn' => 'Signed', 'reporter' => 'Reporting physician', 'male' => 'Male', 'female' => 'Female', 'yes' => 'Yes'];
 
     $shownStatus = $version?->status ?? $study?->status ?? StudyStatus::Draft;
     $signer = match (true) {
@@ -41,6 +41,8 @@
 
     $titles = $narrative ? $narrative->titles() : [Procedures::label($procedure).' Report'];
     $boxes = $narrative ? $narrative->signatureBoxes() : [['title' => $t['reporter'], 'name' => null]];
+    // Sign-off steps signed before the final signature (the discharge summary's intern and resident).
+    $signoffs = $study?->signoffs() ?? [];
 
     $patientItems = array_filter([
         $t['patient'] => trim(($report['first_name'] ?? '').' '.($report['last_name'] ?? '')),
@@ -81,7 +83,7 @@
 
 <div class="report-container" dir="{{ $rtl ? 'rtl' : 'ltr' }}" lang="{{ $rtl ? 'fa' : 'en' }}" @if ($rtl) style="direction: rtl; text-align: right;" @endif>
     @unless ($shownStatus->isSigned())
-        <div style="border:2px solid #c53030;color:#c53030;font-weight:700;text-align:center;padding:6px;margin-bottom:10px;letter-spacing:2px">{{ $t['draft'] }}</div>
+        <div style="border:2px solid #c53030;color:#c53030;font-weight:700;text-align:center;padding:6px;margin-bottom:10px;letter-spacing:2px">{{ $signoffs ? $t['awaiting'] : $t['draft'] }}</div>
     @endunless
 
     <div class="header" dir="ltr" style="position: relative; padding: 15px 0 5px; display: flex; align-items: center; justify-content: space-between;">
@@ -194,6 +196,15 @@
                         <img src="{{ route('users.signature', [$signer, 'procedure_version' => $shownVersion->id]) }}" alt="Signature" style="max-height:60px;max-width:200px;display:block;margin:4px auto">
                     @endif
                     <div style="font-size:12px">{{ $t['signedOn'] }}: {{ JalaliDate::format($signedAt) }}</div>
+                @elseif (($signoff = $signoffs[$box['step'] ?? ''] ?? null) && $signoff['signer'])
+                    <div>{{ $signoff['signer']->name }}</div>
+                    @if ($signoff['signer']->medical_license_no)
+                        <div style="font-size:12px">{{ $t['license'] }}: {{ $signoff['signer']->medical_license_no }}</div>
+                    @endif
+                    @if ($signoff['signature_path'])
+                        <img src="{{ route('users.signature', [$signoff['signer'], 'discharge' => $study->id, 'step' => $box['step']]) }}" alt="Signature" style="max-height:60px;max-width:200px;display:block;margin:4px auto">
+                    @endif
+                    <div style="font-size:12px">{{ $t['signedOn'] }}: {{ JalaliDate::format($signoff['signed_at']) }}</div>
                 @elseif ($box['name'])
                     <div>{{ $box['name'] }}</div>
                 @endif

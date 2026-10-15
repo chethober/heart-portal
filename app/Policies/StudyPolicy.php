@@ -26,6 +26,8 @@ abstract class StudyPolicy
 
     /**
      * Drafts can be edited by clinical staff; signed reports only amended by those who may sign.
+     * Once a sign-off step is signed (the discharge summary's intern, resident), the draft is
+     * edited only by those who may sign: the next signer may change what the last one signed.
      */
     public function update(User $user, EchoStudy|ProcedureStudy $study): bool
     {
@@ -33,7 +35,7 @@ abstract class StudyPolicy
             return false;
         }
 
-        return $this->allows($user, $study, $study->isSigned() ? 'finalize' : 'edit');
+        return $this->allows($user, $study, $study->isSigned() || $this->hasSignoffs($study) ? 'finalize' : 'edit');
     }
 
     public function finalize(User $user, EchoStudy|ProcedureStudy $study): bool
@@ -42,12 +44,12 @@ abstract class StudyPolicy
     }
 
     /**
-     * Only unsigned drafts can be removed, by their author or a hospital admin.
+     * Only unsigned drafts (no sign-off step signed either) can be removed, by their author or a hospital admin.
      * Deletion is soft, so the record stays recoverable.
      */
     public function delete(User $user, EchoStudy|ProcedureStudy $study): bool
     {
-        if (! $this->sameHospital($user, $study) || $study->isSigned()) {
+        if (! $this->sameHospital($user, $study) || $study->isSigned() || $this->hasSignoffs($study)) {
             return false;
         }
 
@@ -59,6 +61,11 @@ abstract class StudyPolicy
     private function allows(User $user, EchoStudy|ProcedureStudy $study, string $ability): bool
     {
         return Forms::allows($user, $this->form($study), $ability);
+    }
+
+    private function hasSignoffs(EchoStudy|ProcedureStudy $study): bool
+    {
+        return $study instanceof ProcedureStudy && $study->hasSignoffs();
     }
 
     private function sameHospital(User $user, EchoStudy|ProcedureStudy $study): bool

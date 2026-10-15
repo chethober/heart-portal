@@ -172,12 +172,17 @@ class ProcedureStudyController extends Controller
     {
         Gate::authorize('finalize', $procedureStudy);
 
-        DB::transaction(function () use ($request, $procedure, $procedureStudy) {
-            $procedureStudy->finalize($request->user());
-            Audit::record("{$procedure}.finalized", $procedureStudy);
+        // Procedures with sign-off steps (discharge: intern, resident) are signed one step at a time.
+        $step = $procedureStudy->nextSignoff();
+
+        DB::transaction(function () use ($request, $procedure, $procedureStudy, $step) {
+            $procedureStudy->signNext($request->user());
+            Audit::record($step ? "{$procedure}.signed" : "{$procedure}.finalized", $procedureStudy, $step ? ['step' => $step] : []);
         });
 
-        return redirect()->route('procedures.show', [$procedure, $procedureStudy])->with('status', __('Report signed and finalized.'));
+        return redirect()->route('procedures.show', [$procedure, $procedureStudy])->with('status', $step
+            ? __('Signed as :step. Next to sign: :next.', ['step' => __($procedureStudy::SIGNOFFS[$step]), 'next' => __($procedureStudy->nextSignoffLabel())])
+            : __('Report signed and finalized.'));
     }
 
     public function destroy(string $procedure, ProcedureStudy $procedureStudy): RedirectResponse

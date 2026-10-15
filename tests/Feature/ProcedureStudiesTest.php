@@ -58,7 +58,10 @@ test('each heart form records, reports and signs a study', function (string $pro
         ->assertSee('DRAFT — NOT SIGNED');
 
     $this->actingAs($this->nurse)->post("/dashboard/procedures/{$procedure}/{$study->id}/finalize")->assertForbidden();
-    $this->actingAs($this->doctor)->post("/dashboard/procedures/{$procedure}/{$study->id}/finalize")->assertRedirect();
+    // The discharge summary is signed in steps (intern, resident, attending physician).
+    foreach (range(0, count(Procedures::model($procedure)::SIGNOFFS)) as $signature) {
+        $this->actingAs($this->doctor)->post("/dashboard/procedures/{$procedure}/{$study->id}/finalize")->assertRedirect();
+    }
 
     expect($study->fresh()->status)->toBe(StudyStatus::Final)
         ->and($study->versions()->sole()->study_type)->toBe($procedure);
