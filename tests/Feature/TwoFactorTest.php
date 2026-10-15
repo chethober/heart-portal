@@ -79,7 +79,7 @@ test('when enforced, users without two-factor are sent to set it up', function (
 
     $this->actingAs($this->user)->get('/dashboard')->assertRedirect(route('profile.edit').'#two-factor');
     $this->actingAs($this->user)->get('/dashboard/patients')->assertRedirect(route('profile.edit').'#two-factor');
-    $this->actingAs($this->user)->getJson('/dashboard/doctors')->assertForbidden();
+    $this->actingAs($this->user)->getJson('/dashboard/patients/lookup?nationalID=0012345678')->assertForbidden();
     $this->actingAs($this->user)->get('/dashboard/profile')->assertOk();
 
     app(TwoFactor::class)->enable($this->user);

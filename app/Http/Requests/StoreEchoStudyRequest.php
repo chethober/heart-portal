@@ -33,7 +33,6 @@ class StoreEchoStudyRequest extends FormRequest
         $rules = [
             ...$this->patientRules(),
             'echo_date' => ['nullable', 'string', self::JALALI_DATE],
-            'doctor' => ['nullable', 'string', 'max:255'],
             // The admission the study belongs to, like the cath-lab forms (checked against the patient on save).
             'admission_id' => ['nullable', 'integer', Rule::exists('admissions', 'id')
                 ->where('hospital_id', $this->user()->hospital_id)
@@ -57,7 +56,8 @@ class StoreEchoStudyRequest extends FormRequest
     public function studyAttributes(): array
     {
         return [
-            ...$this->safe()->only([...config('echo.meta_fields'), ...array_keys(config('echo.fields'))]),
+            // The doctor is not posted: signing records the signer's name.
+            ...$this->safe()->only(['echo_date', ...array_keys(config('echo.fields'))]),
             'admission_id' => $this->validated('admission_id'),
         ];
     }
