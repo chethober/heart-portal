@@ -152,3 +152,15 @@ test('saving a discharge summary keeps its retired complication fields and its w
         ->assertRedirect();
     expect($study->fresh()->non_specific_explanation)->toBeNull();
 });
+
+test('بومی / غیر بومی is a two-way toggle without heart\'s Unknown code', function () {
+    // Two options and no forced dropdown, so choice-inputs.js draws a toggle.
+    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    expect($html)->toMatch('/<select id="f-bomi"[^>]*>/')
+        ->not->toMatch('/<select id="f-bomi"[^>]*data-widget="dropdown"/');
+    expect(config('procedures.discharge.sections.0.fields.bomi.options'))->toBe(['1' => 'بومی', '2' => 'غیر بومی']);
+
+    [$payload] = procedurePayload('discharge');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'bomi' => '9'])->assertSessionHasErrors('bomi');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'bomi' => '2'])->assertSessionHasNoErrors();
+});

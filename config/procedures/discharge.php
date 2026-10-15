@@ -31,7 +31,7 @@ return [
             // Shown with the patient's details rather than as a section of its own.
             'top' => true,
             'fields' => [
-                'bomi' => ['type' => 'choice', 'label' => 'بومی / غیر بومی', 'widget' => 'dropdown', 'options' => ['1' => 'بومی', '2' => 'غیر بومی', '9' => 'Unknown']],
+                'bomi' => ['type' => 'choice', 'label' => 'بومی / غیر بومی', 'options' => ['1' => 'بومی', '2' => 'غیر بومی'], 'blank' => ['9']],
             ],
         ],
         [

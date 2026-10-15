@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Clinical\AdmissionController;
-use App\Http\Controllers\Clinical\DoctorController;
 use App\Http\Controllers\Clinical\EchoStudyController;
 use App\Http\Controllers\Clinical\PatientController;
 use App\Http\Controllers\Clinical\PatientRecordController;
@@ -55,7 +54,6 @@ Route::prefix('dashboard')->group(function () {
                 Route::post('/studies', [EchoStudyController::class, 'store'])->name('studies.store');
                 Route::post('/studies/preview', [EchoStudyController::class, 'preview'])->name('studies.preview');
             });
-            Route::get('/doctors', DoctorController::class)->middleware('can:record-studies')->name('doctors.index');
             // Each procedure has its own "{procedure}.create" permission, checked by the controller.
             Route::middleware('can:record-studies')->group(function () {
                 Route::get('/procedures/{procedure}/create', [ProcedureStudyController::class, 'create'])->name('procedures.create');

@@ -853,14 +853,6 @@
       </div>
     </div>
 
-    <div class="row" style="margin-top:8px">
-      <div class="field">
-        <label for="doctor">Doctor</label>
-        <input id="doctor" name="doctor" type="text" list="doctors_list" />
-        <datalist id="doctors_list"></datalist>
-      </div>
-    </div>
-
     <div class="controls">
       <button type="button" id="previewToggleBtn" class="ef-btn ef-btn-secondary preview-toggle" aria-pressed="false">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -28,7 +28,6 @@ function echoPayload(array $overrides = []): array
         'lv_size' => 'Auto',
         'lv_rwma_checked' => '1',
         'other_des_lv' => 'apical thinning <script>alert(1)</script>',
-        'doctor' => 'Dr. Karimi',
         ...$overrides,
     ];
 }
@@ -69,6 +68,10 @@ test('unknown fields and malformed values are rejected', function () {
 
     $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload(['hospital_id' => 999]))
         ->assertJsonValidationErrors(['hospital_id']);
+
+    // The reporting doctor is whoever signs, so it cannot be typed in.
+    $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload(['doctor' => 'Dr. Karimi']))
+        ->assertJsonValidationErrors(['doctor']);
 
     expect(EchoStudy::withoutGlobalScope(HospitalScope::class)->count())->toBe(0);
 });
@@ -132,15 +135,12 @@ test('hospital admins can view but not create studies', function () {
     $this->actingAs($admin)->get('/dashboard/patients')->assertOk()->assertDontSee(route('studies.create'), false);
 });
 
-test('form page and doctor suggestions load', function () {
-    User::factory()->for($this->hospital)->role(Role::Doctor)->create(['name' => 'Dr. Ahmadi']);
-    User::factory()->role(Role::Doctor)->create(['name' => 'Dr. Elsewhere']);
-
+test('form page loads', function () {
     // The form lives inside the dashboard: its navigation is shown and the old navbar is gone.
     $this->actingAs($this->tech)->get('/dashboard/studies/create')
         ->assertOk()
         ->assertSee('echoForm', false)
         ->assertSee(route('patients.index'), false)
-        ->assertDontSee('app-navbar', false);
-    $this->actingAs($this->tech)->getJson('/dashboard/doctors')->assertOk()->assertJson(['Dr. Ahmadi'])->assertJsonMissing(['Dr. Elsewhere']);
+        ->assertDontSee('app-navbar', false)
+        ->assertDontSee('id="doctor"', false);
 });

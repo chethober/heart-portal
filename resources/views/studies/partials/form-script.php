@@ -14,7 +14,6 @@ $study ??= null;
     const ECHO_ROUTES = <?= json_encode([
         'store' => route('studies.store'),
         'preview' => route('studies.preview'),
-        'doctors' => route('doctors.index'),
         'storageScope' => auth()->user()->hospital_id.':'.auth()->id(),
         'edit' => $study ? [
             'url' => route('studies.update', $study),
@@ -1848,27 +1847,6 @@ $study ??= null;
       queueLivePreviewUpdate();
     }
 
-    // Load last entered doctors for autocompletion
-    async function loadDoctors() {
-      try {
-        const response = await fetch(ECHO_ROUTES.doctors, { headers: { 'Accept': 'application/json' } });
-        if (response.ok) {
-          const doctors = await response.json();
-          const datalist = document.getElementById('doctors_list');
-          if (datalist && Array.isArray(doctors)) {
-            datalist.innerHTML = '';
-            doctors.forEach(doc => {
-              const option = document.createElement('option');
-              option.value = doc;
-              datalist.appendChild(option);
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching doctors:', error);
-      }
-    }
-
     window.addEventListener('load', () => {
       initSectionNav();
       buildRwmaFields();
@@ -1878,7 +1856,6 @@ $study ??= null;
       setupManualToggle('av_aorta', 'av_aorta_manual', 'av_aorta_manual_row');
       updateValveAbnormalityToggles();
       updateNavButtonStates();
-      loadDoctors();
 
       const genBtn = document.getElementById('generateSummaryBtn');
       if (genBtn) {
