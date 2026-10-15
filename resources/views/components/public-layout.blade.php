@@ -5,6 +5,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ $title ? $title.' — '.config('app.name') : config('app.name').' — '.__('Echocardiography reporting for hospitals') }}</title>
+        <x-favicons />
         <meta name="description" content="{{ $description ?? __('Open-source echocardiography reporting platform: structured echo entry, automatic grading, signed reports and audit trails for every hospital.') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">

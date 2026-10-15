@@ -10,7 +10,7 @@ body:
 
         ⚠️ **Do not include real patient data** (names, national IDs, phone numbers, reports or
         screenshots of them). Use the demo data or obviously fake values.
-        Security problems belong in a [private advisory](https://github.com/chethober/echo-portal/security/advisories/new).
+        Security problems belong in a [private advisory](https://github.com/chethober/heart-portal/security/advisories/new).
   - type: textarea
     id: what-happened
     attributes:

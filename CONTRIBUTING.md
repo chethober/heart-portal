@@ -1,6 +1,6 @@
-# Contributing to Echo Portal
+# Contributing to Heart Portal
 
-Thanks for helping improve Echo Portal! This guide explains how to get set up and what we look
+Thanks for helping improve Heart Portal! This guide explains how to get set up and what we look
 for in a pull request.
 
 ## Ground rules

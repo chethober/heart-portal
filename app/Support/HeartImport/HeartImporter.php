@@ -282,7 +282,7 @@ final class HeartImporter
         /** @var EchoStudy|ProcedureStudy|null $study */
         $study = $model::withTrashed()->where('legacy_id', $id)->first();
 
-        // Deleted in Echo Portal, or amended here since: the portal's version stands.
+        // Deleted in Heart Portal, or amended here since: the portal's version stands.
         if ($study && ($study->trashed() || $study->status !== StudyStatus::Final)) {
             return 'skipped';
         }
@@ -317,7 +317,7 @@ final class HeartImporter
     }
 
     /**
-     * Heart's values for a procedure's fields, keyed by Echo Portal column. Columns
+     * Heart's values for a procedure's fields, keyed by Heart Portal column. Columns
      * heart's table does not have are left out.
      *
      * @return array<string, mixed>
@@ -404,7 +404,7 @@ final class HeartImporter
     }
 
     /**
-     * The Echo Portal patient for a heart admit or study row: through heart's
+     * The Heart Portal patient for a heart admit or study row: through heart's
      * patientId, else the row's own national code.
      */
     private function patientFor(LegacyRow $row): ?Patient

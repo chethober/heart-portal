@@ -172,7 +172,7 @@ test('importing again changes nothing, and picks up what changed in heart', func
         ->and($study->versions->last()->reason)->toBe(HeartImporter::REIMPORTED);
 });
 
-test('studies amended or deleted in Echo Portal are not overwritten', function () {
+test('studies amended or deleted in Heart Portal are not overwritten', function () {
     $this->artisan('heart:import', ['--hospital' => 'mehr'])->assertSuccessful();
     asHospital($this->hospital);
     AngiographyStudy::where('legacy_id', 1)->sole()->forceFill(['status' => StudyStatus::Amended, 'lad_pci_Description' => 'Corrected.'])->save();

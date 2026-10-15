@@ -16,6 +16,8 @@ use App\Models\Hospital;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Echo Report — <?= e($hospital->name) ?></title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
     <?= view('studies.partials.report-styles')->render() ?>
     <style>
         body { margin: 0; padding: 8px; background: #fff; }

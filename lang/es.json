@@ -1,6 +1,6 @@
 {
     ":app is free software under the :license.": ":app es software libre bajo la licencia :license.",
-    ":hospital Echo Portal": "Portal de Eco de :hospital",
+    ":hospital Heart Portal": "Portal del Corazón de :hospital",
     ":inviter invited you to join :hospital as :role.": ":inviter le ha invitado a unirse a :hospital como :role.",
     ":name is now :status.": ":name ahora está en estado: :status.",
     "A doctor reviews the report and presses Sign & Finalize. The report then shows the doctor's name, license number, signature image and signing time.": "Un médico revisa el informe y pulsa Firmar y finalizar. El informe muestra entonces el nombre del médico, su número de colegiado, la imagen de su firma y la hora de la firma.",

@@ -1,11 +1,11 @@
 # Security policy
 
-Echo Portal stores health data, so we take security reports seriously.
+Heart Portal stores health data, so we take security reports seriously.
 
 ## Reporting a vulnerability
 
 **Please do not open a public issue.** Report privately through GitHub:
-[**Report a vulnerability**](https://github.com/chethober/echo-portal/security/advisories/new)
+[**Report a vulnerability**](https://github.com/chethober/heart-portal/security/advisories/new)
 (Security → Advisories → *Report a vulnerability*).
 
 Include:

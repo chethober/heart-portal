@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'source_url' => env('APP_SOURCE_URL', 'https://github.com/chethober/echo-portal'),
+    'source_url' => env('APP_SOURCE_URL', 'https://github.com/chethober/heart-portal'),
 
     /*
     |--------------------------------------------------------------------------
