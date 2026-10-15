@@ -92,9 +92,10 @@
                                         <a href="{{ route('procedures.edit', [$key, $draft]) }}" class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
                                     @endcan
                                     @can('finalize', $draft)
-                                        <form method="POST" action="{{ route('procedures.finalize', [$key, $draft]) }}" onsubmit="return confirm(@js(__('Sign and finalize this report? It can only be changed by amendment afterwards.')))">
+                                        @php($step = $draft->nextSignoff())
+                                        <form method="POST" action="{{ route('procedures.finalize', [$key, $draft]) }}" onsubmit="return confirm(@js($step ? __('Sign this report as :step?', ['step' => __($draft::SIGNOFFS[$step])]) : __('Sign and finalize this report? It can only be changed by amendment afterwards.')))">
                                             @csrf
-                                            <button type="submit" class="rounded-md bg-green-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-600">{{ __('Sign') }}</button>
+                                            <button type="submit" class="rounded-md bg-green-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-600">{{ $draft::SIGNOFFS ? __('Sign as :step', ['step' => __($draft->nextSignoffLabel())]) : __('Sign') }}</button>
                                         </form>
                                     @endcan
                                 </div>

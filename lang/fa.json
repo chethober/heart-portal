@@ -501,5 +501,10 @@
     "Stored codes": "کدهای ذخیره‌شده",
     "Recorded from": "ثبت‌شده از",
     "Download CSV": "دریافت CSV",
-    "Use a Jalali date such as 1405/01/01.": "از تاریخ شمسی مانند 1405/01/01 استفاده کنید."
+    "Use a Jalali date such as 1405/01/01.": "از تاریخ شمسی مانند 1405/01/01 استفاده کنید.",
+    "Intern": "کارورز",
+    "Resident": "دستیار",
+    "Sign as :step": "امضا به عنوان :step",
+    "Sign this report as :step?": "این گزارش را به عنوان :step امضا می‌کنید؟",
+    "Signed as :step. Next to sign: :next.": "به عنوان :step امضا شد. امضای بعدی: :next."
 }

@@ -24,6 +24,9 @@ All notable changes to this project are documented here. The format follows
   studies. Every form's report is generated as a clinical narrative, as heart printed it: the right
   heart catheterization report tabulates saturations and pressures by site and gives the
   haemodynamics (PVR calculated from mean PA pressure, PCWP and cardiac output when not recorded).
+- The discharge summary is signed in three steps: intern (کارورز), resident (دستیار), then the
+  attending physician (پزشک معالج), whose signature finalizes it. Each doctor may correct the
+  summary before signing; each step's name, signature and date print in its box on the report.
 - One nurse / technician role for staff who record studies but do not sign them (the earlier
   technician and quality-control roles are merged into it).
 - Patient record with demographics and contact details; admissions with ward, admission type,

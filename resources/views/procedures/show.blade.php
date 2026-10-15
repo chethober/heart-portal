@@ -29,9 +29,11 @@
                     <a href="{{ route('procedures.edit', [$procedure, $study]) }}" class="{{ $buttonSecondary }}">{{ $study->isSigned() ? 'Amend Report' : 'Edit Draft' }}</a>
                 @endcan
                 @can('finalize', $study)
-                    <form method="POST" action="{{ route('procedures.finalize', [$procedure, $study]) }}" onsubmit="return confirm('Sign and finalize this report? It can only be changed by amendment afterwards.');">
+                    {{-- With sign-off steps (discharge: intern → resident → attending physician) each signature is one step. --}}
+                    @php($step = $study->nextSignoff())
+                    <form method="POST" action="{{ route('procedures.finalize', [$procedure, $study]) }}" onsubmit="return confirm(@js($step ? 'Sign this report as '.strtolower($study::SIGNOFFS[$step]).'?' : 'Sign and finalize this report? It can only be changed by amendment afterwards.'));">
                         @csrf
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-600">Sign &amp; Finalize</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-600">{{ $step ? 'Sign as '.$study::SIGNOFFS[$step] : ($study::SIGNOFFS ? 'Sign as '.$study::FINAL_SIGNOFF.' & Finalize' : 'Sign & Finalize') }}</button>
                     </form>
                 @endcan
                 @can('delete', $study)

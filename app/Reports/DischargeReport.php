@@ -48,8 +48,8 @@ final class DischargeReport extends ProcedureReport
     public function signatureBoxes(): array
     {
         return [
-            ['title' => 'مهر و امضای کارورز', 'name' => $this->text('disch_StudentId')],
-            ['title' => 'مهر و امضای دستیار', 'name' => null],
+            ['title' => 'مهر و امضای کارورز', 'name' => $this->text('disch_StudentId'), 'step' => 'intern'],
+            ['title' => 'مهر و امضای دستیار', 'name' => null, 'step' => 'resident'],
             ['title' => 'مهر و امضای پزشک معالج', 'name' => null],
         ];
     }

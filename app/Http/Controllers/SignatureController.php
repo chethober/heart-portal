@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DischargeStudy;
 use App\Models\EchoStudyVersion;
 use App\Models\ProcedureStudyVersion;
 use App\Models\User;
@@ -19,7 +20,8 @@ class SignatureController extends Controller
 {
     /**
      * The user's current signature, or with ?version= (echo) or ?procedure_version= the one a signed
-     * report version was signed with.
+     * report version was signed with, or with ?discharge=&step= the one a discharge summary's
+     * sign-off step (intern, resident) was signed with.
      */
     public function show(Request $request, User $user): StreamedResponse
     {
@@ -29,6 +31,7 @@ class SignatureController extends Controller
             $request->filled('version') => EchoStudyVersion::where('signed_by', $user->id)->findOrFail($request->integer('version'))->signature_path,
             // Signed versions of the procedures ported from heart (angiography, ...).
             $request->filled('procedure_version') => ProcedureStudyVersion::where('signed_by', $user->id)->findOrFail($request->integer('procedure_version'))->signature_path,
+            $request->filled('discharge') => $this->signoffPath($user, $request->integer('discharge'), $request->string('step')->toString()),
             default => $user->signature_path,
         };
 
@@ -38,6 +41,13 @@ class SignatureController extends Controller
             'Cache-Control' => 'private, max-age=300',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private function signoffPath(User $user, int $study, string $step): ?string
+    {
+        abort_unless(array_key_exists($step, DischargeStudy::SIGNOFFS), 404);
+
+        return DischargeStudy::where("{$step}_signed_by", $user->id)->findOrFail($study)->getAttribute("{$step}_signature_path");
     }
 
     public function update(Request $request): RedirectResponse

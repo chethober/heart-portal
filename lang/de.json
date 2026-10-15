@@ -501,5 +501,10 @@
     "Stored codes": "Gespeicherte Codes",
     "Recorded from": "Erfasst ab",
     "Download CSV": "CSV herunterladen",
-    "Use a Jalali date such as 1405/01/01.": "Verwenden Sie ein Jalali-Datum wie 1405/01/01."
+    "Use a Jalali date such as 1405/01/01.": "Verwenden Sie ein Jalali-Datum wie 1405/01/01.",
+    "Intern": "PJ-Student",
+    "Resident": "Assistenzarzt",
+    "Sign as :step": "Als :step unterschreiben",
+    "Sign this report as :step?": "Diesen Bericht als :step unterschreiben?",
+    "Signed as :step. Next to sign: :next.": "Als :step unterschrieben. Als Nächstes unterschreibt: :next."
 }

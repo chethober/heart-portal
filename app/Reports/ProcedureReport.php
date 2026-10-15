@@ -98,9 +98,10 @@ abstract class ProcedureReport
 
     /**
      * Who signs the printed report, as heart's signature table listed them; the last box is the
-     * signing doctor. A name is filled in when the form recorded it.
+     * signing doctor. A name is filled in when the form recorded it; a box with a "step" shows who
+     * signed that sign-off step (ProcedureStudy::SIGNOFFS).
      *
-     * @return list<array{title: string, name: string|null}>
+     * @return list<array{title: string, name: string|null, step?: string}>
      */
     abstract public function signatureBoxes(): array;
 

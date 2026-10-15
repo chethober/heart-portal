@@ -501,5 +501,10 @@
     "Stored codes": "Kayıtlı kodlar",
     "Recorded from": "Kayıt başlangıcı",
     "Download CSV": "CSV indir",
-    "Use a Jalali date such as 1405/01/01.": "1405/01/01 gibi bir Celali tarih kullanın."
+    "Use a Jalali date such as 1405/01/01.": "1405/01/01 gibi bir Celali tarih kullanın.",
+    "Intern": "İntörn",
+    "Resident": "Asistan hekim",
+    "Sign as :step": ":step olarak imzala",
+    "Sign this report as :step?": "Bu rapor :step olarak imzalansın mı?",
+    "Signed as :step. Next to sign: :next.": ":step olarak imzalandı. Sıradaki imza: :next."
 }

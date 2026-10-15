@@ -501,5 +501,10 @@
     "Stored codes": "الرموز المخزنة",
     "Recorded from": "مسجل من",
     "Download CSV": "تنزيل CSV",
-    "Use a Jalali date such as 1405/01/01.": "استخدم تاريخًا هجريًا شمسيًا مثل 1405/01/01."
+    "Use a Jalali date such as 1405/01/01.": "استخدم تاريخًا هجريًا شمسيًا مثل 1405/01/01.",
+    "Intern": "طبيب متدرب",
+    "Resident": "طبيب مقيم",
+    "Sign as :step": "التوقيع بصفة :step",
+    "Sign this report as :step?": "توقيع هذا التقرير بصفة :step؟",
+    "Signed as :step. Next to sign: :next.": "تم التوقيع بصفة :step. التوقيع التالي: :next."
 }

@@ -13,6 +13,17 @@ class DischargeStudy extends ProcedureStudy
     public const PROCEDURE = 'discharge';
 
     /**
+     * Signed in order intern (کارورز), resident (دستیار), then the attending physician (پزشک معالج),
+     * whose signature finalizes the summary. See the 2026_10_15_120000 migration.
+     */
+    public const SIGNOFFS = ['intern' => 'Intern', 'resident' => 'Resident'];
+
+    protected function casts(): array
+    {
+        return [...parent::casts(), 'intern_signed_at' => 'datetime', 'resident_signed_at' => 'datetime'];
+    }
+
+    /**
      * Studies saved before history_mode existed (and heart's) wrote their history by hand when
      * there is one, so the form opens them in manual mode and saving keeps the text.
      *

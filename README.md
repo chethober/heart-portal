@@ -29,7 +29,8 @@ doctors sign the report, and every step is audited.
 - **Cath lab and discharge forms** — coronary angiography, coronary angioplasty (PCI), right heart
   catheterization, peripheral angiography, cardiac intervention and discharge summary, ported from
   the legacy *heart* system. They follow the same draft → signed → amended workflow as echo
-  studies; angiography, angioplasty and discharge reports are written up as clinical narratives.
+  studies (the discharge summary is signed by the intern, then the resident, then the attending
+  physician, each of whom may correct it before signing); angiography, angioplasty and discharge reports are written up as clinical narratives.
 - **Admissions and wards** — patient record with demographics and contact details, admissions
   (ward, type, arrival, referrer, attending physician) and discharge, a live ward census, and
   import of admissions from the hospital information system.
