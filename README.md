@@ -51,9 +51,8 @@ doctors sign the report, and every step is audited.
 
 | Role | Can |
 |---|---|
-| Echo technician / Nurse | record studies, admissions and patient details, draft prescriptions, search patients, view/print reports |
-| Quality control | everything a nurse can + view the audit log |
-| Doctor | everything a technician can + sign and amend reports, sign and cancel prescriptions |
+| Nurse / technician | record studies, admissions and patient details, draft prescriptions, search patients, view/print reports |
+| Doctor | everything a nurse or technician can + sign and amend reports, sign and cancel prescriptions |
 | Hospital admin | invite/manage staff, reset 2FA, manage wards and the drug catalog, view reports and the audit log, delete drafts |
 | Platform admin | approve, suspend and reactivate hospitals (no access to patient data) |
 
@@ -89,9 +88,7 @@ With `APP_ENV=local` the seeder creates demo accounts, all with the password `pa
 | `admin@echo.test` | Platform admin |
 | `hadmin@echo.test` | Hospital admin (Demo Heart Hospital) |
 | `doctor@echo.test` | Doctor |
-| `tech@echo.test` | Echo technician |
-| `nurse@echo.test` | Nurse |
-| `qc@echo.test` | Quality control |
+| `nurse@echo.test` | Nurse / technician |
 
 It also adds six fictional patients with admissions and coronary angiographies recorded in the
 heart system's fields (drafts, signed and amended). On a demo deployment `app:seed-demo` adds the

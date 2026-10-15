@@ -1,6 +1,6 @@
 /**
  * voice-input.js - Reusable Native Web Speech-to-Text Module
- * Provides voice input capability for all text, number, date, and other inputs & textareas (except selections).
+ * Provides voice input for text inputs and textareas (not numbers, dates, times or selections).
  */
 (function (window, document) {
     'use strict';
@@ -265,10 +265,11 @@
                 return true;
             }
 
-            // All inputs EXCEPT selections (select, checkbox, radio), buttons, hidden, and file inputs
+            // All inputs EXCEPT numbers, selections (select, checkbox, radio), buttons, hidden, and file inputs
             if (tagName === 'input') {
                 const type = (el.type || 'text').toLowerCase();
                 const excludedTypes = [
+                    'number',
                     'checkbox',
                     'radio',
                     'button',

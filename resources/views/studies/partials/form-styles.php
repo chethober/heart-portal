@@ -31,23 +31,46 @@
     width: 100%;
   }
 
-  #echo-app .field {
-    display: flex;
-    flex-direction: column;
+  /* Fields are laid out by public/echo-form/form-layout.js, which gives each run of fields an
+   * even column count (--cols); fields on a shorter last line grow to fill it. Text areas,
+   * checkbox groups and anything that isn't a field take the whole line. */
+  #echo-app .row {
+    align-items: flex-start;
+  }
+
+  #echo-app .row > * {
     flex: 1 1 100%;
     min-width: 0;
   }
 
+  #echo-app .field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* A field shown only for some value of another sits in that field's cell, under it. */
+  #echo-app .field.is-sub {
+    margin-top: 10px;
+    padding-inline-start: 10px;
+    border-inline-start: 2px solid #c7d2fe;
+  }
+
+  #echo-app .row > .field:not(.is-wide) {
+    --cell: calc((100% - (var(--cols, 1) - 1) * var(--gap)) / var(--cols, 1));
+    flex: 1 1 calc(var(--cell) - 0.5px);
+    max-width: var(--cell);
+  }
+
   @media (min-width: 640px) {
-    #echo-app .field {
-      flex: 1 1 calc(50% - var(--gap));
+    #echo-app .row > .field:not(.is-wide) {
+      --cols: 2;
     }
   }
 
   @media (min-width: 1024px) {
-    #echo-app .field {
-      flex: 1 1 calc(25% - var(--gap));
-      min-width: 200px;
+    #echo-app .row > .field:not(.is-wide) {
+      --cols: 4;
     }
   }
 
@@ -315,21 +338,34 @@
     width: 100%;
   }
 
+  /* Wraps instead of scrolling; form-layout.js shares the buttons out evenly over the lines (--cols). */
   #echo-app .section-nav-container {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     width: 100%;
-    overflow-x: auto;
     padding: 2px 2px 8px;
-    scrollbar-width: thin;
-    scrollbar-color: #d1d5db transparent;
-    -webkit-overflow-scrolling: touch;
+  }
+
+  #echo-app .section-nav-container.is-balanced > .section-nav-btn {
+    --cell: calc((100% - (var(--cols, 1) - 1) * 8px) / var(--cols, 1));
+    flex: 1 1 calc(var(--cell) - 0.5px);
+    max-width: var(--cell);
+  }
+
+  #echo-app .section-nav-container.is-measuring {
+    flex-wrap: nowrap;
+    width: max-content;
+  }
+
+  #echo-app .is-measuring > .section-nav-btn {
+    flex: none;
   }
 
   #echo-app .section-nav-btn {
     position: relative;
     flex: 1 0 auto;
-    min-width: 64px;
+    min-width: 0;
     min-height: 40px;
     padding: 6px 12px;
     display: flex;
@@ -382,6 +418,10 @@
   #echo-app .section-nav-btn .btn-abbr {
     font-size: 0.8125rem;
     font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Persian Datepicker Mobile Viewport Optimization */
@@ -540,18 +580,6 @@
   @keyframes tabFadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-
-  #echo-app .valve-status-field {
-    flex: 1 1 calc(33.333% - var(--gap));
-    min-width: 240px;
-  }
-
-  @media (max-width: 768px) {
-    #echo-app .valve-status-field {
-      flex: 1 1 100%;
-      min-width: 100%;
-    }
   }
 
   /* Alert dialog (its messages are in Persian, hence right-to-left) */
@@ -868,5 +896,319 @@
       position: relative;
       top: 0;
     }
+  }
+  /* --- Choice inputs (public/echo-form/choice-inputs.js) ----------------------------------
+   * The select stays in the form, visually hidden, as the field's value. */
+  #echo-app select.cx-native {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #echo-app .cx-toggle,
+  #echo-app .cx-chips,
+  #echo-app .cx-dropdown {
+    font-size: 0.875rem;
+  }
+
+  #echo-app .cx-toggle[hidden],
+  #echo-app .cx-chips[hidden],
+  #echo-app .cx-dropdown[hidden] {
+    display: none;
+  }
+
+  /* Toggle: a segmented switch, for one or two options. */
+  #echo-app .cx-toggle {
+    display: flex;
+    width: 100%;
+    min-height: 42px;
+    padding: 3px;
+    gap: 2px;
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    background: #f3f4f6;
+  }
+
+  #echo-app .cx-toggle-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 6px 16px;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: #4b5563;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+  }
+
+  #echo-app .cx-toggle-btn:hover:not(:disabled):not(.is-on) {
+    color: #111827;
+  }
+
+  #echo-app .cx-toggle-btn.is-on {
+    background: #4f46e5;
+    color: #fff;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+  }
+
+  /* Choicebox: one chip per option. */
+  #echo-app .cx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 42px;
+    align-items: center;
+  }
+
+  /* Balanced by form-layout.js into equal columns (--chip-cols); measured on one line first. */
+  #echo-app .cx-chips.is-balanced,
+  #echo-app .cx-group.is-balanced {
+    display: grid;
+    grid-template-columns: repeat(var(--chip-cols), minmax(0, 1fr));
+  }
+
+  #echo-app .cx-chips.is-measuring,
+  #echo-app .cx-group.is-measuring {
+    flex-wrap: nowrap;
+    width: max-content;
+  }
+
+  #echo-app .is-measuring > .cx-chip {
+    flex: none;
+  }
+
+  #echo-app .cx-chip {
+    display: inline-flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background: #fff;
+    color: #374151;
+    font: inherit;
+    cursor: pointer;
+    text-align: start;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  #echo-app .cx-chip:hover:not(:disabled):not(.is-on) {
+    border-color: #9ca3af;
+    background: #f9fafb;
+  }
+
+  #echo-app .cx-chip.is-on {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    color: #3730a3;
+    font-weight: 500;
+  }
+
+  #echo-app .cx-chip[role="checkbox"]::before {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #9ca3af;
+    border-radius: 3px;
+    background: #fff;
+  }
+
+  #echo-app .cx-chip[role="checkbox"].is-on::before {
+    border-color: #4f46e5;
+    background: #4f46e5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center / 12px no-repeat;
+  }
+
+  #echo-app .cx-toggle-btn:focus-visible,
+  #echo-app .cx-chip:focus-visible,
+  #echo-app .cx-trigger:focus-visible,
+  #echo-app .cx-option:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 1px;
+  }
+
+  #echo-app .cx-toggle-btn:disabled,
+  #echo-app .cx-chip:disabled,
+  #echo-app .cx-trigger:disabled,
+  #echo-app .cx-option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Dropdown: for six options or more. */
+  #echo-app .cx-dropdown {
+    position: relative;
+    width: 100%;
+  }
+
+  #echo-app .cx-trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 2.5rem 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E") right 0.75rem center / 1.25em no-repeat;
+    color: #111827;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  #echo-app [dir="rtl"] .cx-trigger,
+  #echo-app[dir="rtl"] .cx-trigger {
+    padding: 8px 12px 8px 2.5rem;
+    background-position: left 0.75rem center;
+  }
+
+  #echo-app .cx-dropdown.is-open .cx-trigger {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 1px #6366f1;
+  }
+
+  #echo-app .cx-trigger-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #echo-app .cx-trigger.is-empty .cx-trigger-text {
+    color: #9ca3af;
+  }
+
+  #echo-app .cx-panel {
+    position: absolute;
+    z-index: 40;
+    inset-inline: 0;
+    top: calc(100% + 4px);
+    min-width: 220px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+
+  #echo-app .cx-dropdown.is-up .cx-panel {
+    top: auto;
+    bottom: calc(100% + 4px);
+  }
+
+  #echo-app .cx-panel[hidden] {
+    display: none;
+  }
+
+  #echo-app .cx-search {
+    width: 100%;
+    min-height: 36px !important;
+    margin-bottom: 4px;
+  }
+
+  #echo-app .cx-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #374151;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  #echo-app .cx-option[hidden] {
+    display: none;
+  }
+
+  #echo-app .cx-option:hover:not(:disabled),
+  #echo-app .cx-option:focus-visible {
+    background: #f3f4f6;
+  }
+
+  #echo-app .cx-option.is-on {
+    color: #3730a3;
+    font-weight: 500;
+  }
+
+  #echo-app .cx-check,
+  #echo-app .cx-box {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+
+  #echo-app .cx-box {
+    border: 1px solid #9ca3af;
+    border-radius: 3px;
+    background: #fff;
+  }
+
+  #echo-app .cx-option.is-on .cx-check {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center / 14px no-repeat;
+  }
+
+  #echo-app .cx-option.is-on .cx-box {
+    border-color: #4f46e5;
+    background: #4f46e5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center / 12px no-repeat;
+  }
+
+  /* A run of yes/no fields that don't exclude each other, shown as one group of checkboxes. */
+  #echo-app .cx-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  #echo-app .cx-group > label.cx-chip {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  #echo-app .cx-group > label.cx-chip input[type="checkbox"] {
+    margin: 0;
+  }
+
+  #echo-app .cx-group > label.cx-chip:has(input:checked) {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    color: #3730a3;
+    font-weight: 500;
+  }
+
+  #echo-app .cx-group-dropdown .cx-panel label.cx-option {
+    margin: 0;
+  }
+
+  #echo-app .cx-group-dropdown .cx-panel label.cx-option input[type="checkbox"] {
+    margin: 0;
+  }
+
+  #echo-app .cx-group-dropdown .cx-panel label.cx-option:has(input:checked) {
+    color: #3730a3;
+    font-weight: 500;
   }
 </style>

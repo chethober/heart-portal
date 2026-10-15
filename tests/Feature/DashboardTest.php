@@ -8,7 +8,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $this->hospital = Hospital::factory()->create();
-    $this->tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $this->tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
 
     $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload())->assertCreated();
     $this->study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();

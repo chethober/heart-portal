@@ -54,11 +54,21 @@ final class Procedures
     /**
      * Every field of the procedure, keyed by column name.
      *
-     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string}>
+     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string, widget?: string, combine?: array<string, list<string>>, retired?: bool}>
      */
     public static function fields(string $key): array
     {
         return array_merge(...array_column(self::sections($key), 'fields'));
+    }
+
+    /**
+     * The fields the form shows and saves: all but "retired" ones, whose stored values are kept.
+     *
+     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string, widget?: string, combine?: array<string, list<string>>, retired?: bool}>
+     */
+    public static function formFields(string $key): array
+    {
+        return array_filter(self::fields($key), fn (array $field) => ! ($field['retired'] ?? false));
     }
 
     /**

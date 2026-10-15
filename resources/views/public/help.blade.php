@@ -60,9 +60,7 @@
                             <tr><th class="p-2">{{ __('Role') }}</th><th class="p-2">{{ __('Can do') }}</th></tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <tr><td class="p-2 font-medium">{{ __('Echo technician') }}</td><td class="p-2">{{ __('Record studies, edit drafts, search patients, view and print reports.') }}</td></tr>
-                            <tr><td class="p-2 font-medium">{{ __('Nurse') }}</td><td class="p-2">{{ __('The same as an echo technician: record studies, edit drafts, search patients, view and print reports.') }}</td></tr>
-                            <tr><td class="p-2 font-medium">{{ __('Quality control') }}</td><td class="p-2">{{ __('Everything a nurse can, plus review the audit log.') }}</td></tr>
+                            <tr><td class="p-2 font-medium">{{ __('Nurse / technician') }}</td><td class="p-2">{{ __('Record studies, edit drafts, search patients, view and print reports.') }}</td></tr>
                             <tr><td class="p-2 font-medium">{{ __('Doctor') }}</td><td class="p-2">{{ __('Everything a technician can, plus sign (finalize) reports, amend signed reports, and sign or cancel prescriptions.') }}</td></tr>
                             <tr><td class="p-2 font-medium">{{ __('Hospital admin') }}</td><td class="p-2">{{ __('Invite and manage staff, change roles, deactivate accounts, manage wards and the drug catalog, view reports and the audit log, and delete drafts.') }}</td></tr>
                             <tr><td class="p-2 font-medium">{{ __('Platform admin') }}</td><td class="p-2">{{ __('Approve, suspend and reactivate hospitals. Platform admins cannot see any patient data.') }}</td></tr>

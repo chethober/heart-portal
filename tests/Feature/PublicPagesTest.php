@@ -26,7 +26,7 @@ test('help center is one public page that includes the echo form guide', functio
         ->assertSee('Viewing and printing reports')
         ->assertDontSee(route('studies.create'));
 
-    $tech = User::factory()->role(Role::Technician)->create();
+    $tech = User::factory()->role(Role::Nurse)->create();
     $this->actingAs($tech)->get('/help')->assertOk()->assertSee(route('studies.create'));
     $this->actingAs($tech)->get('/dashboard')->assertSee(route('help'));
 });

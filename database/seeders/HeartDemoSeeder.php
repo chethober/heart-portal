@@ -202,7 +202,7 @@ class HeartDemoSeeder extends Seeder
             [
                 'patient' => ['national_id' => '9990000001', 'first_name' => 'Maryam', 'last_name' => 'Ahmadi', 'dob' => '1348/03/12', 'gender' => 'Female'],
                 'admission' => ['ward' => 'Cardiology', 'admitted_on' => '1405/06/02', 'discharged_on' => '1405/06/04', 'physician' => 'Dr. Demo'],
-                'author' => [Role::Technician],
+                'author' => [Role::Nurse],
                 'status' => 'final',
                 'study' => [
                     'DateOf_Date_of_angiography' => '1405/06/03',
@@ -216,7 +216,7 @@ class HeartDemoSeeder extends Seeder
             [
                 'patient' => ['national_id' => '9990000002', 'first_name' => 'Hossein', 'last_name' => 'Karimi', 'dob' => '1342/11/02', 'gender' => 'Male'],
                 'admission' => ['ward' => 'CCU', 'admitted_on' => '1405/06/10', 'physician' => 'Dr. Demo'],
-                'author' => [Role::Technician],
+                'author' => [Role::Nurse],
                 'status' => 'final',
                 'study' => [
                     'DateOf_Date_of_angiography' => '1405/06/11',
@@ -285,7 +285,7 @@ class HeartDemoSeeder extends Seeder
             [
                 'patient' => ['national_id' => '9990000003', 'first_name' => 'Reza', 'last_name' => 'Mohammadi', 'dob' => '1338/05/20', 'gender' => 'Male'],
                 'admission' => ['ward' => 'Cardiology', 'admitted_on' => '1405/06/15', 'physician' => 'Dr. Demo'],
-                'author' => [Role::Technician],
+                'author' => [Role::Nurse],
                 'status' => 'amended',
                 'study' => [
                     'DateOf_Date_of_angiography' => '1405/06/16',
@@ -314,7 +314,7 @@ class HeartDemoSeeder extends Seeder
             [
                 'patient' => ['national_id' => '9990000004', 'first_name' => 'Ali', 'last_name' => 'Hosseini', 'dob' => '1355/01/15', 'gender' => 'Male'],
                 'admission' => ['ward' => 'Emergency', 'admitted_on' => '1405/07/01', 'physician' => 'Dr. Demo'],
-                'author' => [Role::Technician],
+                'author' => [Role::Nurse],
                 'status' => 'draft',
                 'study' => [
                     'angiography_status' => 'Emergent_angigraphy',
@@ -357,7 +357,7 @@ class HeartDemoSeeder extends Seeder
             [
                 'patient' => ['national_id' => '9990000005', 'first_name' => 'Fatemeh', 'last_name' => 'Rahimi', 'dob' => '1360/08/09', 'gender' => 'Female'],
                 'admission' => ['ward' => 'Cardiology', 'admitted_on' => '1405/07/05', 'physician' => 'Dr. Demo'],
-                'author' => [Role::Nurse, Role::Technician],
+                'author' => [Role::Nurse],
                 'status' => 'draft',
                 'study' => [
                     'DateOf_Date_of_angiography' => '1405/07/06',
@@ -371,7 +371,7 @@ class HeartDemoSeeder extends Seeder
             [
                 'patient' => ['national_id' => '9990000006', 'first_name' => 'Zahra', 'last_name' => 'Jafari', 'dob' => '1345/02/28', 'gender' => 'Female'],
                 'admission' => ['ward' => 'CCU', 'admitted_on' => '1405/07/08', 'physician' => 'Dr. Demo'],
-                'author' => [Role::QualityControl, Role::Technician],
+                'author' => [Role::Nurse],
                 'status' => 'draft',
                 'study' => [
                     'DateOf_Date_of_angiography' => '1405/07/09',

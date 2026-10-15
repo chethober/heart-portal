@@ -9,7 +9,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $this->hospital = Hospital::factory()->create();
-    $this->tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $this->tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
 });
 
 function echoPayload(array $overrides = []): array

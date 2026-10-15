@@ -27,12 +27,12 @@ test('demo seeding creates the demo hospital and accounts without the default pa
 test('running demo seeding again resets passwords without duplicating accounts', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
     $this->artisan('app:seed-demo')->assertSuccessful();
-    $before = User::where('email', 'tech@echo.test')->value('password');
+    $before = User::where('email', 'nurse@echo.test')->value('password');
 
     $this->artisan('app:seed-demo')->assertSuccessful();
 
-    expect(User::where('email', 'like', '%@echo.test')->count())->toBe(6)
+    expect(User::where('email', 'like', '%@echo.test')->count())->toBe(4)
         ->and(AngiographyStudy::withoutGlobalScope(HospitalScope::class)->count())->toBe(6)
         ->and(Hospital::where('slug', 'demo-heart-hospital')->count())->toBe(1)
-        ->and(User::where('email', 'tech@echo.test')->value('password'))->not->toBe($before);
+        ->and(User::where('email', 'nurse@echo.test')->value('password'))->not->toBe($before);
 });

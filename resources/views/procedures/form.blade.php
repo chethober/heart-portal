@@ -7,14 +7,24 @@
      * clinical language whatever the interface language. Fields with "show_if" are shown only while
      * the field they depend on has that value; the server clears them otherwise.
      *
+     * Choice fields are drawn as toggles, choiceboxes or dropdowns by public/echo-form/choice-inputs.js.
+     * Small fields shown only for another field's value sit inside that field's cell (partials/field).
+     * Runs of yes/no fields in one group don't exclude each other, so they are shown together as
+     * one group of checkboxes (partials/checkbox-group), still saved as their own columns.
+     *
      * @var string $procedure
      * @var \App\Models\ProcedureStudy|null $study
      * @var array<string, mixed> $values  Saved values when editing.
      */
     use App\Support\Procedures;
 
-    $sections = array_values(Procedures::sections($procedure));
-    $fields = Procedures::fields($procedure);
+    // Retired fields are kept in the table but no longer shown; "top" sections join the patient row.
+    $sections = collect(Procedures::sections($procedure))
+        ->map(fn (array $section) => [...$section, 'fields' => array_filter($section['fields'], fn (array $field) => ! ($field['retired'] ?? false))])
+        ->filter(fn (array $section) => $section['fields'] !== []);
+    $top = array_merge([], ...$sections->filter(fn (array $section) => $section['top'] ?? false)->pluck('fields')->all());
+    $sections = $sections->reject(fn (array $section) => $section['top'] ?? false)->values()->all();
+    $fields = Procedures::formFields($procedure);
     $value = fn (string $name) => old($name, $values[$name] ?? null);
     $rtl = Procedures::dir($procedure) === 'rtl';
 
@@ -35,6 +45,10 @@
     <link rel="stylesheet" href="/echo-form/persianDatepicker/css/persianDatepicker-default.css">
     <script src="/echo-form/persianDatepicker/js/jquery-1.10.1.min.js"></script>
     <script src="/echo-form/persianDatepicker/js/persianDatepicker.min.js"></script>
+    <script src="/echo-form/choice-inputs.js" defer></script>
+    <script src="/echo-form/form-layout.js" defer></script>
+    <link rel="stylesheet" href="/echo-form/voice-input.css">
+    <script src="/echo-form/voice-input.js" defer></script>
     @include('studies.partials.form-styles')
 
     <div id="echo-app" dir="{{ $rtl ? 'rtl' : 'ltr' }}" lang="{{ $rtl ? 'fa' : 'en' }}"
@@ -104,6 +118,9 @@
             <div class="form-section-header" style="border:0;margin-bottom:4px">{{ $title }}</div>
             <div class="row">
                 @include('clinical.partials.patient-fields', ['values' => $values, 'admissions' => $admissions ?? collect(), 'admission' => $value('admission_id') ?? request('admission')])
+                @foreach ($top as $name => $field)
+                    @include('procedures.partials.field', ['sub' => false, 'children' => []])
+                @endforeach
             </div>
 
             {{-- One chip per section, green once something in it is filled in, red with an error. --}}
@@ -124,52 +141,43 @@
                 <div id="sec-{{ $index }}" class="form-section {{ $index === $active ? 'active' : '' }}" data-section="{{ $index }}" :class="{ 'active': section === {{ $index }} }">
                     <div class="form-section-header">{{ $section['title'] }}</div>
                     <div class="row">
-                        @foreach ($section['fields'] as $name => $field)
-                            @if (($field['group'] ?? null) !== null && ($field['group'] !== ($previousGroup ?? null)))
-                                <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $field['group'] }}</div>
-                            @endif
-                            @php $previousGroup = $field['group'] ?? null; @endphp
+                        @php
+                            // Small fields shown only for a value of another field in this section are drawn
+                            // inside that field's cell (partials/field), so revealing them moves nothing.
+                            $children = [];
+                            foreach ($section['fields'] as $name => $field) {
+                                $parent = $field['show_if'][0] ?? null;
+                                if ($parent !== null && isset($section['fields'][$parent]) && $section['fields'][$parent]['type'] !== 'boolean'
+                                    && in_array($field['type'], ['text', 'number', 'choice', 'date', 'time'], true)) {
+                                    $children[$parent][] = $name;
+                                }
+                            }
+                            $nested = array_merge([], ...array_values($children));
 
-                            <div class="field" @if ($visible($field)) x-show="{{ $visible($field) }}" x-cloak @endif
-                                 @if (in_array($field['type'], ['multiline', 'diagnoses'], true)) style="flex: 1 1 100%" @endif>
-                                @if ($field['type'] === 'diagnoses')
-                                    <label>{{ $field['label'] }}</label>
-                                    @include('clinical.partials.diagnosis-picker', ['name' => $name, 'selected' => old($name, $values[$name] ?? [])])
-                                @elseif ($field['type'] === 'boolean')
-                                    <label style="display:flex;align-items:center;gap:8px;margin-top:22px">
-                                        <input type="checkbox" name="{{ $name }}" value="1" @checked((bool) $value($name))
-                                               @if ($watched->has($name)) x-on:change="v['{{ $name }}'] = $event.target.checked ? '1' : ''" @endif>
-                                        <span>{{ $field['label'] }}</span>
-                                    </label>
-                                @else
-                                    <label for="f-{{ $name }}">{{ $field['label'] }}</label>
-                                    @switch($field['type'])
-                                        @case('choice')
-                                            <select id="f-{{ $name }}" name="{{ $name }}" {!! $model($name) !!}>
-                                                <option value=""></option>
-                                                @foreach ($field['options'] as $code => $label)
-                                                    <option value="{{ $code }}" @selected((string) $value($name) === (string) $code)>{{ $label }}</option>
-                                                @endforeach
-                                            </select>
-                                            @break
-                                        @case('multiline')
-                                            <textarea id="f-{{ $name }}" name="{{ $name }}" style="min-height: 60px">{{ $value($name) }}</textarea>
-                                            @break
-                                        @case('number')
-                                            <input id="f-{{ $name }}" type="number" step="any" name="{{ $name }}" value="{{ $value($name) }}" {!! $model($name) !!}>
-                                            @break
-                                        @case('date')
-                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="1405/01/01" class="no-voice" data-jalali {!! $model($name) !!}>
-                                            @break
-                                        @case('time')
-                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" placeholder="HH:MM" {!! $model($name) !!}>
-                                            @break
-                                        @default
-                                            <input id="f-{{ $name }}" type="text" name="{{ $name }}" value="{{ $value($name) }}" {!! $model($name) !!}>
-                                    @endswitch
-                                @endif
-                                @error($name) <span class="small" style="color:#dc2626">{{ $message }}</span> @enderror
-                            </div>
+                            // Consecutive yes/no fields of one group become a single checkbox group.
+                            $items = [];
+                            foreach (array_diff_key($section['fields'], array_flip($nested)) as $name => $field) {
+                                $last = array_key_last($items);
+                                if ($field['type'] === 'boolean' && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
+                                    $items[$last]['fields'][$name] = $field;
+                                } else {
+                                    $items[] = ['booleans' => $field['type'] === 'boolean', 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
+                                }
+                            }
+                        @endphp
+                        @foreach ($items as $item)
+                            @if ($item['group'] !== null && $item['group'] !== ($previousGroup ?? null))
+                                <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $item['group'] }}</div>
+                            @endif
+                            @php $previousGroup = $item['group']; @endphp
+
+                            @if (count($item['fields']) > 1)
+                                @include('procedures.partials.checkbox-group', ['fields' => $item['fields']])
+                                @continue
+                            @endif
+                            @php $name = array_key_first($item['fields']); $field = $item['fields'][$name]; @endphp
+
+                            @include('procedures.partials.field', ['sub' => false])
                         @endforeach
                     </div>
                 </div>
@@ -358,6 +366,8 @@
                     this.section = 0;
                     this.mark();
                     this.refresh();
+                    // Checkbox groups recount what is ticked; their boxes were set without events.
+                    window.dispatchEvent(new CustomEvent('choices-sync'));
                     window.patientLookup?.check(false, data.admission_id);
                 },
 
@@ -399,6 +409,27 @@
                     form.target = '';
                     form.noValidate = false;
                     if (this.$refs.method) this.$refs.method.disabled = false;
+                },
+            };
+        }
+
+        /** A dropdown of checkboxes (partials/checkbox-group), summarising what is ticked. */
+        function checkboxGroup() {
+            return {
+                open: false,
+                picked: [],
+                init() { this.count(); },
+                count() {
+                    this.picked = Array.from(this.$refs.panel.querySelectorAll('input:checked')).map((input) => input.nextElementSibling.textContent.trim());
+                },
+                summary() {
+                    if (! this.picked.length) return '—';
+                    return this.picked.length <= 2 ? this.picked.join(', ') : this.picked.length + ' selected';
+                },
+                close(focus = false) {
+                    if (! this.open) return;
+                    this.open = false;
+                    if (focus) this.$refs.trigger.focus();
                 },
             };
         }

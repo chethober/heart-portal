@@ -22,6 +22,8 @@
 @endphp
 
 <x-dashboard-layout title="Prescription">
+    <link rel="stylesheet" href="/echo-form/voice-input.css">
+    <script src="/echo-form/voice-input.js" defer></script>
     <form method="POST" action="{{ $editing ? route('prescriptions.update', $prescription) : route('prescriptions.store') }}"
           dir="ltr" lang="en" class="space-y-4"
           x-data="prescriptionForm(@js($items), @js(route('drugs.search')))">
@@ -58,7 +60,7 @@
             <legend class="px-1 font-semibold">Prescription</legend>
             <label class="block text-sm">
                 <span class="font-medium text-gray-700">Date (YYYY/MM/DD)</span>
-                <input type="text" name="prescribed_on" value="{{ old('prescribed_on', $prescription->prescribed_on) }}" class="{{ $input }}">
+                <input type="text" name="prescribed_on" value="{{ old('prescribed_on', $prescription->prescribed_on) }}" class="{{ $input }} no-voice">
             </label>
             <label class="block text-sm">
                 <span class="font-medium text-gray-700">Admission</span>

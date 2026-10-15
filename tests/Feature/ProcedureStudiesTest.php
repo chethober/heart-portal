@@ -120,3 +120,32 @@ test('the preview needs the form permission and never shows another hospital\'s 
     $this->nurse->revokePermissionTo(['angiography.create', 'angiography.edit']);
     $this->actingAs($this->nurse)->post('/dashboard/procedures/angiography/preview', $payload)->assertForbidden();
 });
+
+test('saving a discharge summary keeps its retired complication fields and its written history', function () {
+    [$payload] = procedurePayload('discharge');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', $payload)->assertRedirect();
+    $study = Procedures::model('discharge')::withoutGlobalScope(HospitalScope::class)->sole();
+    // As heart's import leaves them: structured complications and a history without a mode.
+    $study->forceFill(['diseasestatus' => '1', 'comp_after_cva' => '1', 'non_specific_explanation' => 'Imported history'])->save();
+
+    $this->actingAs($this->nurse)->get("/dashboard/procedures/discharge/{$study->id}/edit")
+        ->assertOk()
+        ->assertDontSee('name="comp_after_cva"', false)
+        ->assertSee('Imported history');
+    expect($study->fresh()->history_mode)->toBe('manual');
+
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/discharge/{$study->id}", [
+        ...$payload, 'diseasestatus' => '1', 'diseasestatus_other' => 'Hematoma',
+        'history_mode' => 'manual', 'non_specific_explanation' => 'Imported history',
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    $study->refresh();
+    expect($study->comp_after_cva)->toBe('1')
+        ->and($study->diseasestatus_other)->toBe('Hematoma')
+        ->and($study->non_specific_explanation)->toBe('Imported history');
+
+    // Auto builds the history from the complaints, so the written one is dropped.
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/discharge/{$study->id}", [...$payload, 'history_mode' => 'auto', 'non_specific_explanation' => 'Imported history'])
+        ->assertRedirect();
+    expect($study->fresh()->non_specific_explanation)->toBeNull();
+});

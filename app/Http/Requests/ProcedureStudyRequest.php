@@ -70,8 +70,9 @@ class ProcedureStudyRequest extends FormRequest
     }
 
     /**
-     * Every field of the procedure. Fields left out of the form (an unticked box)
-     * become null, as do fields hidden because the field they depend on changed.
+     * Every field the form shows. Fields left out of the form (an unticked box) become
+     * null, as do fields hidden because the field they depend on changed. Retired
+     * fields are not in the form, so their stored values are left as they are.
      *
      * @return array<string, mixed>
      */
@@ -102,6 +103,6 @@ class ProcedureStudyRequest extends FormRequest
      */
     private function fields(): array
     {
-        return Procedures::fields($this->route('procedure'));
+        return Procedures::formFields($this->route('procedure'));
     }
 }
