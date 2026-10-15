@@ -100,7 +100,7 @@ class ProcedureStudyController extends Controller
         $study = new (Procedures::model($procedure));
         $values = [];
 
-        foreach (Procedures::fields($procedure) as $name => $field) {
+        foreach (Procedures::formFields($procedure) as $name => $field) {
             $value = $request->input($name);
             $value = match ($field['type']) {
                 'boolean' => (bool) $value ?: null,

@@ -15,29 +15,32 @@
 | which are stored as null. "show_if" shows a field only while another field
 | has the given value.
 |
+| Form-only keys: a "top" section is shown with the patient's details; "widget"
+| draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
+| (checkboxes whose combination picks the code); a "retired" field is kept
+| (import, export, report) but no longer shown in the form or changed by it.
+|
 */
 
 return [
     'label' => 'Discharge Summary',
-    // Heart's labels for this form are Persian, so it is shown right to left.
-    'dir' => 'rtl',
     'date_field' => 'DateOf_disch_date',
     'sections' => [
         [
             'title' => 'Registration',
+            // Shown with the patient's details rather than as a section of its own.
+            'top' => true,
             'fields' => [
-                'bomi' => ['type' => 'choice', 'label' => 'بومی یا غیر بومی بودن بیمار را مشخص کنید؟', 'options' => ['1' => 'بومی', '2' => 'غیر بومی', '9' => 'Unknown']],
+                'bomi' => ['type' => 'choice', 'label' => 'بومی / غیر بومی', 'widget' => 'dropdown', 'options' => ['1' => 'بومی', '2' => 'غیر بومی', '9' => 'Unknown']],
             ],
         ],
         [
-            'title' => 'شرح حال انشائی',
+            'title' => 'شکایت بالینی و شرح حال',
             'fields' => [
-                'non_specific_explanation' => ['type' => 'multiline', 'label' => 'شرح حال انشائی'],
-            ],
-        ],
-        [
-            'title' => 'شکایت بالینی بیمار',
-            'fields' => [
+                // Auto: the report's opening sentence is built from the complaints below.
+                // Manual: the history written here is printed instead.
+                'history_mode' => ['type' => 'choice', 'label' => 'شرح حال', 'options' => ['auto' => 'Auto', 'manual' => 'Manual']],
+                'non_specific_explanation' => ['type' => 'multiline', 'label' => 'شرح حال انشائی', 'show_if' => ['history_mode', 'manual']],
                 'clinicalcomplaint_chestpaininactivity' => ['type' => 'choice', 'label' => 'درد سینه در هنگام فعالیت', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'clinicalcomplaint_chestDisromfort' => ['type' => 'choice', 'label' => 'ناراحتی قفسه سینه در فعالیت', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'clinicalcomplaint_chestpainInrest' => ['type' => 'choice', 'label' => 'درد سینه در استراحت', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
@@ -61,31 +64,33 @@ return [
         [
             'title' => 'ریسک فاکتورها و سوابق بیماری های قلبی و بیماری های همراه',
             'fields' => [
-                'hxPrevMI_main' => ['type' => 'choice', 'label' => 'سابقه سکته قلبی', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
+                'hxPrevMI_main' => ['type' => 'choice', 'label' => 'سابقه سکته قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevMI_date' => ['type' => 'date', 'label' => 'تاریخ'],
-                'hxPrevHF_main' => ['type' => 'choice', 'label' => 'سابقه نارسایی قلب', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
+                'hxPrevHF_main' => ['type' => 'choice', 'label' => 'سابقه نارسایی قلب', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevHF_date' => ['type' => 'date', 'label' => 'تاریخ'],
-                'previous_cvd' => ['type' => 'choice', 'label' => 'بیماری های عروق محیطی', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
-                'hxPrevCVA_main' => ['type' => 'choice', 'label' => 'سابقه CVA', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
+                'previous_cvd' => ['type' => 'choice', 'label' => 'بیماری های عروق محیطی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'hxPrevCVA_main' => ['type' => 'choice', 'label' => 'سابقه CVA', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevCVA_date' => ['type' => 'date', 'label' => 'تاریخ'],
-                'hxCRF' => ['type' => 'choice', 'label' => 'نارسایی کلیه وابسته به دیالیز', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
+                'hxCRF' => ['type' => 'choice', 'label' => 'نارسایی کلیه وابسته به دیالیز', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'other_past_history' => ['type' => 'multiline', 'label' => 'سایر بیماری ها و ریسک فاکتورها'],
-                'rf_htn_hx' => ['type' => 'choice', 'label' => 'فشارخون بالا', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
-                'rf_htn_tx' => ['type' => 'choice', 'label' => 'درمان', 'options' => ['1' => 'رژیم غذایی', '2' => 'درمان دارویی', '3' => 'رژیم غذایی + درمان دارویی', '4' => 'هیچکدام'], 'blank' => ['9'], 'show_if' => ['rf_htn_hx', '1']],
-                'rf_diabetes_hx' => ['type' => 'choice', 'label' => 'دیابت', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
-                'dm_tx_regimen' => ['type' => 'choice', 'label' => 'رژیم غذایی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
-                'dm_tx_oral' => ['type' => 'choice', 'label' => 'دارو خوراکی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
-                'dm_tx_insulin' => ['type' => 'choice', 'label' => 'انسولین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
-                'rf_hyperchol_hx' => ['type' => 'choice', 'label' => 'هیپرکلسترولمی', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
-                'hyperchol_tx_regimen' => ['type' => 'choice', 'label' => 'رژیم غذایی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
-                'hyperchol_tx_statin' => ['type' => 'choice', 'label' => 'مصرف استاتین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
-                'hyperchol_tx_non_statin' => ['type' => 'choice', 'label' => 'مصرف داروی غیر استاتین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
-                'rf_smoking' => ['type' => 'choice', 'label' => 'سیگار', 'options' => ['1' => 'سیگاری است', '2' => 'سیگار را ترک است', '3' => 'هرگز سیگار نکشیده است'], 'blank' => ['9']],
+                'rf_htn_hx' => ['type' => 'choice', 'label' => 'فشارخون بالا', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'rf_htn_tx' => ['type' => 'choice', 'label' => 'درمان', 'options' => ['1' => 'رژیم غذایی', '2' => 'درمان دارویی', '3' => 'رژیم غذایی + درمان دارویی', '4' => 'هیچکدام'], 'blank' => ['9'], 'show_if' => ['rf_htn_hx', '1'],
+                    // Ticked as two checkboxes; each code is the combination it stands for.
+                    'widget' => 'combine', 'combine' => ['1' => ['1'], '2' => ['2'], '3' => ['1', '2']]],
+                'rf_diabetes_hx' => ['type' => 'choice', 'label' => 'دیابت', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'dm_tx_regimen' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'رژیم غذایی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
+                'dm_tx_oral' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'دارو خوراکی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
+                'dm_tx_insulin' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'انسولین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
+                'rf_hyperchol_hx' => ['type' => 'choice', 'label' => 'هیپرکلسترولمی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'hyperchol_tx_regimen' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'رژیم غذایی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
+                'hyperchol_tx_statin' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'مصرف استاتین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
+                'hyperchol_tx_non_statin' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'مصرف داروی غیر استاتین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
+                'rf_smoking' => ['type' => 'choice', 'label' => 'سیگار', 'options' => ['1' => 'Current smoker', '2' => 'Former smoker', '3' => 'Never smoked'], 'blank' => ['9']],
                 'rf_hookah' => ['type' => 'choice', 'label' => 'مصرف قلیان', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'rf_opium' => ['type' => 'choice', 'label' => 'مصرف تریاک', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'rf_alcohol' => ['type' => 'choice', 'label' => 'مصرف الکل', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'rf_opioides' => ['type' => 'choice', 'label' => 'مصرف سایر مخدرها', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'cad_family_hx' => ['type' => 'choice', 'label' => 'سابقه فامیلی بیماری قلبی', 'options' => ['1' => 'Yes', '2' => 'مشکوک', '3' => 'No'], 'blank' => ['9']],
+                'cad_family_hx' => ['type' => 'choice', 'label' => 'سابقه فامیلی بیماری قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'cad_family_hx_father' => ['type' => 'boolean', 'label' => 'سابقه بیماری قلبی پدر', 'show_if' => ['cad_family_hx', '1']],
                 'cad_family_hx_mother' => ['type' => 'boolean', 'label' => 'سابقه بیماری قلبی مادر', 'show_if' => ['cad_family_hx', '1']],
                 'cad_family_hx_brother' => ['type' => 'boolean', 'label' => 'سابقه بیماری قلبی برادر', 'show_if' => ['cad_family_hx', '1']],
@@ -273,14 +278,14 @@ return [
             'title' => 'بروز عوارض در حین بستری',
             'fields' => [
                 'diseasestatus' => ['type' => 'choice', 'label' => 'بروز عوارض در حین بستری', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'diseasestatus_other' => ['type' => 'text', 'label' => 'سایرموارد', 'show_if' => ['diseasestatus', '1']],
-                'comp_after_hematoma' => ['type' => 'choice', 'label' => 'هماتوم محل آنژيوگرافي', 'options' => ['0' => 'No', '1' => 'Yes', '9' => 'نامشخص'], 'show_if' => ['diseasestatus', '1']],
-                'comp_after_hematoma_size' => ['type' => 'choice', 'label' => 'اندازه هماتوم (سانتي متر)', 'options' => ['1' => 'کمتر از 3', '2' => 'بین 3 تا 5', '3' => 'بین 5 تا 10', '4' => 'بیشتر از 10', '9' => 'نامشخص'], 'show_if' => ['comp_after_hematoma', '1']],
-                'comp_after_intervention' => ['type' => 'choice', 'label' => 'نوع مداخله', 'options' => ['1' => 'بدون هيچ گونه مداخله', '2' => 'كمپرس بيشتر', '3' => 'تخليه هماتوم', '4' => 'مداخله جراحي', '5' => 'نياز  به تزريق خون', '9' => 'نامشخص'], 'show_if' => ['comp_after_hematoma', '1']],
-                'comp_after_pulseless' => ['type' => 'choice', 'label' => 'از بين رفتن نبض اندام مربوطه', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['diseasestatus', '1']],
-                'comp_after_pulseless_intervention' => ['type' => 'choice', 'label' => 'نوع مداخله', 'options' => ['1' => 'تجويز هپارين', '2' => 'مداخله جراحي', '3' => 'مداخله اينترونشن', '9' => 'نامشخص'], 'show_if' => ['comp_after_pulseless', '1']],
-                'comp_after_cva' => ['type' => 'choice', 'label' => 'TIA  و  يا CVA  هنگام ترخيص', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['diseasestatus', '1']],
-                'diseasestatus_complication' => ['type' => 'multiline', 'label' => 'Other Complications', 'show_if' => ['diseasestatus', '1']],
+                'diseasestatus_other' => ['type' => 'text', 'label' => 'شرح عوارض', 'show_if' => ['diseasestatus', '1']],
+                'comp_after_hematoma' => ['type' => 'choice', 'label' => 'هماتوم محل آنژيوگرافي', 'options' => ['0' => 'No', '1' => 'Yes', '9' => 'نامشخص'], 'show_if' => ['diseasestatus', '1'], 'retired' => true],
+                'comp_after_hematoma_size' => ['type' => 'choice', 'label' => 'اندازه هماتوم (سانتي متر)', 'options' => ['1' => 'کمتر از 3', '2' => 'بین 3 تا 5', '3' => 'بین 5 تا 10', '4' => 'بیشتر از 10', '9' => 'نامشخص'], 'show_if' => ['comp_after_hematoma', '1'], 'retired' => true],
+                'comp_after_intervention' => ['type' => 'choice', 'label' => 'نوع مداخله', 'options' => ['1' => 'بدون هيچ گونه مداخله', '2' => 'كمپرس بيشتر', '3' => 'تخليه هماتوم', '4' => 'مداخله جراحي', '5' => 'نياز  به تزريق خون', '9' => 'نامشخص'], 'show_if' => ['comp_after_hematoma', '1'], 'retired' => true],
+                'comp_after_pulseless' => ['type' => 'choice', 'label' => 'از بين رفتن نبض اندام مربوطه', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['diseasestatus', '1'], 'retired' => true],
+                'comp_after_pulseless_intervention' => ['type' => 'choice', 'label' => 'نوع مداخله', 'options' => ['1' => 'تجويز هپارين', '2' => 'مداخله جراحي', '3' => 'مداخله اينترونشن', '9' => 'نامشخص'], 'show_if' => ['comp_after_pulseless', '1'], 'retired' => true],
+                'comp_after_cva' => ['type' => 'choice', 'label' => 'TIA  و  يا CVA  هنگام ترخيص', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['diseasestatus', '1'], 'retired' => true],
+                'diseasestatus_complication' => ['type' => 'multiline', 'label' => 'Other Complications', 'show_if' => ['diseasestatus', '1'], 'retired' => true],
             ],
         ],
         [

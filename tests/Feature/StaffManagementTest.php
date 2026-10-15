@@ -55,7 +55,7 @@ test('clinical staff cannot manage staff', function (Role $role) {
 
     $this->actingAs($user)->get('/dashboard/staff')->assertForbidden();
     $this->actingAs($user)->post('/dashboard/staff/invitations', ['email' => 'x@example.com', 'role' => 'doctor'])->assertForbidden();
-})->with([Role::Doctor, Role::Technician, Role::Nurse, Role::QualityControl]);
+})->with([Role::Doctor, Role::Nurse]);
 
 test('hospital admin only sees and edits their own staff and invitations', function () {
     $otherHospital = Hospital::factory()->create();
@@ -76,7 +76,7 @@ test('hospital admin only sees and edits their own staff and invitations', funct
         ->assertDontSee('secret@example.com');
 
     $this->actingAs($this->admin)
-        ->patch("/dashboard/staff/{$otherDoctor->id}", ['role' => 'technician', 'is_active' => 0])
+        ->patch("/dashboard/staff/{$otherDoctor->id}", ['role' => 'nurse', 'is_active' => 0])
         ->assertNotFound();
     $this->actingAs($this->admin)->delete("/dashboard/staff/invitations/{$otherInvite->id}")->assertNotFound();
 
@@ -84,10 +84,10 @@ test('hospital admin only sees and edits their own staff and invitations', funct
 });
 
 test('deactivated staff are logged out and cannot log in', function () {
-    $tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
 
     $this->actingAs($this->admin)
-        ->patch("/dashboard/staff/{$tech->id}", ['role' => 'technician', 'is_active' => 0])
+        ->patch("/dashboard/staff/{$tech->id}", ['role' => 'nurse', 'is_active' => 0])
         ->assertRedirect();
     expect($tech->fresh()->is_active)->toBeFalse();
 

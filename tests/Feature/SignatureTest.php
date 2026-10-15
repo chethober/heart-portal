@@ -22,7 +22,7 @@ test('doctors upload a private signature that colleagues can see but other hospi
     $path = $this->doctor->fresh()->signature_path;
     Storage::disk('local')->assertExists($path);
 
-    $colleague = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $colleague = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
     $this->actingAs($colleague)->get("/dashboard/users/{$this->doctor->id}/signature")->assertOk();
 
     $stranger = User::factory()->role(Role::Doctor)->create();
@@ -30,7 +30,7 @@ test('doctors upload a private signature that colleagues can see but other hospi
 });
 
 test('technicians cannot upload signatures and non-images are rejected', function () {
-    $tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
     $this->actingAs($tech)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('s.png')])->assertForbidden();
 
     $this->actingAs($this->doctor)

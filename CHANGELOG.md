@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 - Multi-hospital platform: hospital self-registration with platform-admin approval, staff
-  invitations, roles (platform admin, hospital admin, doctor, echo technician).
+  invitations, roles (platform admin, hospital admin, doctor, nurse / technician).
 - Echo study form, patient history and printable report, ported from the original
   single-hospital application, with server-side validation of every field.
 - `EchoCalculations` service for automatic grading (single source of truth for all reports).
@@ -24,7 +24,8 @@ All notable changes to this project are documented here. The format follows
   studies. Every form's report is generated as a clinical narrative, as heart printed it: the right
   heart catheterization report tabulates saturations and pressures by site and gives the
   haemodynamics (PVR calculated from mean PA pressure, PCWP and cardiac output when not recorded).
-- Nurse and quality-control roles. Quality control can also review the audit log.
+- One nurse / technician role for staff who record studies but do not sign them (the earlier
+  technician and quality-control roles are merged into it).
 - Patient record with demographics and contact details; admissions with ward, admission type,
   arrival, referrer and attending physician, discharge, and a Ward patients census. Hospital
   admins manage their wards.

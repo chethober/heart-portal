@@ -15,7 +15,7 @@
                     <x-input-label for="role" :value="__('Role')" />
                     <select id="role" name="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @foreach ($roles as $role)
-                            <option value="{{ $role->value }}" @selected(old('role', 'technician') === $role->value)>{{ $role->label() }}</option>
+                            <option value="{{ $role->value }}" @selected(old('role', 'nurse') === $role->value)>{{ $role->label() }}</option>
                         @endforeach
                     </select>
                 </div>

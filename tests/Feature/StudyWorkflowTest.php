@@ -9,7 +9,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $this->hospital = Hospital::factory()->create();
-    $this->tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $this->tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
     $this->doctor = User::factory()->for($this->hospital)->role(Role::Doctor)->create(['name' => 'Dr. Signer', 'medical_license_no' => 'M-12345']);
 
     $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload())->assertCreated();
@@ -101,7 +101,7 @@ test('signed reports are locked and can only be amended by a doctor with a reaso
 });
 
 test('drafts can be deleted by their author or a hospital admin only', function () {
-    $otherTech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $otherTech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
     $this->actingAs($otherTech)->delete("/dashboard/studies/{$this->study->id}")->assertForbidden();
     $this->actingAs($this->doctor)->delete("/dashboard/studies/{$this->study->id}")->assertForbidden();
 

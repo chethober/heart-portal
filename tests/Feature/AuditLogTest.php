@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 beforeEach(function () {
     $this->hospital = Hospital::factory()->create();
     $this->admin = User::factory()->for($this->hospital)->role(Role::HospitalAdmin)->create();
-    $this->tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $this->tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
 });
 
 function auditActions(): array
@@ -80,5 +80,5 @@ test('staff management is audited', function () {
 
     $updated = AuditLog::withoutGlobalScope(HospitalScope::class)->where('action', 'staff.updated')->sole();
     expect(auditActions())->toContain('staff.invited')
-        ->and($updated->changes['role'])->toBe(['technician', 'doctor']);
+        ->and($updated->changes['role'])->toBe(['nurse', 'doctor']);
 });

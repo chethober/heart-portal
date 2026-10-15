@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -10,6 +11,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DischargeStudy extends ProcedureStudy
 {
     public const PROCEDURE = 'discharge';
+
+    /**
+     * Studies saved before history_mode existed (and heart's) wrote their history by hand when
+     * there is one, so the form opens them in manual mode and saving keeps the text.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function historyMode(): Attribute
+    {
+        return Attribute::get(fn (?string $value, array $attributes) => $value
+            ?? (filled($attributes['non_specific_explanation'] ?? null) ? 'manual' : null));
+    }
 
     /**
      * Discharge medications (heart's drugDischarge_ep prescription widget), newest first.

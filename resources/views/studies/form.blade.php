@@ -17,6 +17,8 @@
     <script src="/echo-form/persianDatepicker/js/jquery-1.10.1.min.js"></script>
     <script src="/echo-form/persianDatepicker/js/persianDatepicker.min.js"></script>
     <script src="/echo-form/voice-input.js" defer></script>
+    <script src="/echo-form/choice-inputs.js" defer></script>
+    <script src="/echo-form/form-layout.js" defer></script>
     @include('studies.partials.form-styles')
 
     <div id="echo-app" dir="ltr" lang="en">
@@ -76,7 +78,7 @@
         <input id="echo_date" name="echo_date" type="text" class="no-voice" />
         <span id="echo_date-display"></span>
       </div>
-      <div class="field hidden" id="other_Echo_indication_wrap">
+      <div class="field hidden" id="other_Echo_indication_wrap" data-follows="Echo_indication">
         <label for="other_Echo_indication">other Echo indication</label>
         <input id="other_Echo_indication" name="other_Echo_indication" type="text" />
       </div>
@@ -149,7 +151,7 @@
             <option value="Other">Other</option>
           </select>
         </div>
-        <div class="field hidden" id="other_Rhythm_wrap">
+        <div class="field hidden" id="other_Rhythm_wrap" data-follows="Rhythm">
           <label for="other_Rhythm">other Rhythm</label>
           <input id="other_Rhythm" name="other_Rhythm" type="text" />
         </div>
@@ -170,7 +172,7 @@
           </select>
         </div>
 
-        <div class="field hidden" id="other_Echo_type_wrap">
+        <div class="field hidden" id="other_Echo_type_wrap" data-follows="Echo_type">
           <label for="other_Echo_type">Other Echo type</label>
           <input id="other_Echo_type" name="other_Echo_type" type="text" />
         </div>
@@ -261,14 +263,14 @@
             <option value="Large organized LV clot">Large organized LV clot</option>
           </select>
         </div>
-        <div class="field hidden" id="PPG_wrap">
+        <div class="field hidden" id="PPG_wrap" data-follows="lv_Hypertrophy">
           <label for="PPG">PPG (mmHg)</label>
           <input id="PPG" name="PPG" type="number" step="1" />
         </div>
       </div>
 
       <div class="row">
-        <div class="field" id="lv_manual_row" style="display: none;">
+        <div class="field" id="lv_manual_row" data-follows="lv_size" style="display: none;">
           <label for="lv_size_manual">Manual LV Size Description</label>
           <input type="text" id="lv_size_manual" name="lv_size_manual" />
         </div>
@@ -314,7 +316,7 @@
                 <option value="2">thinning and loss of tissue</option>
               </select>
             </div>
-            <div class="field hidden" id="other_clot_wrap_lv"><label for="other_clot_lv">other clot</label><input
+            <div class="field hidden" id="other_clot_wrap_lv" data-follows="lv_clot"><label for="other_clot_lv">other clot</label><input
                 id="lv_other_clot" name="lv_other_clot" /></div>
           </div>
 
@@ -389,7 +391,7 @@
       </div>
 
       <div class="row">
-        <div class="field" id="rv_manual_row" style="display: none;">
+        <div class="field" id="rv_manual_row" data-follows="rv_size" style="display: none;">
           <label for="rv_size_manual">Manual RV Size Description</label>
           <input type="text" id="rv_size_manual" name="rv_size_manual" />
         </div>
@@ -488,7 +490,7 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="mv_abnormality_container" style="display: none;">
+        <div class="field" id="mv_abnormality_container" data-follows="mv_mvls" style="display: none;">
           <label for="mv_abnormality_description">Abnormality Description</label>
           <input id="mv_abnormality_description" name="mv_abnormality_description" type="text" />
         </div>
@@ -545,7 +547,7 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="av_abnormality_container" style="display: none;">
+        <div class="field" id="av_abnormality_container" data-follows="av_Aortic_valve" style="display: none;">
           <label for="av_abnormality_description">Abnormality Description</label>
           <input id="av_abnormality_description" name="av_abnormality_description" type="text" />
         </div>
@@ -598,7 +600,7 @@
               <option value="Manual">Manual</option>
             </select>
           </div>
-          <div class="field" id="av_aorta_manual_row" style="display: none;">
+          <div class="field" id="av_aorta_manual_row" data-follows="av_aorta" style="display: none;">
             <label for="av_aorta_manual">Manual Aorta Description</label>
             <input type="text" id="av_aorta_manual" name="av_aorta_manual" />
           </div>
@@ -635,7 +637,7 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="pv_abnormality_container" style="display: none;">
+        <div class="field" id="pv_abnormality_container" data-follows="pv_Pulmonary_valve" style="display: none;">
           <label for="pv_abnormality_description">Abnormality Description</label>
           <input id="pv_abnormality_description" name="pv_abnormality_description" type="text" />
         </div>
@@ -692,7 +694,7 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="tv_abnormality_container" style="display: none;">
+        <div class="field" id="tv_abnormality_container" data-follows="tv_Tricuspid_valve" style="display: none;">
           <label for="tv_abnormality_description">Abnormality Description</label>
           <input id="tv_abnormality_description" name="tv_abnormality_description" type="text" />
         </div>

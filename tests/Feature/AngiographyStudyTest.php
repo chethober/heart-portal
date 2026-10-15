@@ -32,7 +32,7 @@ function angiographyPayload(array $overrides = []): array
 
 beforeEach(function () {
     $this->hospital = Hospital::factory()->create();
-    $this->tech = User::factory()->for($this->hospital)->role(Role::Technician)->create();
+    $this->tech = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
     $this->doctor = User::factory()->for($this->hospital)->role(Role::Doctor)->create(['name' => 'Dr. Signer']);
 });
 

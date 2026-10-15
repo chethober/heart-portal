@@ -23,9 +23,7 @@ class SeedDemo extends Command
         'admin@echo.test' => ['Platform Admin', Role::PlatformAdmin],
         'hadmin@echo.test' => ['Hospital Admin', Role::HospitalAdmin],
         'doctor@echo.test' => ['Dr. Demo', Role::Doctor],
-        'tech@echo.test' => ['Tech Demo', Role::Technician],
         'nurse@echo.test' => ['Nurse Demo', Role::Nurse],
-        'qc@echo.test' => ['QC Demo', Role::QualityControl],
     ];
 
     public function handle(): int

@@ -8,6 +8,8 @@
 @endphp
 
 <x-dashboard-layout :title="$title">
+    <link rel="stylesheet" href="/echo-form/voice-input.css">
+    <script src="/echo-form/voice-input.js" defer></script>
     <form method="POST" action="{{ $editing ? route('admissions.update', [$patient, $admission]) : route('admissions.store', $patient) }}" class="space-y-6"
           x-data="{ arrival: @js((string) $value('arrival_mode')) }">
         @csrf
@@ -38,12 +40,12 @@
                 </label>
                 <label class="block text-sm">
                     <span class="font-medium text-gray-700">{{ __('Admission date (YYYY/MM/DD)') }}</span>
-                    <input type="text" name="admitted_on" value="{{ $value('admitted_on') }}" placeholder="1405/07/01" required class="{{ $input }}">
+                    <input type="text" name="admitted_on" value="{{ $value('admitted_on') }}" placeholder="1405/07/01" required class="{{ $input }} no-voice">
                     <x-input-error :messages="$errors->get('admitted_on')" class="mt-1" />
                 </label>
                 <label class="block text-sm">
                     <span class="font-medium text-gray-700">{{ __('Admission time (HH:MM)') }}</span>
-                    <input type="text" name="admitted_at" value="{{ $value('admitted_at') }}" placeholder="08:30" class="{{ $input }}">
+                    <input type="text" name="admitted_at" value="{{ $value('admitted_at') }}" placeholder="08:30" class="{{ $input }} no-voice">
                     <x-input-error :messages="$errors->get('admitted_at')" class="mt-1" />
                 </label>
                 <label class="block text-sm">
@@ -84,12 +86,12 @@
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <label class="block text-sm">
                     <span class="font-medium text-gray-700">{{ __('Discharge date (YYYY/MM/DD)') }}</span>
-                    <input type="text" name="discharged_on" value="{{ $value('discharged_on') }}" placeholder="1405/07/05" class="{{ $input }}">
+                    <input type="text" name="discharged_on" value="{{ $value('discharged_on') }}" placeholder="1405/07/05" class="{{ $input }} no-voice">
                     <x-input-error :messages="$errors->get('discharged_on')" class="mt-1" />
                 </label>
                 <label class="block text-sm">
                     <span class="font-medium text-gray-700">{{ __('Discharge time (HH:MM)') }}</span>
-                    <input type="text" name="discharged_at" value="{{ $value('discharged_at') }}" placeholder="14:00" class="{{ $input }}">
+                    <input type="text" name="discharged_at" value="{{ $value('discharged_at') }}" placeholder="14:00" class="{{ $input }} no-voice">
                     <x-input-error :messages="$errors->get('discharged_at')" class="mt-1" />
                 </label>
             </div>

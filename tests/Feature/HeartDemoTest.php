@@ -27,7 +27,7 @@ test('heart demo data fills only the demo hospital, once', function () {
     $hospital = Hospital::factory()->create(['slug' => 'demo-heart-hospital']);
     $other = Hospital::factory()->create();
     $doctor = User::factory()->for($hospital)->role(Role::Doctor)->create();
-    User::factory()->for($hospital)->role(Role::Technician)->create();
+    User::factory()->for($hospital)->role(Role::Nurse)->create();
 
     $this->artisan('app:seed-heart-demo')->assertSuccessful();
     $this->artisan('app:seed-heart-demo')->assertSuccessful();

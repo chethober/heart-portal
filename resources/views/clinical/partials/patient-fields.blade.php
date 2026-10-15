@@ -60,7 +60,7 @@
 {{-- The patient's admissions (heart links each form to an admit record); filled in by the lookup. --}}
 <div class="field" id="admission_field" @if ($admissions->isEmpty()) hidden @endif>
     <label for="admission_id">Admission</label>
-    <select id="admission_id" name="admission_id" data-selected="{{ $admission }}">
+    <select id="admission_id" name="admission_id" data-native data-selected="{{ $admission }}">
         <option value="">Not linked to an admission</option>
         @if ($admission && ! $admissions->contains('id', (int) $admission))
             <option value="{{ $admission }}" selected>Admission #{{ $admission }}</option>

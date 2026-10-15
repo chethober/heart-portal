@@ -32,6 +32,14 @@ final class DischargeReport extends ProcedureReport
         'lab_ferritine' => '',
     ];
 
+    /**
+     * Printed in Persian like heart's, although the form itself is laid out left to right.
+     */
+    public function language(): string
+    {
+        return 'fa';
+    }
+
     public function titles(): array
     {
         return ['برگ خلاصه پرونده', 'Unit summary sheet'];

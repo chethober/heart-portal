@@ -4,6 +4,8 @@
 @endphp
 
 <x-dashboard-layout :title="__('Edit patient details')">
+    <link rel="stylesheet" href="/echo-form/voice-input.css">
+    <script src="/echo-form/voice-input.js" defer></script>
     <form method="POST" action="{{ route('patients.update', $patient) }}" class="space-y-6"
           x-data="{ nationality: @js((string) $value('nationality')) }">
         @csrf

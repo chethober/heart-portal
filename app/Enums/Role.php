@@ -9,10 +9,8 @@ enum Role: string
     case PlatformAdmin = 'platform_admin';
     case HospitalAdmin = 'hospital_admin';
     case Doctor = 'doctor';
-    case Technician = 'technician';
-    // Roles from the heart system: ward nurses and registry quality control record studies too.
+    // Nurses and echo technicians share one role: they record studies but do not sign them.
     case Nurse = 'nurse';
-    case QualityControl = 'quality_control';
 
     public function label(): string
     {
@@ -20,9 +18,7 @@ enum Role: string
             self::PlatformAdmin => __('Platform admin'),
             self::HospitalAdmin => __('Hospital admin'),
             self::Doctor => __('Doctor'),
-            self::Technician => __('Echo technician'),
-            self::Nurse => __('Nurse'),
-            self::QualityControl => __('Quality control'),
+            self::Nurse => __('Nurse / technician'),
         };
     }
 
@@ -33,7 +29,7 @@ enum Role: string
      */
     public static function assignableByHospital(): array
     {
-        return [self::HospitalAdmin, self::Doctor, self::Technician, self::Nurse, self::QualityControl];
+        return [self::HospitalAdmin, self::Doctor, self::Nurse];
     }
 
     /**
@@ -50,8 +46,7 @@ enum Role: string
             self::PlatformAdmin => ['hospitals.manage'],
             self::HospitalAdmin => ['staff.manage', 'hospital.settings', 'audit.view', 'patients.view', 'registry.export'],
             self::Doctor => [...$clinical, 'prescriptions.sign'],
-            self::Technician, self::Nurse => $clinical,
-            self::QualityControl => [...$clinical, 'audit.view', 'registry.export'],
+            self::Nurse => $clinical,
         };
     }
 
@@ -67,7 +62,7 @@ enum Role: string
             self::PlatformAdmin => [],
             self::HospitalAdmin => Forms::permissionsFor(['view']),
             self::Doctor => Forms::permissions(),
-            self::Technician, self::Nurse, self::QualityControl => Forms::permissionsFor(['view', 'create', 'edit']),
+            self::Nurse => Forms::permissionsFor(['view', 'create', 'edit']),
         };
     }
 
