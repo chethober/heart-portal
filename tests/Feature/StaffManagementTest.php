@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\AuditLog;
 use App\Models\Hospital;
 use App\Models\Invitation;
 use App\Models\Scopes\HospitalScope;
 use App\Models\User;
 use App\Notifications\StaffInvitation;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
@@ -121,4 +123,27 @@ test('tenant scope hides other hospitals rows and fails closed without context',
 
     $this->actingAs(User::factory()->role(Role::HospitalAdmin)->create());
     expect(Invitation::count())->toBe(0);
+});
+
+test('hospital admin can email a staff member a password reset link, but not to another hospital', function () {
+    Notification::fake();
+    $nurse = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
+
+    $this->actingAs($this->admin)->post("/dashboard/staff/{$nurse->id}/password-reset")->assertSessionHasNoErrors()->assertRedirect();
+    Notification::assertSentTo($nurse, ResetPassword::class);
+    expect(AuditLog::where('action', 'staff.password_reset_sent')->where('subject_id', $nurse->id)->exists())->toBeTrue();
+
+    $stranger = User::factory()->role(Role::Nurse)->create();
+    $this->actingAs($this->admin)->post("/dashboard/staff/{$stranger->id}/password-reset")->assertNotFound();
+    Notification::assertNotSentTo($stranger, ResetPassword::class);
+
+    $this->actingAs($nurse)->post("/dashboard/staff/{$this->admin->id}/password-reset")->assertForbidden();
+});
+
+test('deactivated staff are not sent password reset links', function () {
+    Notification::fake();
+    $nurse = User::factory()->for($this->hospital)->role(Role::Nurse)->create(['is_active' => false]);
+
+    $this->actingAs($this->admin)->post("/dashboard/staff/{$nurse->id}/password-reset")->assertSessionHasErrors('staff');
+    Notification::assertNothingSent();
 });

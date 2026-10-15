@@ -86,6 +86,12 @@
                                             <button type="submit" class="text-xs text-gray-500 underline">{{ __('Reset 2FA') }}</button>
                                         </form>
                                     @endif
+                                    @if ($member->is_active && ! $member->is(Auth::user()))
+                                        <form method="POST" action="{{ route('staff.password-reset', $member) }}" class="mt-1" onsubmit="return confirm(@js(__('Email :name a link to choose a new password?', ['name' => $member->name])))">
+                                            @csrf
+                                            <button type="submit" class="text-xs text-gray-500 underline">{{ __('Send password reset') }}</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                             @php

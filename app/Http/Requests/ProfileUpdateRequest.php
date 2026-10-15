@@ -26,6 +26,8 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            // Printed under the signature on reports, so only for those who sign them.
+            'medical_license_no' => [Rule::excludeIf(! $this->user()->can('sign-reports')), 'nullable', 'string', 'max:64'],
         ];
     }
 }

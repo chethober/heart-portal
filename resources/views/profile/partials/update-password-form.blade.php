@@ -1,7 +1,7 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Update Password') }}
+            {{ __('Password') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
@@ -45,4 +45,17 @@
             @endif
         </div>
     </form>
+
+    {{-- Forgotten the current password: the same reset link as the login page's "Forgot your password?". --}}
+    <div class="mt-6 border-t border-gray-100 pt-4">
+        <p class="text-sm text-gray-600">{{ __("Don't remember your current password? We'll email a reset link to :email.", ['email' => $user->email]) }}</p>
+        <form method="post" action="{{ route('profile.password-reset') }}" class="mt-3 flex flex-wrap items-center gap-3">
+            @csrf
+            <x-secondary-button type="submit">{{ __('Email me a reset link') }}</x-secondary-button>
+            @if (session('status') === 'password-reset-link-sent')
+                <p class="text-sm text-green-700">{{ __('Reset link sent. Check your inbox; the link expires in :count minutes.', ['count' => config('auth.passwords.users.expire')]) }}</p>
+            @endif
+        </form>
+        <x-input-error :messages="$errors->passwordReset->get('email')" class="mt-2" />
+    </div>
 </section>

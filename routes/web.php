@@ -116,6 +116,7 @@ Route::prefix('dashboard')->group(function () {
                 Route::patch('/{user}', [StaffController::class, 'update'])->name('update');
                 Route::put('/{user}/access', [StaffController::class, 'updateAccess'])->name('access.update');
                 Route::delete('/{user}/two-factor', [StaffController::class, 'resetTwoFactor'])->name('two-factor.reset');
+                Route::post('/{user}/password-reset', [StaffController::class, 'sendPasswordReset'])->middleware('throttle:6,1')->name('password-reset');
                 Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
                 Route::delete('/invitations/{invitation}', [InvitationController::class, 'destroy'])->name('invitations.destroy');
             });
@@ -126,6 +127,7 @@ Route::prefix('dashboard')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/password-reset', [ProfileController::class, 'sendPasswordResetLink'])->middleware('throttle:6,1')->name('profile.password-reset');
 
         Route::post('/profile/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.enable');
         Route::post('/profile/two-factor/confirm', [TwoFactorController::class, 'confirm'])->middleware('throttle:6,1')->name('two-factor.confirm');

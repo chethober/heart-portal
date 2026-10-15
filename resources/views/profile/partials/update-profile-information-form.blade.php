@@ -1,7 +1,7 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+            {{ __('Account') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
@@ -19,7 +19,7 @@
 
         <div>
             <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
@@ -46,6 +46,15 @@
                 </div>
             @endif
         </div>
+
+        @if ($canSign ?? false)
+            <div>
+                <x-input-label for="medical_license_no" :value="__('Medical license number')" />
+                <x-text-input id="medical_license_no" name="medical_license_no" type="text" class="mt-1 block w-full" :value="old('medical_license_no', $user->medical_license_no)" dir="ltr" />
+                <p class="mt-1 text-xs text-gray-500">{{ __('Printed under your signature on reports.') }}</p>
+                <x-input-error class="mt-2" :messages="$errors->get('medical_license_no')" />
+            </div>
+        @endif
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
