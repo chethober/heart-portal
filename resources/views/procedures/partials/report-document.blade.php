@@ -43,6 +43,12 @@
     $boxes = $narrative ? $narrative->signatureBoxes() : [['title' => $t['reporter'], 'name' => null]];
     // Sign-off steps signed before the final signature (the discharge summary's intern and resident).
     $signoffs = $study?->signoffs() ?? [];
+    // A doctor who signed more than one step is printed once, in the last (most senior) box they signed.
+    $boxSigners = array_map(fn (array $box, int $i) => $i === count($boxes) - 1
+        ? $signer?->id
+        : ($signoffs[$box['step'] ?? '']['signer'] ?? null)?->id, $boxes, array_keys($boxes));
+    $repeatedBoxes = array_keys(array_filter($boxSigners, fn (?int $id, int $i) => $id !== null
+        && in_array($id, array_slice($boxSigners, $i + 1), true), ARRAY_FILTER_USE_BOTH));
 
     $patientItems = array_filter([
         $t['patient'] => trim(($report['first_name'] ?? '').' '.($report['last_name'] ?? '')),
@@ -196,7 +202,7 @@
                         <img src="{{ route('users.signature', [$signer, 'procedure_version' => $shownVersion->id]) }}" alt="Signature" style="max-height:60px;max-width:200px;display:block;margin:4px auto">
                     @endif
                     <div style="font-size:12px">{{ $t['signedOn'] }}: {{ JalaliDate::format($signedAt) }}</div>
-                @elseif (($signoff = $signoffs[$box['step'] ?? ''] ?? null) && $signoff['signer'])
+                @elseif (! in_array($loop->index, $repeatedBoxes, true) && ($signoff = $signoffs[$box['step'] ?? ''] ?? null) && $signoff['signer'])
                     <div>{{ $signoff['signer']->name }}</div>
                     @if ($signoff['signer']->medical_license_no)
                         <div style="font-size:12px">{{ $t['license'] }}: {{ $signoff['signer']->medical_license_no }}</div>

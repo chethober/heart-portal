@@ -86,6 +86,19 @@ test('one doctor may sign more than one step', function () {
         ->and($study->status)->toBe(StudyStatus::Final);
 });
 
+test('a doctor who signed more than one step is printed once, in the last box they signed', function () {
+    $this->actingAs($this->resident)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
+    $this->actingAs($this->resident)->post("{$this->url}/finalize");
+    $this->actingAs($this->resident)->post("{$this->url}/finalize");
+
+    $image = fn (string $step) => e(route('users.signature', [$this->resident, 'discharge' => $this->study->id, 'step' => $step]));
+    $report = $this->actingAs($this->attending)->get($this->url)->assertOk()->getContent();
+
+    expect($report)->not->toContain($image('intern'))
+        ->and($report)->toContain($image('resident'))
+        ->and(substr_count($report, 'Dr Resident'))->toBe(1);
+});
+
 test('nurses cannot sign a step', function () {
     $this->actingAs($this->nurse)->post("{$this->url}/finalize")->assertForbidden();
 
