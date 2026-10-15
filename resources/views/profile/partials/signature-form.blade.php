@@ -1,42 +1,39 @@
-<section id="signature" x-data="signaturePad" class="scroll-mt-6">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Signature') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Shown on reports you sign. Draw it below with a mouse, finger or stylus, or upload an image.') }}</p>
-    </header>
-
-    <div class="mt-4 grid gap-6 md:grid-cols-[minmax(0,1fr)_14rem]">
-        <div>
-            <div class="inline-flex rounded-md border border-gray-300 p-0.5 text-sm" role="group" aria-label="{{ __('How to add your signature') }}">
-                <button type="button" class="rounded px-3 py-1.5" :class="tab === 'draw' ? 'bg-gray-800 text-white' : 'text-gray-700 hover:bg-gray-100'" :aria-pressed="tab === 'draw'" @click="tab = 'draw'">{{ __('Draw') }}</button>
-                <button type="button" class="rounded px-3 py-1.5" :class="tab === 'upload' ? 'bg-gray-800 text-white' : 'text-gray-700 hover:bg-gray-100'" :aria-pressed="tab === 'upload'" @click="tab = 'upload'">{{ __('Upload image') }}</button>
+<x-profile.section id="signature" :title="__('Signature')" :description="__('Shown on reports you sign. Draw it below with a mouse, finger or stylus, or upload an image.')" x-data="signaturePad">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_13rem]">
+        <div class="min-w-0">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="inline-flex rounded-lg bg-gray-100 p-1 text-sm" role="group" aria-label="{{ __('How to add your signature') }}">
+                    <button type="button" class="rounded-md px-3 py-1.5 font-medium transition-colors" :class="tab === 'draw' ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-900/5' : 'text-gray-600 hover:text-gray-900'" :aria-pressed="tab === 'draw'" @click="tab = 'draw'">{{ __('Draw') }}</button>
+                    <button type="button" class="rounded-md px-3 py-1.5 font-medium transition-colors" :class="tab === 'upload' ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-900/5' : 'text-gray-600 hover:text-gray-900'" :aria-pressed="tab === 'upload'" @click="tab = 'upload'">{{ __('Upload image') }}</button>
+                </div>
+                <div x-show="tab === 'draw'" class="flex gap-1">
+                    <x-profile.button type="button" variant="ghost" size="sm" x-on:click="undo()" x-bind:disabled="empty">{{ __('Undo') }}</x-profile.button>
+                    <x-profile.button type="button" variant="ghost" size="sm" x-on:click="clear()" x-bind:disabled="empty">{{ __('Clear') }}</x-profile.button>
+                </div>
             </div>
 
-            <form x-show="tab === 'draw'" method="POST" action="{{ route('profile.signature') }}" class="mt-4" @submit="prepare($event)">
+            <form x-show="tab === 'draw'" method="POST" action="{{ route('profile.signature') }}" class="mt-3" @submit="prepare($event)">
                 @csrf
                 <input type="hidden" name="drawn_signature" x-ref="data">
                 {{-- The canvas is always left-to-right: a signature is a drawing, not text. --}}
                 <div class="relative" dir="ltr">
-                    <canvas x-ref="canvas" class="block w-full h-48 touch-none cursor-crosshair rounded-md border border-dashed border-gray-300 bg-white"
+                    <canvas x-ref="canvas" class="block w-full h-48 touch-none cursor-crosshair rounded-lg bg-gray-50 ring-1 ring-inset ring-gray-200"
                         aria-label="{{ __('Signature drawing area') }}"
                         @pointerdown="start($event)" @pointermove="move($event)" @pointerup="end()" @pointercancel="end()"></canvas>
                     <div class="pointer-events-none absolute inset-x-6 bottom-10 border-b border-gray-300" aria-hidden="true"></div>
                     <span class="pointer-events-none absolute left-6 bottom-11 text-gray-400 text-lg" aria-hidden="true">×</span>
                     <p x-show="empty" class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-gray-400">{{ __('Sign here') }}</p>
                 </div>
-                <div class="mt-3 flex flex-wrap items-center gap-3">
-                    <x-primary-button x-bind:disabled="empty" class="disabled:opacity-50">{{ __('Save signature') }}</x-primary-button>
-                    <x-secondary-button type="button" x-on:click="undo()" x-bind:disabled="empty">{{ __('Undo') }}</x-secondary-button>
-                    <x-secondary-button type="button" x-on:click="clear()" x-bind:disabled="empty">{{ __('Clear') }}</x-secondary-button>
+                <div class="mt-4">
+                    <x-profile.button x-bind:disabled="empty">{{ __('Save signature') }}</x-profile.button>
                 </div>
             </form>
 
-            <form x-show="tab === 'upload'" x-cloak method="POST" action="{{ route('profile.signature') }}" enctype="multipart/form-data" class="mt-4 space-y-3">
+            <form x-show="tab === 'upload'" x-cloak method="POST" action="{{ route('profile.signature') }}" enctype="multipart/form-data" class="mt-3 space-y-4">
                 @csrf
                 <p class="text-sm text-gray-600">{{ __('PNG or JPG, ideally on a white or transparent background, up to 1 MB.') }}</p>
-                <div class="flex flex-wrap gap-3 items-end">
-                    <input type="file" name="signature" accept="image/png,image/jpeg" required class="text-sm">
-                    <x-primary-button>{{ $user->signature_path ? __('Replace') : __('Upload') }}</x-primary-button>
-                </div>
+                <input type="file" name="signature" accept="image/png,image/jpeg" required class="block w-full text-sm text-gray-600 file:me-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-800 file:shadow-sm file:ring-1 file:ring-inset file:ring-gray-300 hover:file:bg-gray-50">
+                <x-profile.button>{{ $user->signature_path ? __('Replace') : __('Upload') }}</x-profile.button>
             </form>
 
             <x-input-error :messages="$errors->signature->get('signature')" class="mt-2" />
@@ -46,17 +43,17 @@
             @endif
         </div>
 
-        <div>
+        <div class="xl:pt-[3.25rem]">
             <h3 class="text-sm font-medium text-gray-700">{{ __('Current signature') }}</h3>
             @if ($user->signature_path)
-                <img src="{{ route('users.signature', $user) }}" alt="{{ __('Your signature') }}" class="mt-2 max-h-24 w-full object-contain border rounded-md p-2 bg-white">
-                <p class="mt-2 text-xs text-gray-500">{{ __('Reports you have already signed keep the signature they were signed with.') }}</p>
+                <img src="{{ route('users.signature', $user) }}" alt="{{ __('Your signature') }}" class="mt-2 h-28 w-full object-contain rounded-lg bg-white p-2 ring-1 ring-inset ring-gray-200">
+                <p class="mt-2 text-xs leading-5 text-gray-500">{{ __('Reports you have already signed keep the signature they were signed with.') }}</p>
             @else
-                <p class="mt-2 text-sm text-gray-500">{{ __('None yet. Reports you sign will show only your name until you add one.') }}</p>
+                <p class="mt-2 rounded-lg border border-dashed border-gray-300 px-3 py-4 text-sm text-gray-500">{{ __('None yet. Reports you sign will show only your name until you add one.') }}</p>
             @endif
         </div>
     </div>
-</section>
+</x-profile.section>
 
 <script>
     document.addEventListener('alpine:init', () => {
