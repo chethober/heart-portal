@@ -11,6 +11,7 @@ use App\Support\Audit;
 use App\Support\TwoFactor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -86,5 +87,26 @@ class StaffController extends Controller
         Audit::record('staff.two_factor_reset', $user);
 
         return back()->with('status', __('Two-factor login reset for :name.', ['name' => $user->name]));
+    }
+
+    /**
+     * Emails the member a link to choose a new password. The admin never sees or sets it.
+     */
+    public function sendPasswordReset(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->hospital_id === $request->user()->hospital_id, 404);
+
+        if (! $user->is_active) {
+            return back()->withErrors(['staff' => __('Reactivate :name before sending a password reset email.', ['name' => $user->name])]);
+        }
+
+        $status = Password::sendResetLink(['email' => $user->email]);
+        if ($status !== Password::RESET_LINK_SENT) {
+            return back()->withErrors(['staff' => __($status)]);
+        }
+
+        Audit::record('staff.password_reset_sent', $user);
+
+        return back()->with('status', __('Password reset email sent to :email.', ['email' => $user->email]));
     }
 }
