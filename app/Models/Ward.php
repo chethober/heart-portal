@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A hospital ward (heart's location.ward): admissions are made to a ward and the
- * ward patients page lists who is in each one.
+ * patients page lists who is in each one.
  *
  * @property int $id
  * @property int $hospital_id

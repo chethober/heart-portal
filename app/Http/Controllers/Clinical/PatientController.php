@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admission;
 use App\Models\EchoStudy;
 use App\Models\Patient;
+use App\Models\Ward;
 use App\Support\Audit;
 use App\Support\Forms;
 use App\Support\NationalId;
@@ -20,8 +21,8 @@ class PatientController extends Controller
 {
     /**
      * The dashboard's "Patients" section: search by national ID, HIS admission number or name
-     * (PatientSearch, heart's search), then list one patient's studies or the matching patients.
-     * The search text itself is never logged.
+     * (PatientSearch, heart's search), then list one patient's studies or the matching patients;
+     * before a search, who is in hospital by ward. The search text itself is never logged.
      */
     public function index(Request $request): View
     {
@@ -76,7 +77,33 @@ class PatientController extends Controller
             'fromHis' => $fromHis,
             'echoReports' => $echoReports,
             'procedures' => $procedures,
+            // Without a search the page lists who is in hospital now, by ward (heart's home page).
+            ...($search === '' ? $this->inHospital($request) : []),
         ]);
+    }
+
+    /**
+     * Patients currently admitted (no discharge date), optionally in one ward.
+     *
+     * @return array{wards: Collection<int, Ward>, ward: Ward|null, wardId: int|null, admissions: Collection<int, Admission>}
+     */
+    private function inHospital(Request $request): array
+    {
+        $wardId = $request->integer('ward') ?: null;
+
+        return [
+            'wards' => Ward::query()->active()->orderBy('name')->get(),
+            'ward' => $wardId ? Ward::find($wardId) : null,
+            'wardId' => $wardId,
+            'admissions' => Admission::query()
+                ->current()
+                ->with(['patient', 'wardRecord'])
+                ->whereHas('patient')
+                ->when($wardId, fn ($query) => $query->where('ward_id', $wardId))
+                ->orderBy('admitted_on')
+                ->orderBy('id')
+                ->get(),
+        ];
     }
 
     /**

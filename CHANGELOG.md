@@ -27,11 +27,13 @@ All notable changes to this project are documented here. The format follows
 - The discharge summary is signed in three steps: intern (کارورز), resident (دستیار), then the
   attending physician (پزشک معالج), whose signature finalizes it. Each doctor may correct the
   summary before signing; each step's name, signature and date print in its box on the report.
+- Doctors draw their signature on the profile page (mouse, finger or stylus); signature images are
+  no longer uploaded. A doctor who signed more than one discharge step is printed once.
 - One nurse / technician role for staff who record studies but do not sign them (the earlier
   technician and quality-control roles are merged into it).
 - Patient record with demographics and contact details; admissions with ward, admission type,
-  arrival, referrer and attending physician, discharge, and a Ward patients census. Hospital
-  admins manage their wards.
+  arrival, referrer and attending physician, and discharge. Until something is searched, the
+  Patients page lists who is in hospital by ward. Hospital admins manage their wards.
 - E-prescription: shared drug catalog (hospitals can add and withdraw drugs), prescriptions
   drafted by clinical staff and signed or cancelled by doctors, discharge medications on the
   discharge summary, and a QR code linking to a public verification page.

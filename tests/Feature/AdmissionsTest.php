@@ -163,20 +163,20 @@ test('another hospital cannot read, change or discharge admissions, nor use its 
 
     // Our ward is not a ward of theirs.
     $this->actingAs($outsider)->post("/dashboard/patients/{$outsidersPatient->id}/admissions", admissionPayload())->assertSessionHasErrors('ward_id');
-    $this->actingAs($outsider)->get('/dashboard/ward-patients')->assertOk()->assertDontSee('Rezaei')->assertDontSee('CCU');
+    $this->actingAs($outsider)->get('/dashboard/patients')->assertOk()->assertDontSee('Rezaei')->assertDontSee('CCU');
 
     $this->actingAs($this->nurse);
     expect($admission->fresh())->physician->toBe('Dr. Demo')->discharged_on->toBeNull();
 });
 
-test('the ward patients page lists current admissions by ward', function () {
+test('the patients page lists current admissions by ward until something is searched', function () {
     $icu = Ward::factory()->for($this->hospital)->create(['name' => 'ICU']);
     Admission::factory()->for($this->patient)->create(['ward_id' => $this->ward->id, 'ward' => 'CCU', 'admitted_on' => '1405/07/01']);
     Admission::factory()->for(Patient::factory()->for($this->hospital)->state(['last_name' => 'Karimi']))->create(['ward_id' => $icu->id, 'ward' => 'ICU']);
     Admission::factory()->for(Patient::factory()->for($this->hospital)->state(['last_name' => 'Gone']))->create(['ward' => 'CCU', 'discharged_on' => '1405/07/02']);
     Admission::factory()->for(Patient::factory()->state(['last_name' => 'Elsewhere']))->create(['ward' => 'CCU']);
 
-    $this->actingAs($this->nurse)->get('/dashboard/ward-patients')
+    $this->actingAs($this->nurse)->get('/dashboard/patients')
         ->assertOk()
         ->assertSee('Rezaei')
         ->assertSee('Karimi')
@@ -185,12 +185,18 @@ test('the ward patients page lists current admissions by ward', function () {
         ->assertSee(route('patients.show', $this->patient), false)
         ->assertSee(e(route('procedures.create', ['angiography', 'nationalID' => '0012345678', 'admission' => Admission::where('patient_id', $this->patient->id)->value('id')])), false);
 
-    $this->actingAs($this->nurse)->get("/dashboard/ward-patients?ward={$icu->id}")
+    $this->actingAs($this->nurse)->get("/dashboard/patients?ward={$icu->id}")
         ->assertOk()
         ->assertSee('Karimi')
         ->assertDontSee('Rezaei');
 
-    $this->actingAs($this->nurse)->get('/dashboard/patients')->assertSee(route('ward-patients'), false);
+    // A search shows the matches instead of the ward list.
+    $this->actingAs($this->nurse)->get('/dashboard/patients?nationalID=Karimi')->assertOk()->assertDontSee('Patients in hospital');
+
+    // The old ward patients page and its links lead to the patients page.
+    $this->actingAs($this->nurse)->get("/dashboard/ward-patients?ward={$icu->id}")
+        ->assertRedirect(route('patients.index', ['ward' => $icu->id]))->assertStatus(301);
+    $this->actingAs($this->nurse)->get('/dashboard/patients')->assertDontSee('/dashboard/ward-patients');
 });
 
 test('the admission page lists the studies recorded during it', function () {

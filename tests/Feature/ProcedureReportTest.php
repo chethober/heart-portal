@@ -6,7 +6,6 @@ use App\Models\Scopes\HospitalScope;
 use App\Models\User;
 use App\Reports\ProcedureReport;
 use App\Support\Procedures;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 dataset('narrative procedures', array_keys(Procedures::MODELS));
@@ -125,7 +124,7 @@ test('a signed procedure report shows the signature it was signed with, only to 
     $colleague = User::factory()->for($hospital)->role(Role::Doctor)->create();
     $stranger = User::factory()->for(Hospital::factory())->role(Role::Doctor)->create();
 
-    $this->actingAs($doctor)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
+    $this->actingAs($doctor)->post('/dashboard/profile/signature', drawnSignature());
     $this->actingAs($doctor)->post('/dashboard/procedures/angiography', [
         'nationalID' => '0012345678', 'first_name' => 'Ali', 'last_name' => 'Rezaei',
         'DateOf_Date_of_angiography' => '1405/07/09', 'lad_Vessel_patency' => '1',

@@ -9,7 +9,6 @@ use App\Http\Controllers\Clinical\PatientController;
 use App\Http\Controllers\Clinical\PatientRecordController;
 use App\Http\Controllers\Clinical\ProcedureStudyController;
 use App\Http\Controllers\Clinical\WardController;
-use App\Http\Controllers\Clinical\WardPatientsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HospitalPendingController;
 use App\Http\Controllers\LocaleController;
@@ -84,9 +83,10 @@ Route::prefix('dashboard')->group(function () {
                 Route::post('/procedures/{procedure}/{procedureStudy}/finalize', [ProcedureStudyController::class, 'finalize'])->name('procedures.finalize');
             });
 
-            // Heart's patient record, admissions, wards and ward patient list.
+            // Heart's patient record and admissions.
             Route::middleware('permission:patients.view')->group(function () {
-                Route::get('/ward-patients', WardPatientsController::class)->name('ward-patients');
+                // The ward patient list is now the patients page when nothing is searched.
+                Route::get('/ward-patients', fn (Request $request) => redirect()->route('patients.index', $request->only('ward'), 301));
                 Route::get('/patients/{patient}', [PatientRecordController::class, 'show'])->whereNumber('patient')->name('patients.show');
                 Route::get('/patients/{patient}/admissions/{admission}', [AdmissionController::class, 'show'])->middleware('permission:admission.view')->whereNumber(['patient', 'admission'])->scopeBindings()->name('admissions.show');
             });

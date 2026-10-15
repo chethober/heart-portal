@@ -6,7 +6,6 @@ use App\Models\DischargeStudy;
 use App\Models\Hospital;
 use App\Models\Scopes\HospitalScope;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -87,7 +86,7 @@ test('one doctor may sign more than one step', function () {
 });
 
 test('a doctor who signed more than one step is printed once, in the last box they signed', function () {
-    $this->actingAs($this->resident)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
+    $this->actingAs($this->resident)->post('/dashboard/profile/signature', drawnSignature());
     $this->actingAs($this->resident)->post("{$this->url}/finalize");
     $this->actingAs($this->resident)->post("{$this->url}/finalize");
 
@@ -106,10 +105,10 @@ test('nurses cannot sign a step', function () {
 });
 
 test('each step keeps the signature it was signed with', function () {
-    $this->actingAs($this->intern)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
+    $this->actingAs($this->intern)->post('/dashboard/profile/signature', drawnSignature());
     $original = $this->intern->fresh()->signature_path;
     $this->actingAs($this->intern)->post("{$this->url}/finalize");
-    $this->actingAs($this->intern)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('b.png', 300, 100)]);
+    $this->actingAs($this->intern)->post('/dashboard/profile/signature', drawnSignature());
 
     $image = route('users.signature', [$this->intern, 'discharge' => $this->study->id, 'step' => 'intern']);
     expect($this->study->fresh()->intern_signature_path)->toBe($original);
@@ -120,7 +119,7 @@ test('each step keeps the signature it was signed with', function () {
 });
 
 test('another hospital cannot sign a step or see its signature', function () {
-    $this->actingAs($this->intern)->post('/dashboard/profile/signature', ['signature' => UploadedFile::fake()->image('a.png', 300, 100)]);
+    $this->actingAs($this->intern)->post('/dashboard/profile/signature', drawnSignature());
     $this->actingAs($this->intern)->post("{$this->url}/finalize");
     $outsider = User::factory()->for(Hospital::factory())->role(Role::Doctor)->create();
 

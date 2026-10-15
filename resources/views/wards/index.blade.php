@@ -35,7 +35,7 @@
                                         <input type="text" name="name" form="ward-{{ $ward->id }}" value="{{ $ward->name }}" maxlength="100" required aria-label="{{ __('Ward name') }}" class="w-full rounded-md border-gray-300 text-sm">
                                     </td>
                                     <td class="px-3 py-2">
-                                        <a href="{{ route('ward-patients', ['ward' => $ward->id]) }}" class="text-indigo-600 underline hover:text-indigo-500">{{ $ward->current_count }}</a>
+                                        <a href="{{ route('patients.index', ['ward' => $ward->id]) }}" class="text-indigo-600 underline hover:text-indigo-500">{{ $ward->current_count }}</a>
                                     </td>
                                     <td class="px-3 py-2">
                                         <input type="hidden" name="is_active" value="0" form="ward-{{ $ward->id }}">

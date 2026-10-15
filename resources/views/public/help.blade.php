@@ -105,7 +105,7 @@
                     <li>{{ __('Every signed version is kept and can be opened from the Signed versions list below the report.') }}</li>
                     <li>{{ __('Only drafts can be deleted, by their author or a hospital admin.') }}</li>
                 </ul>
-                <p class="mt-4">{{ __('Doctors upload their signature image (PNG or JPG) on their Profile page.') }}</p>
+                <p class="mt-4">{{ __('Doctors draw their signature on their Profile page.') }}</p>
             </section>
 
             <section id="procedures">
@@ -151,7 +151,7 @@
                 <ul class="mt-4">
                     <li>{{ __('From the patient record, choose New admission to record the ward, admission type, arrival, referring hospital and attending physician. Discharge the patient from the admission page.') }}</li>
                     <li>{{ __('The admission page lists every study recorded during that stay.') }}</li>
-                    <li>{{ __('Ward patients shows everyone currently admitted, by ward, with their length of stay.') }}</li>
+                    <li>{{ __('Until you search, Patients shows everyone currently admitted, by ward, with their length of stay.') }}</li>
                     <li>{{ __('Hospital admins add, rename and deactivate wards on the Wards page. Inactive wards are no longer offered for new admissions.') }}</li>
                     <li>{{ __('Admissions can also be imported from the hospital information system; ask your operator.') }}</li>
                 </ul>

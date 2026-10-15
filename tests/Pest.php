@@ -48,3 +48,25 @@ function something()
 {
     // ..
 }
+
+/**
+ * A blank image as the canvas would send it (or, for the tests that expect a rejection, a JPEG).
+ */
+function signatureImage(int $width, int $height, string $type = 'png'): string
+{
+    $image = imagecreatetruecolor($width, $height);
+    ob_start();
+    $type === 'png' ? imagepng($image) : imagejpeg($image);
+
+    return (string) ob_get_clean();
+}
+
+/**
+ * The profile page's signature form as the canvas posts it.
+ *
+ * @return array{drawn_signature: string}
+ */
+function drawnSignature(int $width = 300, int $height = 100): array
+{
+    return ['drawn_signature' => 'data:image/png;base64,'.base64_encode(signatureImage($width, $height))];
+}

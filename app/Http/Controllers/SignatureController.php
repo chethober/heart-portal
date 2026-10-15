@@ -53,37 +53,29 @@ class SignatureController extends Controller
     }
 
     /**
-     * Saves a signature uploaded as an image file, or drawn on the profile page's canvas
-     * (sent as a PNG data URL in `drawn_signature`).
+     * Saves the signature drawn on the profile page's canvas (sent as a PNG data URL in
+     * `drawn_signature`). Signatures are drawn, not uploaded as image files.
      */
     public function update(Request $request): RedirectResponse
     {
         $request->validateWithBag('signature', [
-            'signature' => ['required_without:drawn_signature', 'file', 'mimes:png,jpg,jpeg', 'max:1024', 'dimensions:max_width=2000,max_height=1000'],
-            'drawn_signature' => ['required_without:signature', 'string', 'starts_with:data:image/png;base64,', 'max:1400000'],
+            'drawn_signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:1400000'],
         ]);
 
         $user = $request->user();
-        $directory = "signatures/{$user->hospital_id}";
 
         // Earlier files are kept: signed report versions still show the signature they were signed with.
-        if ($request->hasFile('signature')) {
-            $path = $request->file('signature')->store($directory, 'local');
-            $method = 'uploaded';
-        } else {
-            $path = "{$directory}/".Str::random(40).'.png';
-            Storage::disk('local')->put($path, $this->decodeDrawnSignature($request->string('drawn_signature')->toString()));
-            $method = 'drawn';
-        }
+        $path = "signatures/{$user->hospital_id}/".Str::random(40).'.png';
+        Storage::disk('local')->put($path, $this->decodeDrawnSignature($request->string('drawn_signature')->toString()));
 
         $user->forceFill(['signature_path' => $path])->save();
-        Audit::record('user.signature_updated', $user, ['method' => $method]);
+        Audit::record('user.signature_updated', $user, ['method' => 'drawn']);
 
         return redirect()->to(route('profile.edit').'#signature')->with('status', 'signature-updated');
     }
 
     /**
-     * The canvas sends a data URL; accept it only if it really is a PNG within the upload limits.
+     * The canvas sends a data URL; accept it only if it really is a PNG within the size limits.
      *
      * @throws ValidationException
      */

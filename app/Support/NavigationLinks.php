@@ -52,7 +52,6 @@ final class NavigationLinks
             }
             $links[] = self::link(__('Worklist'), 'worklist', $drafts);
             $links[] = self::link(__('Patients'), ['patients.index', 'patients.show', 'patients.edit', 'admissions.*']);
-            $links[] = self::link(__('Ward patients'), 'ward-patients');
             $links[] = self::link(__('Statistics'), 'statistics');
             $links[] = self::link(__('Drugs'), 'drugs.index');
         }

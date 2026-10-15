@@ -2,7 +2,7 @@
     use App\Support\JalaliDate;
 @endphp
 
-<x-dashboard-layout :title="__('Patient echos')">
+<x-dashboard-layout :title="__('Patients')">
     {{-- Search by national ID, HIS admission number or name; the box is also in the dashboard header. --}}
     <form method="GET" action="{{ route('patients.index') }}" role="search" class="mb-6 flex flex-wrap gap-2 lg:hidden">
         <input name="nationalID" type="search" value="{{ $search }}" required placeholder="{{ __('National ID, admission number or name') }}" aria-label="{{ __('Search patients') }}"
@@ -54,7 +54,8 @@
             </div>
         @endif
     @elseif ($nationalID === '')
-        <p class="py-8 text-center text-gray-500">{{ __('Search by national ID, HIS admission number or name to see a patient\'s studies.') }}</p>
+        <p class="mb-6 text-sm text-gray-500">{{ __('Search by national ID, HIS admission number or name to see a patient\'s studies.') }}</p>
+        @include('patients.partials.in-hospital')
     @elseif ($echoReports->isEmpty())
         <div class="py-8 text-center text-gray-500">
             <p>{{ __('No echo reports found for this National ID.') }}</p>
