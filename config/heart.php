@@ -56,7 +56,7 @@ return [
     /*
     | Heart's echo form (echo.html, table `echo`) predates the echo form that
     | config/echo.php describes. Columns with the same name are copied; the
-    | maps below cover the rest. Heart stores choices as codes, Echo Portal's
+    | maps below cover the rest. Heart stores choices as codes, Heart Portal's
     | echo form stores the option text, so every choice column needs a code
     | map. Codes not listed (heart's -1 "none" and 9 "Missing" placeholders,
     | or unknown codes) import as null.

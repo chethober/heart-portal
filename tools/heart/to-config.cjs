@@ -1,6 +1,6 @@
 // Usage: node to-config.cjs spec.json <key> <label> <dateField> <sourceForm> > config/procedures/<key>.php
 // Run from the repository root; see tools/heart/README.md.
-// Turns a heart form spec (from extract.cjs) into an Echo Portal procedure config.
+// Turns a heart form spec (from extract.cjs) into an Heart Portal procedure config.
 const [specFile, key, label, dateField, sourceForm] = process.argv.slice(2);
 const spec = require(require('path').resolve(specFile));
 

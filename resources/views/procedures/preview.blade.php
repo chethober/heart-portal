@@ -16,6 +16,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ App\Support\Procedures::label($procedure) }} Report — {{ $hospital?->name }}</title>
+    <x-favicons />
     @include('studies.partials.report-styles')
     <style>
         body { margin: 0; padding: 8px; background: #fff; }

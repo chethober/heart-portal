@@ -4,7 +4,7 @@ namespace App\Support\HeartImport;
 
 /**
  * Turns raw values read from heart's MySQL tables or the hospital information
- * system into what Echo Portal stores. Every method returns null for "no value".
+ * system into what Heart Portal stores. Every method returns null for "no value".
  */
 final class LegacyValue
 {

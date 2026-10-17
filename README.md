@@ -1,13 +1,13 @@
 <div align="center">
 
-# Echo Portal
+# Heart Portal
 
 **Open-source, multi-hospital cardiology reporting — echo lab, cath lab, admissions and e-prescriptions.**
 
 Technicians enter measurements once, the platform grades them against guideline cut-offs,
 doctors sign the report, and every step is audited.
 
-[![CI](https://github.com/chethober/echo-portal/actions/workflows/ci.yml/badge.svg)](https://github.com/chethober/echo-portal/actions/workflows/ci.yml)
+[![CI](https://github.com/chethober/heart-portal/actions/workflows/ci.yml/badge.svg)](https://github.com/chethober/heart-portal/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
 </div>
@@ -67,8 +67,8 @@ everything their role allows, and the role caps what can be granted (only doctor
 Requirements: Docker with Compose, Node.js 20+ (for building the front-end assets).
 
 ```sh
-git clone https://github.com/chethober/echo-portal.git
-cd echo-portal
+git clone https://github.com/chethober/heart-portal.git
+cd heart-portal
 cp .env.example .env
 
 docker compose up -d --build
@@ -128,7 +128,7 @@ until every interface string is translated.
 
 ## Importing from heart and the HIS
 
-Echo Portal replaces the legacy *heart* system (Mehr clinical information system). Its data is
+Heart Portal replaces the legacy *heart* system (Mehr clinical information system). Its data is
 copied in with two re-runnable artisan commands; both take `--dry-run`, which reads and checks
 everything and then rolls back.
 
@@ -143,7 +143,7 @@ php artisan his:import-admissions --hospital=<slug or id> [--since=1405/01/01] [
 - Rows are matched on `legacy_id` (heart's row id), admissions also on the HIS admission number, and
   patients on national ID within the hospital. Running an import again only applies what changed.
 - Imported studies are signed history (status final, no signing user) with a version saying
-  "Imported from heart". Studies amended or deleted in Echo Portal are never overwritten.
+  "Imported from heart". Studies amended or deleted in Heart Portal are never overwritten.
 - heart's placeholder codes ("Missing", 9, -1) import as empty. heart's users are never imported:
   invite staff instead.
 - A heart database holding several centers (`admit.centerId`) needs `--center` or `--all-centers`,
@@ -202,7 +202,7 @@ Found a vulnerability? Please follow [SECURITY.md](SECURITY.md) instead of openi
 
 ## Medical disclaimer
 
-Echo Portal is reporting software. Automatic grading follows published reference ranges but is
+Heart Portal is reporting software. Automatic grading follows published reference ranges but is
 an aid, not a diagnosis: the signing physician is responsible for every report. The software is
 provided without warranty; see the license.
 

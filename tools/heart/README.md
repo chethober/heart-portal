@@ -24,7 +24,7 @@ Mapping rules (in `to-config.cjs`):
 - fields that clash with workflow columns (`status`, ...) are prefixed with the procedure key, and
   `legacy` keeps heart's name for importing data.
 - `nationalcode` becomes the patient, `admitId` the admission link; heart's `auto_*` audit columns
-  are dropped (Echo Portal's audit log replaces them).
+  are dropped (Heart Portal's audit log replaces them).
 
 The create migration reads the config when it runs, so once a procedure's table exists in any
 database, add or change its fields with a new migration (and edit the config to match) rather than

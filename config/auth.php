@@ -127,7 +127,7 @@ return [
 
     'two_factor' => [
         'enforced' => env('TWO_FACTOR_ENFORCED', true),
-        'issuer' => env('TWO_FACTOR_ISSUER', env('APP_NAME', 'Echo Portal')),
+        'issuer' => env('TWO_FACTOR_ISSUER', env('APP_NAME', 'Heart Portal')),
     ],
 
 ];

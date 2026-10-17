@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "chethober/echo-portal",
+    "name": "chethober/heart-portal",
     "type": "project",
     "description": "Open-source, multi-hospital echocardiography reporting platform: structured echo entry, automatic grading, signed and versioned reports, audit trail and 2FA.",
     "keywords": [
@@ -96,10 +96,10 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "homepage": "https://github.com/chethober/echo-portal",
+    "homepage": "https://github.com/chethober/heart-portal",
     "support": {
-        "issues": "https://github.com/chethober/echo-portal/issues",
-        "source": "https://github.com/chethober/echo-portal",
-        "security": "https://github.com/chethober/echo-portal/security/policy"
+        "issues": "https://github.com/chethober/heart-portal/issues",
+        "source": "https://github.com/chethober/heart-portal",
+        "security": "https://github.com/chethober/heart-portal/security/policy"
     }
 }
