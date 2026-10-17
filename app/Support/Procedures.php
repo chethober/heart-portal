@@ -44,7 +44,7 @@ final class Procedures
     }
 
     /**
-     * @return list<array{title: string, fields: array<string, array<string, mixed>>}>
+     * @return list<array{title: string, fa?: string, top?: bool, fields: array<string, array<string, mixed>>}>
      */
     public static function sections(string $key): array
     {
@@ -54,7 +54,7 @@ final class Procedures
     /**
      * Every field of the procedure, keyed by column name.
      *
-     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string, widget?: string, combine?: array<string, list<string>>, retired?: bool}>
+     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string, widget?: string, combine?: array<string, list<string>>, retired?: bool, nest?: bool, fa?: string, fa_options?: array<string, string>}>
      */
     public static function fields(string $key): array
     {
@@ -64,7 +64,7 @@ final class Procedures
     /**
      * The fields the form shows and saves: all but "retired" ones, whose stored values are kept.
      *
-     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string, widget?: string, combine?: array<string, list<string>>, retired?: bool}>
+     * @return array<string, array{type: string, label: string, group?: string, options?: array<string, string>, blank?: list<string>, show_if?: array{0: string, 1: string}, legacy?: string, widget?: string, combine?: array<string, list<string>>, retired?: bool, nest?: bool, fa?: string, fa_options?: array<string, string>}>
      */
     public static function formFields(string $key): array
     {

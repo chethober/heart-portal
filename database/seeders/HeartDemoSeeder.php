@@ -263,6 +263,7 @@ class HeartDemoSeeder extends Seeder
                         't1_s1_proximal' => '1',
                     ]],
                     ['procedure' => 'discharge', 'status' => 'draft', 'values' => [
+                        'history_mode' => 'auto',
                         'clinicalcomplaint_chestpaininactivity' => '1',
                         'unstable_angina' => '1',
                         'for_angioplasty' => '1',
