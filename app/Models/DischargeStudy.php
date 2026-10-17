@@ -24,15 +24,15 @@ class DischargeStudy extends ProcedureStudy
     }
 
     /**
-     * Studies saved before history_mode existed (and heart's) wrote their history by hand when
-     * there is one, so the form opens them in manual mode and saving keeps the text.
+     * Auto unless set. Studies saved before history_mode existed (and heart's) wrote their history
+     * by hand when there is one, so the form opens them in manual mode and saving keeps the text.
      *
-     * @return Attribute<string|null, string|null>
+     * @return Attribute<string, string|null>
      */
     protected function historyMode(): Attribute
     {
         return Attribute::get(fn (?string $value, array $attributes) => $value
-            ?? (filled($attributes['non_specific_explanation'] ?? null) ? 'manual' : null));
+            ?? (filled($attributes['non_specific_explanation'] ?? null) ? 'manual' : 'auto'));
     }
 
     /**

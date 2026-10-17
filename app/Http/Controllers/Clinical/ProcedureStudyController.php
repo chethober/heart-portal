@@ -208,7 +208,10 @@ class ProcedureStudyController extends Controller
             'study' => $study,
             // A known patient's admissions, to link the study to one of them.
             'admissions' => $patient ? $patient->admissions()->with('wardRecord')->orderByDesc('admitted_on')->orderByDesc('id')->get() : collect(),
-            'values' => $study ? [...$study->patient->toFormArray(), ...$study->only(['admission_id', ...array_keys($study->fields())])] : $values,
+            // A new study starts from the model's defaults (e.g. the discharge history in Auto mode).
+            'values' => $study
+                ? [...$study->patient->toFormArray(), ...$study->only(['admission_id', ...array_keys($study->fields())])]
+                : [...array_filter((new (Procedures::model($procedure)))->only(array_keys(Procedures::formFields($procedure))), fn ($value) => $value !== null), ...$values],
         ]);
     }
 

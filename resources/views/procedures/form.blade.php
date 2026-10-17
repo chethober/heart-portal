@@ -143,11 +143,13 @@
                     <div class="row">
                         @php
                             // Small fields shown only for a value of another field in this section are drawn
-                            // inside that field's cell (partials/field), so revealing them moves nothing.
+                            // inside that field's cell (partials/field), so revealing them moves nothing,
+                            // unless the field says "nest" => false (it switches a whole run of fields).
                             $children = [];
                             foreach ($section['fields'] as $name => $field) {
                                 $parent = $field['show_if'][0] ?? null;
                                 if ($parent !== null && isset($section['fields'][$parent]) && $section['fields'][$parent]['type'] !== 'boolean'
+                                    && ($section['fields'][$parent]['nest'] ?? true)
                                     && in_array($field['type'], ['text', 'number', 'choice', 'date', 'time'], true)) {
                                     $children[$parent][] = $name;
                                 }

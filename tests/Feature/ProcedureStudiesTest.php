@@ -7,6 +7,7 @@ use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\Scopes\HospitalScope;
 use App\Models\User;
+use App\Reports\ProcedureReport;
 use App\Support\Procedures;
 
 dataset('procedures', array_keys(Procedures::MODELS));
@@ -25,13 +26,15 @@ function procedurePayload(string $procedure): array
     $field = $fields[$name];
     $value = $field['type'] === 'choice' ? (string) array_key_first($field['options']) : 'Demo finding';
 
+    // A Persian report (the discharge summary) prints a choice's Persian wording.
+
     return [[
         'nationalID' => '0012345678',
         'first_name' => 'Ali',
         'last_name' => 'Rezaei',
         config("procedures.{$procedure}.date_field") => '1405/07/09',
         $name => $value,
-    ], $field['type'] === 'choice' ? $field['options'][$value] : $value];
+    ], $field['type'] === 'choice' ? ($field['fa_options'] ?? $field['options'])[$value] : $value];
 }
 
 beforeEach(function () {
@@ -153,12 +156,43 @@ test('saving a discharge summary keeps its retired complication fields and its w
     expect($study->fresh()->non_specific_explanation)->toBeNull();
 });
 
+test('the history\'s complaint boxes are only shown and kept in Auto mode, which a new summary starts in', function () {
+    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    expect($html)->toMatch('/<option value="auto" selected/')
+        ->toContain('x-show="v[&#039;history_mode&#039;] === &#039;auto&#039;"');
+
+    [$payload] = procedurePayload('discharge');
+    $complaints = ['clinicalcomplaint_syncope' => '1', 'symptoms_others' => 'Dizziness'];
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, ...$complaints, 'history_mode' => 'manual', 'non_specific_explanation' => 'Written by hand'])
+        ->assertSessionHasNoErrors()->assertRedirect();
+    $study = Procedures::model('discharge')::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->clinicalcomplaint_syncope)->toBeNull()
+        ->and($study->symptoms_others)->toBeNull()
+        ->and($study->non_specific_explanation)->toBe('Written by hand');
+
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/discharge/{$study->id}", [...$payload, ...$complaints, 'history_mode' => 'auto'])->assertRedirect();
+    expect($study->fresh()->clinicalcomplaint_syncope)->toBe('1');
+});
+
+test('the discharge form is in English while its report keeps heart\'s Persian wording', function () {
+    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')
+        ->assertOk()
+        ->assertSee('Rf &amp; PMH', false)
+        ->assertSee('Syncope')
+        ->assertDontSee('سنکوب');
+
+    $report = ProcedureReport::for('discharge', ['history_mode' => 'auto', 'clinicalcomplaint_syncope' => '1', 'disch_status' => '1', 'symptoms_others' => null]);
+    $text = collect($report->sections())->flatMap(fn ($section) => array_column($section['lines'], 'text'))->implode(' ');
+    expect($text)->toContain('سنکوب')->toContain('بهبودی کامل')->not->toContain('Syncope');
+});
+
 test('بومی / غیر بومی is a two-way toggle without heart\'s Unknown code', function () {
     // Two options and no forced dropdown, so choice-inputs.js draws a toggle.
     $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
     expect($html)->toMatch('/<select id="f-bomi"[^>]*>/')
         ->not->toMatch('/<select id="f-bomi"[^>]*data-widget="dropdown"/');
-    expect(config('procedures.discharge.sections.0.fields.bomi.options'))->toBe(['1' => 'بومی', '2' => 'غیر بومی']);
+    expect(config('procedures.discharge.sections.0.fields.bomi.options'))->toBe(['1' => 'Local', '2' => 'Non-local'])
+        ->and(config('procedures.discharge.sections.0.fields.bomi.fa_options'))->toBe(['1' => 'بومی', '2' => 'غیر بومی']);
 
     [$payload] = procedurePayload('discharge');
     $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'bomi' => '9'])->assertSessionHasErrors('bomi');

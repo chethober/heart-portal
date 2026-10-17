@@ -61,7 +61,13 @@ abstract class ProcedureReport
      */
     final public function __construct(protected readonly array $data)
     {
-        $this->fields = Procedures::fields(static::PROCEDURE);
+        $fields = Procedures::fields(static::PROCEDURE);
+        // A Persian report uses the Persian wording a form in English keeps beside its own ("fa").
+        $this->fields = $this->language() === 'fa' ? array_map(fn (array $field) => [
+            ...$field,
+            'label' => $field['fa'] ?? $field['label'],
+            ...(isset($field['fa_options']) ? ['options' => $field['fa_options']] : []),
+        ], $fields) : $fields;
     }
 
     /**
@@ -150,10 +156,10 @@ abstract class ProcedureReport
                 if (isset($this->reported[$name]) || ($value = $this->display($name)) === null) {
                     continue;
                 }
-                $items[] = ['label' => $field['label'], 'value' => $value];
+                $items[] = ['label' => $this->fields[$name]['label'], 'value' => $value];
             }
             if ($items !== []) {
-                $appendix[] = ['title' => $section['title'], 'items' => $items];
+                $appendix[] = ['title' => $this->language() === 'fa' ? ($section['fa'] ?? $section['title']) : $section['title'], 'items' => $items];
             }
         }
 
