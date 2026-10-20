@@ -353,6 +353,19 @@
     max-width: var(--cell);
   }
 
+  /* Short section names: one line, buttons sharing the width, scrolling sideways if too narrow. */
+  #echo-app .section-nav-container.is-one-line {
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  #echo-app .section-nav-container.is-one-line > .section-nav-btn {
+    flex: 1 0 auto;
+    gap: 4px;
+    padding: 6px 8px;
+  }
+
   #echo-app .section-nav-container.is-measuring {
     flex-wrap: nowrap;
     width: max-content;

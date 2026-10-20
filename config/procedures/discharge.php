@@ -15,7 +15,8 @@
 | which are stored as null. "show_if" shows a field only while another field
 | has the given value.
 |
-| Form-only keys: a "top" section is shown with the patient's details; "widget"
+| Form-only keys: a "top" section is shown with the patient's details; "abbr"
+| is a section's short name in the section bar (its title shows on hover); "widget"
 | draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
 | (checkboxes whose combination picks the code); a "retired" field is kept
 | (import, export, report) but no longer shown in the form or changed by it;
@@ -33,7 +34,7 @@ return [
     'date_field' => 'DateOf_disch_date',
     'sections' => [
         [
-            'title' => 'Registration',
+            'title' => 'Registration', 'abbr' => 'Reg',
             // Shown with the patient's details rather than as a section of its own.
             'top' => true,
             'fields' => [
@@ -41,7 +42,7 @@ return [
             ],
         ],
         [
-            'title' => 'History', 'fa' => 'شکایت بالینی و شرح حال',
+            'title' => 'Present Illness', 'abbr' => 'PI', 'fa' => 'شکایت بالینی و شرح حال',
             'fields' => [
                 // Auto: the report's opening sentence is built from the complaints below, which are
                 // only shown in this mode. Manual: the history written here is printed instead.
@@ -68,7 +69,7 @@ return [
             ],
         ],
         [
-            'title' => 'Rf & PMH', 'fa' => 'ریسک فاکتورها و سوابق بیماری های قلبی و بیماری های همراه',
+            'title' => 'Risk Factors & Past Medical History', 'abbr' => 'RF', 'fa' => 'ریسک فاکتورها و سوابق بیماری های قلبی و بیماری های همراه',
             'fields' => [
                 'hxPrevMI_main' => ['type' => 'choice', 'label' => 'Previous MI', 'fa' => 'سابقه سکته قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevMI_date' => ['type' => 'date', 'label' => 'Date', 'fa' => 'تاریخ'],
@@ -104,7 +105,7 @@ return [
             ],
         ],
         [
-            'title' => 'PMS', 'fa' => 'سابقه پروسیجرهای قبلی',
+            'title' => 'Post Medical Surgery', 'abbr' => 'PMS', 'fa' => 'سابقه پروسیجرهای قبلی',
             'fields' => [
                 'HxPCI' => ['type' => 'choice', 'label' => 'PCI', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'icd' => ['type' => 'choice', 'label' => 'ICD implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
@@ -115,7 +116,7 @@ return [
             ],
         ],
         [
-            'title' => 'VS', 'fa' => 'علائم حیاتی بیمار در بدو ورود',
+            'title' => 'Vital Signs', 'abbr' => 'VS', 'fa' => 'علائم حیاتی بیمار در بدو ورود',
             'fields' => [
                 'sbp' => ['type' => 'number', 'label' => 'Systolic BP', 'fa' => 'فشار خون سیستولیک'],
                 'dbp' => ['type' => 'number', 'label' => 'Diastolic BP', 'fa' => 'فشار خون دیاستولیک'],
@@ -127,7 +128,7 @@ return [
             ],
         ],
         [
-            'title' => 'Signs', 'fa' => 'نشانه ها',
+            'title' => 'Physical Signs', 'abbr' => 'PE', 'fa' => 'نشانه ها',
             'fields' => [
                 'signs_jvp' => ['type' => 'choice', 'label' => 'Elevated JVP', 'fa' => 'JVP بالا', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'signs_rales' => ['type' => 'choice', 'label' => 'Rales', 'fa' => 'رال ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
@@ -143,7 +144,7 @@ return [
             ],
         ],
         [
-            'title' => 'Primary Diagnosis',
+            'title' => 'Primary Diagnosis', 'abbr' => 'PD',
             'fields' => [
                 'stableangina' => ['type' => 'choice', 'label' => 'Stable Angina', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
                 'STElevatedMI' => ['type' => 'choice', 'label' => 'ST Elevated MI', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
@@ -170,7 +171,7 @@ return [
             ],
         ],
         [
-            'title' => 'final diagnosis',
+            'title' => 'Final Diagnosis', 'abbr' => 'FD',
             'fields' => [
                 // Chosen from heart's final-diagnosis guide (config/diagnoses.php), with ICD-10 codes.
                 'final_diagnosis_codes' => ['type' => 'diagnoses', 'label' => 'Final diagnosis (ICD-10)', 'fa' => 'تشخیص نهایی (ICD-10)'],
@@ -178,7 +179,7 @@ return [
             ],
         ],
         [
-            'title' => 'Echo & ECG',
+            'title' => 'Echo & ECG', 'abbr' => 'ECG',
             'fields' => [
                 'ecg_normal' => ['type' => 'choice', 'label' => 'Abnormal ECG (Arrhythmia / Ischemia)', 'group' => 'ECG Findings', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'ecg_sinus' => ['type' => 'choice', 'label' => 'Sinus Rhythm', 'group' => 'ECG Findings', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['ecg_normal', '1']],
@@ -203,7 +204,7 @@ return [
             ],
         ],
         [
-            'title' => 'Other Non-invasive Tests', 'fa' => 'سایر تست های تشخیصی غیر تهاجمی',
+            'title' => 'Other Non-invasive Tests', 'abbr' => 'NIT', 'fa' => 'سایر تست های تشخیصی غیر تهاجمی',
             'fields' => [
                 'exercise_stress_test' => ['type' => 'choice', 'label' => 'exercise stress test', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
                 'result_exercise_stress_test' => ['type' => 'choice', 'label' => 'result exercise stress test', 'options' => ['9' => 'unavailable', '1' => 'low risk for CAD', '2' => 'intermediate risk for CAD', '3' => 'high risk for CAD'], 'show_if' => ['exercise_stress_test', '1']],
@@ -217,7 +218,7 @@ return [
             ],
         ],
         [
-            'title' => 'Lab Data',
+            'title' => 'Lab Data', 'abbr' => 'Lab',
             'fields' => [
                 'lab_UREA' => ['type' => 'number', 'label' => 'UREA'],
                 'lab_BUN' => ['type' => 'number', 'label' => 'BUN'],
@@ -263,7 +264,7 @@ return [
             ],
         ],
         [
-            'title' => 'In-hospital Procedures & Treatment', 'fa' => 'اقدامات تشخیصی درمانی در زمان بستری',
+            'title' => 'In-hospital Procedures & Treatment', 'abbr' => 'Tx', 'fa' => 'اقدامات تشخیصی درمانی در زمان بستری',
             'fields' => [
                 'medication_treatment' => ['type' => 'boolean', 'label' => 'Medical therapy', 'fa' => 'درمان داروئی'],
                 'medication_treatmentFor' => ['type' => 'multiline', 'label' => 'In-hospital medications', 'fa' => 'نام داروهای زمان بستری', 'show_if' => ['medication_treatment', '1']],
@@ -281,7 +282,7 @@ return [
             ],
         ],
         [
-            'title' => 'In-hospital Complications', 'fa' => 'بروز عوارض در حین بستری',
+            'title' => 'In-hospital Complications', 'abbr' => 'Cx', 'fa' => 'بروز عوارض در حین بستری',
             'fields' => [
                 'diseasestatus' => ['type' => 'choice', 'label' => 'In-hospital complications', 'fa' => 'بروز عوارض در حین بستری', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'diseasestatus_other' => ['type' => 'text', 'label' => 'Description of complications', 'fa' => 'شرح عوارض', 'show_if' => ['diseasestatus', '1']],
@@ -295,13 +296,13 @@ return [
             ],
         ],
         [
-            'title' => 'Hospital Course', 'fa' => 'سیر بیماری',
+            'title' => 'Hospital Course', 'abbr' => 'HC', 'fa' => 'سیر بیماری',
             'fields' => [
                 'comment' => ['type' => 'multiline', 'label' => 'comment'],
             ],
         ],
         [
-            'title' => 'Discharge Recommendations', 'fa' => 'توصیه های پس از ترخیص',
+            'title' => 'Discharge Recommendations', 'abbr' => 'Rec', 'fa' => 'توصیه های پس از ترخیص',
             'fields' => [
                 'medication_education' => ['type' => 'boolean', 'label' => 'Education on taking medications regularly', 'fa' => 'آموزش مصرف منظم داروها'],
                 'nutrition_education' => ['type' => 'boolean', 'label' => 'Nutrition education', 'fa' => 'آموزش های تغذیه ای'],
@@ -318,13 +319,13 @@ return [
             ],
         ],
         [
-            'title' => 'Discharge Medications', 'fa' => 'داروهای موقع ترخیص',
+            'title' => 'Discharge Medications', 'abbr' => 'Meds', 'fa' => 'داروهای موقع ترخیص',
             'fields' => [
                 'drugDischarge' => ['type' => 'multiline', 'label' => 'Discharge medications', 'fa' => 'داروی های موقع ترخیص'],
             ],
         ],
         [
-            'title' => 'MI Specific', 'fa' => 'اختصاصی MI',
+            'title' => 'MI Specific', 'abbr' => 'MI', 'fa' => 'اختصاصی MI',
             'fields' => [
                 'pain_time_status' => ['type' => 'choice', 'label' => 'Pain onset time', 'fa' => 'زمان شروع درد', 'group' => 'Reperfusion Therapy', 'options' => ['-1' => 'Unknown', '1' => 'Known'], 'fa_options' => ['-1' => 'نامشخص', '1' => 'مشخص']],
                 'DateOf_pain_date' => ['type' => 'date', 'label' => 'Date', 'fa' => 'تاریخ', 'group' => 'Reperfusion Therapy', 'show_if' => ['pain_time_status', '1']],
@@ -357,7 +358,7 @@ return [
             ],
         ],
         [
-            'title' => 'HF Specific', 'fa' => 'اختصاصی hf',
+            'title' => 'HF Specific', 'abbr' => 'HF', 'fa' => 'اختصاصی hf',
             'fields' => [
                 'diagnosis' => ['type' => 'choice', 'label' => 'Diagnosis', 'fa' => 'تشخیص بیماری', 'options' => ['unknown' => '** Unknown **', 'acutehfoverchronichf' => 'Acute on chronic heart failure', 'newhf' => 'New acute heart failure', 'hfandshock' => 'Heart failure with cardiogenic shock', 'hfandpulmunaryedema' => 'Heart failure with acute pulmonary edema', 'righthf' => 'Right heart failure'], 'fa_options' => ['unknown' => '** نامشخص **', 'acutehfoverchronichf' => 'نارسایی حاد قلب در بیمار با نارسایی مزمن قلبی', 'newhf' => 'نارسائی حاد قلب جدید', 'hfandshock' => 'نارسائی قلب و شوک کاردیوژنیک', 'hfandpulmunaryedema' => 'نارسائی قلب و ادم حاد ریه', 'righthf' => 'نارسائی بطن راست']],
                 'etiology' => ['type' => 'choice', 'label' => 'Heart failure etiology', 'fa' => 'اتیولوژی نارسایی قلب', 'options' => ['unknown' => '** Unknown **', 'ischemic' => 'Ischemic', 'valvular' => 'Valvular', 'hcm' => 'Hypertrophic cardiomyopathy', 'rcm' => 'Restrictive cardiomyopathy', 'cp' => 'Constrictive pericarditis', 'dcm' => 'Dilated cardiomyopathy', 'others' => 'Other'], 'fa_options' => ['unknown' => '** نامشخص **', 'ischemic' => 'ایسمیک', 'valvular' => 'دریچه ای', 'hcm' => 'هیپرتروفیک کاردیومیوپاتی', 'rcm' => 'رستریکتیوکاردیومیوپاتی', 'cp' => 'پریکاردیت فشارنده', 'dcm' => 'کاردیومیوپاتی دیلاته', 'others' => 'سایر موارد']],
@@ -377,7 +378,7 @@ return [
             ],
         ],
         [
-            'title' => 'CABG Specific', 'fa' => 'اختصاصی CABG',
+            'title' => 'CABG Specific', 'abbr' => 'CABG', 'fa' => 'اختصاصی CABG',
             'fields' => [
                 'emerg_cabg' => ['type' => 'choice', 'label' => 'Emergent CABG', 'group' => 'Indication For CABG', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'emerg_cabg_indication' => ['type' => 'choice', 'label' => 'Emergent CABG Indication', 'group' => 'Indication For CABG', 'options' => ['1' => 'Post AMI', '2' => 'Post Unstable Angina', '3' => 'Post Procedural (PCI) Complication', '9' => 'Unknown'], 'show_if' => ['emerg_cabg', '1']],
@@ -491,7 +492,7 @@ return [
             ],
         ],
         [
-            'title' => 'Discharge Status', 'fa' => 'وضعیت بیمار هنگام ترخیص',
+            'title' => 'Discharge Status', 'abbr' => 'DS', 'fa' => 'وضعیت بیمار هنگام ترخیص',
             'fields' => [
                 'DateOf_disch_date' => ['type' => 'date', 'label' => 'Date', 'fa' => 'تاریخ'],
                 'disch_time' => ['type' => 'time', 'label' => 'Time', 'fa' => 'ساعت'],

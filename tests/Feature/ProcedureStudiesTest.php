@@ -177,7 +177,9 @@ test('the history\'s complaint boxes are only shown and kept in Auto mode, which
 test('the discharge form is in English while its report keeps heart\'s Persian wording', function () {
     $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')
         ->assertOk()
-        ->assertSee('Rf &amp; PMH', false)
+        ->assertSee('title="Risk Factors &amp; Past Medical History"', false)
+        ->assertSee('<span class="btn-abbr">RF</span>', false)
+        ->assertSee('section-nav-container is-one-line', false)
         ->assertSee('Syncope')
         ->assertDontSee('سنکوب');
 

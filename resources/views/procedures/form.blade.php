@@ -125,13 +125,15 @@
 
             {{-- One chip per section, green once something in it is filled in, red with an error. --}}
             <div class="section-nav-wrapper">
-                <div class="section-nav-container" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
+                {{-- Sections with short names ("abbr") fit on one line; the full title shows on hover. --}}
+                @php $abbreviated = collect($sections)->every(fn (array $section) => isset($section['abbr'])); @endphp
+                <div class="section-nav-container {{ $abbreviated ? 'is-one-line' : '' }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
                     @foreach ($sections as $index => $section)
                         @php $hasErrors = collect($section['fields'])->keys()->contains(fn ($name) => $errors->has($name)); @endphp
                         <button type="button" class="section-nav-btn" title="{{ $section['title'] }}"
                                 :class="{ 'active': section === {{ $index }}, 'status-filled': filled[{{ $index }}] && ! {{ $hasErrors ? 'true' : 'false' }}, 'status-unfilled': {{ $hasErrors ? 'true' : 'false' }} }"
                                 x-on:click="section = {{ $index }}">
-                            <span class="btn-abbr">{{ Str::limit($section['title'], 28) }}</span>
+                            <span class="btn-abbr">{{ $section['abbr'] ?? Str::limit($section['title'], 28) }}</span>
                         </button>
                     @endforeach
                 </div>

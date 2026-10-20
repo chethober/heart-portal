@@ -9,7 +9,7 @@
  * the widest chip allows, shared out evenly, so four chips that don't fit on one line make two
  * lines of two rather than three and a lone one. The section bar is shared out like fields (28
  * sections make lines of 6, 6, 6, 5 and 5), its buttons capped at NAV_MAX wide so long titles
- * are cut short.
+ * are cut short. A bar marked .is-one-line (short section names) stays on one line instead.
  *
  * A field marked data-follows="<id>" (an "Other" box, a manual value) is shown only for some value
  * of that field, so it is moved into that field's cell, under it: revealing it moves nothing else.
@@ -107,7 +107,7 @@
             const width = row.clientWidth;
             if (width > 0) layoutRow(row, width);
         });
-        app.querySelectorAll('.cx-chips, .cx-group, .section-nav-container').forEach((group) => {
+        app.querySelectorAll('.cx-chips, .cx-group, .section-nav-container:not(.is-one-line)').forEach((group) => {
             const width = group.clientWidth;
             if (width > 0) layoutChips(group, width);
         });

@@ -44,7 +44,7 @@ final class Procedures
     }
 
     /**
-     * @return list<array{title: string, fa?: string, top?: bool, fields: array<string, array<string, mixed>>}>
+     * @return list<array{title: string, abbr?: string, fa?: string, top?: bool, fields: array<string, array<string, mixed>>}>
      */
     public static function sections(string $key): array
     {
