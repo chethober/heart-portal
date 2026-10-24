@@ -1,7 +1,8 @@
 @php
     /**
      * A run of yes/no fields that don't exclude each other, as one group of checkboxes: chips up
-     * to four, a dropdown of checkboxes from five. Each box is still its own field (name=1).
+     * to four, a dropdown of checkboxes from five, while "checkbox" choices are always chips, one
+     * checkbox each. Each box is still its own field (name=1).
      * A show_if the whole run shares hides the group; others hide just their box.
      *
      * @var array<string, array<string, mixed>> $fields
@@ -11,7 +12,7 @@
      */
     $conditions = collect($fields)->map(fn (array $field) => $visible($field))->unique();
     $shared = $conditions->count() === 1 ? $conditions->first() : null;
-    $dropdown = count($fields) >= 5;
+    $dropdown = count($fields) >= 5 && collect($fields)->every(fn (array $field) => $field['type'] === 'boolean');
 @endphp
 
 <div class="field cx-group-field" @if ($shared) x-show="{{ $shared }}" x-cloak @endif>

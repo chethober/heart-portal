@@ -9,8 +9,9 @@
      *
      * Choice fields are drawn as toggles, choiceboxes or dropdowns by public/echo-form/choice-inputs.js.
      * Small fields shown only for another field's value sit inside that field's cell (partials/field).
-     * Runs of yes/no fields in one group don't exclude each other, so they are shown together as
-     * one group of checkboxes (partials/checkbox-group), still saved as their own columns.
+     * Runs of yes/no fields (and "checkbox" choices) in one group don't exclude each other, so they
+     * are shown together as one group of checkboxes (partials/checkbox-group), still saved as their
+     * own columns.
      *
      * @var string $procedure
      * @var \App\Models\ProcedureStudy|null $study
@@ -31,7 +32,17 @@
     // Only the fields others depend on need to be tracked in the browser.
     $watched = collect($fields)->pluck('show_if.0')->filter()->unique()
         ->mapWithKeys(fn (string $name) => [$name => (string) ($value($name) ?? '')]);
-    $visible = fn (array $field) => isset($field['show_if']) ? "v['{$field['show_if'][0]}'] === '{$field['show_if'][1]}'" : null;
+    // A field is shown only while the field it depends on is shown too.
+    $visible = function (array $field) use (&$visible, $fields): ?string {
+        if (! isset($field['show_if'])) {
+            return null;
+        }
+        [$parent, $code] = $field['show_if'];
+        $condition = "v['{$parent}'] === '{$code}'";
+        $outer = isset($fields[$parent]) ? $visible($fields[$parent]) : null;
+
+        return $outer === null ? $condition : "{$outer} && {$condition}";
+    };
     $model = fn (string $name) => $watched->has($name) ? "x-model=\"v['{$name}']\"" : '';
 
     // The section to open first: the first with an error, else the first.
@@ -151,7 +162,7 @@
                             foreach ($section['fields'] as $name => $field) {
                                 $parent = $field['show_if'][0] ?? null;
                                 if ($parent !== null && isset($section['fields'][$parent]) && $section['fields'][$parent]['type'] !== 'boolean'
-                                    && ($section['fields'][$parent]['nest'] ?? true)
+                                    && ($section['fields'][$parent]['widget'] ?? null) !== 'checkbox' && ($section['fields'][$parent]['nest'] ?? true)
                                     && in_array($field['type'], ['text', 'number', 'choice', 'date', 'time'], true)) {
                                     $children[$parent][] = $name;
                                 }
@@ -162,10 +173,11 @@
                             $items = [];
                             foreach (array_diff_key($section['fields'], array_flip($nested)) as $name => $field) {
                                 $last = array_key_last($items);
-                                if ($field['type'] === 'boolean' && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
+                                $box = $field['type'] === 'boolean' || ($field['widget'] ?? null) === 'checkbox';
+                                if ($box && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
                                     $items[$last]['fields'][$name] = $field;
                                 } else {
-                                    $items[] = ['booleans' => $field['type'] === 'boolean', 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
+                                    $items[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
                                 }
                             }
                         @endphp
@@ -175,7 +187,7 @@
                             @endif
                             @php $previousGroup = $item['group']; @endphp
 
-                            @if (count($item['fields']) > 1)
+                            @if (count($item['fields']) > 1 || (Arr::first($item['fields'])['widget'] ?? null) === 'checkbox')
                                 @include('procedures.partials.checkbox-group', ['fields' => $item['fields']])
                                 @continue
                             @endif

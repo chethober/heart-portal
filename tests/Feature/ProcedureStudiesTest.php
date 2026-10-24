@@ -174,6 +174,33 @@ test('the history\'s complaint boxes are only shown and kept in Auto mode, which
     expect($study->fresh()->clinicalcomplaint_syncope)->toBe('1');
 });
 
+test('the history\'s complaints are one checkbox each, and dyspnea class shows only with dyspnea on exertion in Auto mode', function () {
+    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    expect($html)->toContain('<input type="checkbox" name="clinicalcomplaint_syncope" value="1"')
+        ->not->toContain('<select id="f-clinicalcomplaint_syncope"')
+        ->toContain('x-on:change="v[\'clinicalcomplaint_asthmainactivity\'] = $event.target.checked ? \'1\' : \'\'"')
+        ->toContain('x-show="v[&#039;history_mode&#039;] === &#039;auto&#039; &amp;&amp; v[&#039;clinicalcomplaint_asthmainactivity&#039;] === &#039;1&#039;"');
+});
+
+test('the discharge form groups its sections and leaves out risk factor dates and non-statin medication', function () {
+    [$payload] = procedurePayload('discharge');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', $payload)->assertRedirect();
+    $study = Procedures::model('discharge')::withoutGlobalScope(HospitalScope::class)->sole();
+    // Imported from heart, these are kept although the form no longer asks for them.
+    $study->forceFill(['DateOf_hxPrevMI_date' => '1400/01/01', 'hyperchol_tx_non_statin' => '1'])->save();
+
+    $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/discharge/{$study->id}/edit")->assertOk()->getContent();
+    $abbrs = preg_match_all('/<span class="btn-abbr">([^<]*)<\/span>/', $html, $matches) ? $matches[1] : [];
+    expect($abbrs)->toBe(['PI', 'RF', 'PSH', 'VS', 'PE', 'Dx', 'ECG', 'Lab', 'Tx', 'Com', 'HC', 'Rec', 'Meds', 'DS', 'Others'])
+        ->and($html)->toContain('title="Post Surgical History"')->toContain('title="Admission Vital Signs"')
+        ->toContain('MI — Reperfusion Therapy')->toContain('HF Specific')->toContain('CABG — Operation Information')
+        ->not->toContain('name="DateOf_hxPrevMI_date"')->not->toContain('name="hyperchol_tx_non_statin"');
+
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/discharge/{$study->id}", $payload)->assertSessionHasNoErrors()->assertRedirect();
+    expect($study->fresh()->DateOf_hxPrevMI_date)->toBe('1400/01/01')
+        ->and($study->fresh()->hyperchol_tx_non_statin)->toBe('1');
+});
+
 test('the discharge form is in English while its report keeps heart\'s Persian wording', function () {
     $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')
         ->assertOk()
