@@ -151,49 +151,58 @@
             </div>
 
             @foreach ($sections as $index => $section)
-                <div id="sec-{{ $index }}" class="form-section {{ $index === $active ? 'active' : '' }}" data-section="{{ $index }}" :class="{ 'active': section === {{ $index }} }">
+                @php
+                    // Small fields shown only for a value of another field in this section are drawn
+                    // inside that field's cell (partials/field), so revealing them moves nothing,
+                    // unless the field says "nest" => false (it switches a whole run of fields).
+                    $children = [];
+                    foreach ($section['fields'] as $name => $field) {
+                        $parent = $field['show_if'][0] ?? null;
+                        if ($parent !== null && isset($section['fields'][$parent]) && $section['fields'][$parent]['type'] !== 'boolean'
+                            && ($section['fields'][$parent]['widget'] ?? null) !== 'checkbox' && ($section['fields'][$parent]['nest'] ?? true)
+                            && in_array($field['type'], ['text', 'number', 'choice', 'date', 'time'], true)) {
+                            $children[$parent][] = $name;
+                        }
+                    }
+                    $nested = array_merge([], ...array_values($children));
+
+                    // Consecutive yes/no fields of one group become a single checkbox group.
+                    $items = [];
+                    foreach (array_diff_key($section['fields'], array_flip($nested)) as $name => $field) {
+                        $last = array_key_last($items);
+                        $box = $field['type'] === 'boolean' || ($field['widget'] ?? null) === 'checkbox';
+                        if ($box && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
+                            $items[$last]['fields'][$name] = $field;
+                        } else {
+                            $items[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
+                        }
+                    }
+
+                    // Each group under its heading; a "collapse" section folds the groups, one open
+                    // at a time (the first with an error opens).
+                    $groups = collect($items)->chunkWhile(fn (array $item, int $key, $chunk) => $item['group'] === $chunk->last()['group'])->values();
+                    $collapse = $section['collapse'] ?? false;
+                    $openGroup = $groups->search(fn ($chunk) => $chunk->contains(fn (array $item) => collect($item['fields'])->keys()->contains(fn ($name) => $errors->has($name))));
+                @endphp
+                <div id="sec-{{ $index }}" class="form-section {{ $index === $active ? 'active' : '' }}" data-section="{{ $index }}" :class="{ 'active': section === {{ $index }} }"
+                     @if ($section['collapse'] ?? false) x-data="{ part: @js($openGroup === false ? null : $openGroup) }" @endif>
                     <div class="form-section-header">{{ $section['title'] }}</div>
                     <div class="row">
-                        @php
-                            // Small fields shown only for a value of another field in this section are drawn
-                            // inside that field's cell (partials/field), so revealing them moves nothing,
-                            // unless the field says "nest" => false (it switches a whole run of fields).
-                            $children = [];
-                            foreach ($section['fields'] as $name => $field) {
-                                $parent = $field['show_if'][0] ?? null;
-                                if ($parent !== null && isset($section['fields'][$parent]) && $section['fields'][$parent]['type'] !== 'boolean'
-                                    && ($section['fields'][$parent]['widget'] ?? null) !== 'checkbox' && ($section['fields'][$parent]['nest'] ?? true)
-                                    && in_array($field['type'], ['text', 'number', 'choice', 'date', 'time'], true)) {
-                                    $children[$parent][] = $name;
-                                }
-                            }
-                            $nested = array_merge([], ...array_values($children));
-
-                            // Consecutive yes/no fields of one group become a single checkbox group.
-                            $items = [];
-                            foreach (array_diff_key($section['fields'], array_flip($nested)) as $name => $field) {
-                                $last = array_key_last($items);
-                                $box = $field['type'] === 'boolean' || ($field['widget'] ?? null) === 'checkbox';
-                                if ($box && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
-                                    $items[$last]['fields'][$name] = $field;
-                                } else {
-                                    $items[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
-                                }
-                            }
-                        @endphp
-                        @foreach ($items as $item)
-                            @if ($item['group'] !== null && $item['group'] !== ($previousGroup ?? null))
-                                <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $item['group'] }}</div>
+                        @foreach ($groups as $part => $chunk)
+                            @php $group = $chunk->first()['group']; @endphp
+                            @if ($collapse && $group !== null)
+                                <div class="collapse-part" :class="{ 'is-open': part === {{ $part }} }">
+                                    <button type="button" class="collapse-trigger" :aria-expanded="part === {{ $part }}" x-on:click="part = part === {{ $part }} ? null : {{ $part }}">{{ $group }}</button>
+                                    <div class="row" x-show="part === {{ $part }}" @if ($openGroup !== $part) x-cloak @endif>
+                                        @include('procedures.partials.group-items', ['items' => $chunk])
+                                    </div>
+                                </div>
+                            @else
+                                @if ($group !== null)
+                                    <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $group }}</div>
+                                @endif
+                                @include('procedures.partials.group-items', ['items' => $chunk])
                             @endif
-                            @php $previousGroup = $item['group']; @endphp
-
-                            @if (count($item['fields']) > 1 || (Arr::first($item['fields'])['widget'] ?? null) === 'checkbox')
-                                @include('procedures.partials.checkbox-group', ['fields' => $item['fields']])
-                                @continue
-                            @endif
-                            @php $name = array_key_first($item['fields']); $field = $item['fields'][$name]; @endphp
-
-                            @include('procedures.partials.field', ['sub' => false])
                         @endforeach
                     </div>
                 </div>

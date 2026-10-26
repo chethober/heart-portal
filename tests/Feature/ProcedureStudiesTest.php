@@ -182,6 +182,47 @@ test('the history\'s complaints are one checkbox each, and dyspnea class shows o
         ->toContain('x-show="v[&#039;history_mode&#039;] === &#039;auto&#039; &amp;&amp; v[&#039;clinicalcomplaint_asthmainactivity&#039;] === &#039;1&#039;"');
 });
 
+test('the discharge diagnoses are checkboxes, ticked only for Yes, and the arrhythmia type shows with arrhythmia', function () {
+    [$payload] = procedurePayload('discharge');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'stableangina' => '1', 'arrhythmia' => '1', 'typeOfArrhythmia' => 'AF', 'for_CABG' => '1'])
+        ->assertSessionHasNoErrors()->assertRedirect();
+    $study = Procedures::model('discharge')::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->stableangina)->toBe('1')->and($study->typeOfArrhythmia)->toBe('AF')->and($study->for_CABG)->toBe('1');
+
+    // Heart's No (2) and Unknown (9) are not ticked.
+    $study->forceFill(['heart_failure' => '2', 'lung_emboli' => '9'])->save();
+    $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/discharge/{$study->id}/edit")->assertOk()->getContent();
+    expect($html)->toContain('<input type="checkbox" name="stableangina" value="1" checked')
+        ->toContain('<input type="checkbox" name="for_CABG" value="1" checked')
+        ->toMatch('/<input type="checkbox" name="heart_failure" value="1"\s*>/')
+        ->toMatch('/<input type="checkbox" name="lung_emboli" value="1"\s*>/')
+        ->not->toContain('<select id="f-stableangina"')
+        ->toContain('x-show="v[&#039;arrhythmia&#039;] === &#039;1&#039;"');
+
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/discharge/{$study->id}", [...$payload, 'stableangina' => '1'])->assertRedirect();
+    expect($study->fresh()->stableangina)->toBe('1')->and($study->fresh()->arrhythmia)->toBeNull()->and($study->fresh()->typeOfArrhythmia)->toBeNull();
+});
+
+test('the discharge form folds each part of Others under its heading, one open at a time', function () {
+    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    expect($html)->toContain('x-data="{ part: null }"')
+        ->toContain('class="collapse-trigger" :aria-expanded="part === 0" x-on:click="part = part === 0 ? null : 0">Other Non-invasive Tests</button>')
+        ->toContain('>HF Specific</button>')
+        ->and(substr_count($html, 'class="collapse-part"'))->toBe(11);
+
+    // A part with an error opens.
+    [$payload] = procedurePayload('discharge');
+    $html = $this->actingAs($this->nurse)->from('/dashboard/procedures/discharge/create')->followingRedirects()
+        ->post('/dashboard/procedures/discharge', [...$payload, 'exercise_stress_test' => 'nope'])->getContent();
+    expect($html)->toContain('x-data="{ part: 0 }"');
+});
+
+test('the final diagnosis list shows once three letters are typed', function () {
+    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()
+        ->assertSee('<div x-show="searching" x-cloak', false)
+        ->assertSee('name="final_diagnosis_codes[]"', false);
+});
+
 test('the discharge form groups its sections and leaves out risk factor dates and non-statin medication', function () {
     [$payload] = procedurePayload('discharge');
     $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', $payload)->assertRedirect();
@@ -191,7 +232,7 @@ test('the discharge form groups its sections and leaves out risk factor dates an
 
     $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/discharge/{$study->id}/edit")->assertOk()->getContent();
     $abbrs = preg_match_all('/<span class="btn-abbr">([^<]*)<\/span>/', $html, $matches) ? $matches[1] : [];
-    expect($abbrs)->toBe(['PI', 'RF', 'PSH', 'VS', 'PE', 'Dx', 'ECG', 'Lab', 'Tx', 'Com', 'HC', 'Rec', 'Meds', 'DS', 'Others'])
+    expect($abbrs)->toBe(['PI', 'RF', 'PSH', 'VS', 'PE', 'Px', 'Dx', 'ECG', 'Lab', 'Tx', 'Com', 'HC', 'Rec', 'Meds', 'DS', 'Others'])
         ->and($html)->toContain('title="Post Surgical History"')->toContain('title="Admission Vital Signs"')
         ->toContain('MI — Reperfusion Therapy')->toContain('HF Specific')->toContain('CABG — Operation Information')
         ->not->toContain('name="DateOf_hxPrevMI_date"')->not->toContain('name="hyperchol_tx_non_statin"');

@@ -16,7 +16,8 @@
 | has the given value.
 |
 | Form-only keys: a "top" section is shown with the patient's details; "abbr"
-| is a section's short name in the section bar (its title shows on hover); "widget"
+| is a section's short name in the section bar (its title shows on hover); a
+| "collapse" section folds each group under its heading, one open at a time; "widget"
 | draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
 | (checkboxes whose combination picks the code); a "retired" field is kept
 | (import, export, report) but no longer shown in the form or changed by it;
@@ -144,33 +145,38 @@ return [
             ],
         ],
         [
-            'title' => 'Diagnosis', 'abbr' => 'Dx', 'fa' => 'تشخیص',
+            'title' => 'Primary Diagnosis', 'abbr' => 'Px', 'fa' => 'تشخیص اولیه',
             'fields' => [
-                'stableangina' => ['type' => 'choice', 'label' => 'Stable Angina', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'STElevatedMI' => ['type' => 'choice', 'label' => 'ST Elevated MI', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'nonSTElevatedMI' => ['type' => 'choice', 'label' => 'Non ST Elevated MI', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'unstable_angina' => ['type' => 'choice', 'label' => 'unstable angina', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'positive_stress_test' => ['type' => 'choice', 'label' => 'Positive Stress Test (High Risk Patient)', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'cardiogenic_shock_within24hrs' => ['type' => 'choice', 'label' => 'cardiogenic shock within 24 hrs', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'LV_systolic_dysfunction' => ['type' => 'choice', 'label' => 'LV systolic dysfunction', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'cardiomyopathy' => ['type' => 'choice', 'label' => 'cardiomyopathy', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'pulmonary_hypertension' => ['type' => 'choice', 'label' => 'pulmonary hypertension', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'heart_failure' => ['type' => 'choice', 'label' => 'heart failure', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'peripheral_vascular_disease' => ['type' => 'choice', 'label' => 'peripheral vascular disease', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'cardiac_arrest_within_24hrs' => ['type' => 'choice', 'label' => 'cardiac arrest within 24hrs', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'arrhythmia' => ['type' => 'choice', 'label' => 'arrhythmia', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'typeOfArrhythmia' => ['type' => 'text', 'label' => 'Type Of Arrhythmia', 'group' => 'Primary Diagnosis', 'show_if' => ['arrhythmia', '1']],
-                'acute_lung_edema' => ['type' => 'choice', 'label' => 'acute pulmonary edema', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'lung_emboli' => ['type' => 'choice', 'label' => 'pulmonary emboli', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'heart_valvular_disease' => ['type' => 'choice', 'label' => 'heart valvular disease', 'group' => 'Primary Diagnosis', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
-                'for_angiography' => ['type' => 'choice', 'label' => 'For coronary angiography', 'fa' => 'جهت آنژیوگرافی عروق کرونر', 'group' => 'Primary Diagnosis', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'for_angioplasty' => ['type' => 'choice', 'label' => 'For coronary angioplasty', 'fa' => 'جهت آنژیوپلاستی عروق کرونر', 'group' => 'Primary Diagnosis', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'for_CABG' => ['type' => 'choice', 'label' => 'For CABG surgery', 'fa' => 'جهت عمل جراحی CABG', 'group' => 'Primary Diagnosis', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'for_heart_valve_surgery' => ['type' => 'choice', 'label' => 'For heart valve surgery', 'fa' => 'جهت عمل جراحی دریچه قلب', 'group' => 'Primary Diagnosis', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'other_indication' => ['type' => 'multiline', 'label' => 'other', 'group' => 'Primary Diagnosis'],
+                'stableangina' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Stable Angina', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'STElevatedMI' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'ST Elevated MI', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'nonSTElevatedMI' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Non ST Elevated MI', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'unstable_angina' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'unstable angina', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'positive_stress_test' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Positive Stress Test (High Risk Patient)', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'cardiogenic_shock_within24hrs' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'cardiogenic shock within 24 hrs', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'LV_systolic_dysfunction' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'LV systolic dysfunction', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'cardiomyopathy' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'cardiomyopathy', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'pulmonary_hypertension' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'pulmonary hypertension', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'heart_failure' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'heart failure', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'peripheral_vascular_disease' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'peripheral vascular disease', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'cardiac_arrest_within_24hrs' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'cardiac arrest within 24hrs', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'arrhythmia' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'arrhythmia', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'acute_lung_edema' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'acute pulmonary edema', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'lung_emboli' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'pulmonary emboli', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'heart_valvular_disease' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'heart valvular disease', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
+                'for_angiography' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'For coronary angiography', 'fa' => 'جهت آنژیوگرافی عروق کرونر', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'for_angioplasty' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'For coronary angioplasty', 'fa' => 'جهت آنژیوپلاستی عروق کرونر', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'for_CABG' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'For CABG surgery', 'fa' => 'جهت عمل جراحی CABG', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'for_heart_valve_surgery' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'For heart valve surgery', 'fa' => 'جهت عمل جراحی دریچه قلب', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'typeOfArrhythmia' => ['type' => 'text', 'label' => 'Type Of Arrhythmia', 'show_if' => ['arrhythmia', '1']],
+                'other_indication' => ['type' => 'multiline', 'label' => 'other'],
+            ],
+        ],
+        [
+            'title' => 'Final Diagnosis', 'abbr' => 'Dx', 'fa' => 'تشخیص نهایی',
+            'fields' => [
                 // Chosen from heart's final-diagnosis guide (config/diagnoses.php), with ICD-10 codes.
-                'final_diagnosis_codes' => ['type' => 'diagnoses', 'label' => 'Final diagnosis (ICD-10)', 'fa' => 'تشخیص نهایی (ICD-10)', 'group' => 'Final Diagnosis'],
-                'finalDiagnosis' => ['type' => 'multiline', 'label' => 'Final diagnosis', 'fa' => 'تشخیص نهایی', 'group' => 'Final Diagnosis'],
+                'final_diagnosis_codes' => ['type' => 'diagnoses', 'label' => 'Final diagnosis (ICD-10)', 'fa' => 'تشخیص نهایی (ICD-10)'],
+                'finalDiagnosis' => ['type' => 'multiline', 'label' => 'Final diagnosis', 'fa' => 'تشخیص نهایی'],
             ],
         ],
         [
@@ -327,7 +333,8 @@ return [
         [
             'title' => 'Others', 'abbr' => 'Others', 'fa' => 'سایر موارد',
             // Each part's fields are headed by its name (the former sections Other Non-invasive
-            // Tests, MI / HF / CABG Specific).
+            // Tests, MI / HF / CABG Specific), each part collapsed under its heading.
+            'collapse' => true,
             'fields' => [
                 'exercise_stress_test' => ['type' => 'choice', 'label' => 'exercise stress test', 'group' => 'Other Non-invasive Tests', 'options' => ['9' => 'Unknown', '1' => 'Yes', '2' => 'No'], 'blank' => ['0']],
                 'result_exercise_stress_test' => ['type' => 'choice', 'label' => 'result exercise stress test', 'group' => 'Other Non-invasive Tests', 'options' => ['9' => 'unavailable', '1' => 'low risk for CAD', '2' => 'intermediate risk for CAD', '3' => 'high risk for CAD'], 'show_if' => ['exercise_stress_test', '1']],

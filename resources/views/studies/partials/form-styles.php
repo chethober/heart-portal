@@ -590,6 +590,51 @@
     font-size: 0.875rem;
   }
 
+  /* A "collapse" section's groups: one folded part per heading, one open at a time. */
+  #echo-app .collapse-part {
+    flex: 1 1 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    background: #fff;
+  }
+
+  #echo-app .collapse-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    background: none;
+    color: #374151;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  #echo-app .collapse-trigger::after {
+    content: "";
+    width: 1.25em;
+    height: 1.25em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E") center / contain no-repeat;
+    transition: transform 0.15s ease;
+  }
+
+  #echo-app .collapse-part.is-open .collapse-trigger::after {
+    transform: rotate(180deg);
+  }
+
+  #echo-app .collapse-trigger:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: -2px;
+  }
+
+  #echo-app .collapse-part > .row {
+    padding: 0 12px 12px;
+  }
+
   @keyframes tabFadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
