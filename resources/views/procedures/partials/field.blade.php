@@ -5,6 +5,7 @@
 
     A choice's "widget" can draw it as a "dropdown" whatever its size, a "checkbox" (ticked = the
     "1" code), or "combine": checkboxes whose combination picks the code (config "combine").
+    A text with "insert" => "drugs" gets a drug catalog search whose picks are added to it.
 
     @var string $name
     @var array<string, mixed> $field
@@ -38,6 +39,9 @@
                 </select>
                 @break
             @case('multiline')
+                @if (($field['insert'] ?? null) === 'drugs' && auth()->user()->can('prescriptions.create'))
+                    @include('procedures.partials.drug-insert')
+                @endif
                 <textarea id="f-{{ $name }}" name="{{ $name }}" style="min-height: 60px">{{ $value($name) }}</textarea>
                 @break
             @case('number')

@@ -6,6 +6,7 @@
      * A show_if the whole run shares hides the group; others hide just their box.
      *
      * @var array<string, array<string, mixed>> $fields
+     * @var string|null $caption
      * @var \Closure $value
      * @var \Closure $visible
      * @var \Illuminate\Support\Collection<string, string> $watched
@@ -16,6 +17,9 @@
 @endphp
 
 <div class="field cx-group-field" @if ($shared) x-show="{{ $shared }}" x-cloak @endif>
+    @if ($caption ?? null)
+        <label>{{ $caption }}</label>
+    @endif
     @if ($dropdown)
         <div class="cx-dropdown cx-group-dropdown" x-data="checkboxGroup()" :class="{ 'is-open': open }"
              x-on:change="count()" x-on:choices-sync.window="count()"

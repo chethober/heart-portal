@@ -203,6 +203,46 @@ test('the discharge diagnoses are checkboxes, ticked only for Yes, and the arrhy
     expect($study->fresh()->stableangina)->toBe('1')->and($study->fresh()->arrhythmia)->toBeNull()->and($study->fresh()->typeOfArrhythmia)->toBeNull();
 });
 
+test('the discharge risk factors (but smoking), surgical history and signs are checkboxes', function () {
+    [$payload] = procedurePayload('discharge');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'rf_diabetes_hx' => '1', 'dm_tx_oral' => '1', 'rf_opium' => '1',
+        'cad_family_hx' => '1', 'cad_family_hx_father' => '1', 'rf_smoking' => '2', 'HxPCI' => '1', 'signs_rales' => '1'])
+        ->assertSessionHasNoErrors()->assertRedirect();
+    $study = Procedures::model('discharge')::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->only('rf_diabetes_hx', 'dm_tx_oral', 'rf_opium', 'cad_family_hx', 'rf_smoking', 'HxPCI', 'signs_rales'))
+        ->toBe(['rf_diabetes_hx' => '1', 'dm_tx_oral' => '1', 'rf_opium' => '1', 'cad_family_hx' => '1', 'rf_smoking' => '2', 'HxPCI' => '1', 'signs_rales' => '1'])
+        ->and($study->cad_family_hx_father)->toBeTruthy();
+
+    // Heart's Unknown (2) and No (3) are not ticked.
+    $study->forceFill(['hxPrevMI_main' => '2', 'rf_hyperchol_hx' => '3'])->save();
+    $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/discharge/{$study->id}/edit")->assertOk()->getContent();
+    foreach (['rf_diabetes_hx', 'dm_tx_oral', 'rf_opium', 'cad_family_hx', 'HxPCI', 'signs_rales'] as $name) {
+        expect($html)->toContain('<input type="checkbox" name="'.$name.'" value="1" checked');
+    }
+    foreach (['hxPrevMI_main', 'rf_hyperchol_hx', 'rf_hookah', 'crt', 'signs_s3'] as $name) {
+        expect($html)->toMatch('/<input type="checkbox" name="'.$name.'" value="1"\s*(x-on:change="[^"]*")?\s*>/')
+            ->not->toContain('<select id="f-'.$name.'"');
+    }
+    expect($html)->toContain('<select id="f-rf_smoking"');
+
+    // The risk factors stay one run of checkboxes; what a ticked one reveals follows it, captioned.
+    expect(strpos($html, 'name="rf_hyperchol_hx"'))->toBeLessThan(strpos($html, 'name="dm_tx_regimen"'))
+        ->and($html)->toMatch('/x-show="v\[&#039;rf_diabetes_hx&#039;\] === &#039;1&#039;" x-cloak>\s*<label>Diabetes<\/label>/')
+        ->toMatch('/<label>Family history of heart disease<\/label>\s*<div class="cx-group" role="group">\s*<label class="cx-chip">\s*<input type="checkbox" name="cad_family_hx_father"/')
+        ->toContain('>Hypertension treatment</label>');
+
+    // Unticking clears what it revealed.
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/discharge/{$study->id}", [...$payload, 'dm_tx_oral' => '1'])->assertRedirect();
+    expect($study->fresh()->rf_diabetes_hx)->toBeNull()->and($study->fresh()->dm_tx_oral)->toBeNull();
+});
+
+test('discharge medications can be added from the medications list', function () {
+    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()
+        ->assertSee('x-data="drugInsert(&quot;'.e(route('drugs.search')), false)
+        ->assertSee('placeholder="Add from the medications list…"', false)
+        ->assertSee('<textarea id="f-drugDischarge" name="drugDischarge"', false);
+});
+
 test('the discharge form folds each part of Others under its heading, one open at a time', function () {
     $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
     expect($html)->toContain('x-data="{ part: null }"')
