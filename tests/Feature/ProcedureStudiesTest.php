@@ -9,6 +9,7 @@ use App\Models\Scopes\HospitalScope;
 use App\Models\User;
 use App\Reports\ProcedureReport;
 use App\Support\Procedures;
+use Illuminate\Support\Js;
 
 dataset('procedures', array_keys(Procedures::MODELS));
 
@@ -227,8 +228,8 @@ test('the discharge risk factors (but smoking), surgical history and signs are c
 
     // The risk factors stay one run of checkboxes; what a ticked one reveals follows it, captioned.
     expect(strpos($html, 'name="rf_hyperchol_hx"'))->toBeLessThan(strpos($html, 'name="dm_tx_regimen"'))
-        ->and($html)->toMatch('/x-show="v\[&#039;rf_diabetes_hx&#039;\] === &#039;1&#039;" x-cloak>\s*<label>Diabetes<\/label>/')
-        ->toMatch('/<label>Family history of heart disease<\/label>\s*<div class="cx-group" role="group">\s*<label class="cx-chip">\s*<input type="checkbox" name="cad_family_hx_father"/')
+        ->and($html)->toMatch('/x-show="v\[&#039;rf_diabetes_hx&#039;\] === &#039;1&#039;" x-cloak\s*>\s*<label>Diabetes<\/label>/')
+        ->toMatch('/<label>Family history of heart disease<\/label>\s*<div class="cx-group" role="group">\s*<label class="cx-chip"\s*>\s*<input type="checkbox" name="cad_family_hx_father"/')
         ->toContain('>Hypertension treatment</label>');
 
     // Unticking clears what it revealed.
@@ -238,7 +239,7 @@ test('the discharge risk factors (but smoking), surgical history and signs are c
 
 test('discharge medications can be added from the medications list', function () {
     $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()
-        ->assertSee('x-data="drugInsert(&quot;'.e(route('drugs.search')), false)
+        ->assertSee('x-data="drugInsert('.Js::from(route('drugs.search')), false)
         ->assertSee('placeholder="Add from the medications list…"', false)
         ->assertSee('<textarea id="f-drugDischarge" name="drugDischarge"', false);
 });
