@@ -166,17 +166,43 @@
                     }
                     $nested = array_merge([], ...array_values($children));
 
-                    // Consecutive yes/no fields of one group become a single checkbox group.
+                    // Consecutive yes/no fields of one group become a single checkbox group. Fields
+                    // shown only while a checkbox here is ticked don't break its run: they follow it,
+                    // captioned with that checkbox's label when they are checkboxes themselves.
+                    $isBox = fn (array $field) => $field['type'] === 'boolean' || ($field['widget'] ?? null) === 'checkbox';
                     $items = [];
+                    $dependents = [];
+                    $runOf = [];
                     foreach (array_diff_key($section['fields'], array_flip($nested)) as $name => $field) {
+                        $box = $isBox($field);
+                        $parent = $field['show_if'][0] ?? null;
+                        if ($parent !== null && isset($runOf[$parent])) {
+                            $list = &$dependents[$runOf[$parent]];
+                            $last = $list === null ? null : array_key_last($list);
+                            if ($box && $last !== null && $list[$last]['booleans'] && $list[$last]['parent'] === $parent) {
+                                $list[$last]['fields'][$name] = $field;
+                            } else {
+                                $list[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'parent' => $parent,
+                                    'caption' => $box ? $section['fields'][$parent]['label'] : null, 'fields' => [$name => $field]];
+                            }
+                            unset($list);
+                            if ($box) {
+                                $runOf[$name] = $runOf[$parent];
+                            }
+                            continue;
+                        }
                         $last = array_key_last($items);
-                        $box = $field['type'] === 'boolean' || ($field['widget'] ?? null) === 'checkbox';
                         if ($box && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
                             $items[$last]['fields'][$name] = $field;
                         } else {
                             $items[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
+                            $last = array_key_last($items);
+                        }
+                        if ($box) {
+                            $runOf[$name] = $last;
                         }
                     }
+                    $items = collect($items)->flatMap(fn (array $item, int $index) => [$item, ...($dependents[$index] ?? [])])->all();
 
                     // Each group under its heading; a "collapse" section folds the groups, one open
                     // at a time (the first with an error opens).
@@ -398,8 +424,9 @@
 
                 // --- Sections, dates and preview ------------------------------------------
                 mark() {
+                    // Only posted inputs count, not search boxes.
                     this.filled = Array.from(this.form.querySelectorAll('[data-section]')).map((el) =>
-                        Array.from(el.querySelectorAll('input, select, textarea')).some((input) =>
+                        Array.from(el.querySelectorAll('input[name], select[name], textarea[name]')).some((input) =>
                             input.type === 'checkbox' ? input.checked : input.value.trim() !== ''));
                 },
                 datepickers() {
@@ -434,6 +461,39 @@
                     form.target = '';
                     form.noValidate = false;
                     if (this.$refs.method) this.$refs.method.disabled = false;
+                },
+            };
+        }
+
+        /**
+         * Drug catalog search for a text field (partials/drug-insert): a picked drug is added to
+         * the field as a line, followed by the dose, route and frequency suggested for it.
+         */
+        function drugInsert(searchUrl, target) {
+            return {
+                q: '',
+                results: [],
+                active: 0,
+                async search() {
+                    const q = this.q.trim();
+                    if (q.length < 2) {
+                        this.results = [];
+                        return;
+                    }
+                    const response = await fetch(searchUrl + '?q=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } });
+                    if (! response.ok || this.q.trim() !== q) return;
+                    this.results = (await response.json()).data;
+                    this.active = 0;
+                },
+                pick(drug) {
+                    const dose = [drug.dose, drug.unit, drug.route, drug.frequency].filter(Boolean).join(' ');
+                    const line = drug.label + (dose ? ' — ' + dose : '');
+                    const field = document.getElementById(target);
+                    field.value = field.value.replace(/\s+$/, '') + (field.value.trim() ? '\n' : '') + line;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                    this.q = '';
+                    this.results = [];
                 },
             };
         }

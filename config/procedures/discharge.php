@@ -19,10 +19,11 @@
 | is a section's short name in the section bar (its title shows on hover); a
 | "collapse" section folds each group under its heading, one open at a time; "widget"
 | draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
-| (checkboxes whose combination picks the code); a "retired" field is kept
-| (import, export, report) but no longer shown in the form or changed by it;
-| "nest" => false lays out the fields shown for a field's value in the section
-| as usual instead of inside that field's cell.
+| (checkboxes whose combination picks the code); "insert" => "drugs" adds a drug
+| catalog search to a text field, whose picks are added to the text as lines; a
+| "retired" field is kept (import, export, report) but no longer shown in the form
+| or changed by it; "nest" => false lays out the fields shown for a field's value
+| in the section as usual instead of inside that field's cell.
 |
 | The form is in English, but the report prints in Persian as heart did: "fa"
 | is a section title's or field label's Persian wording and "fa_options" its
@@ -72,32 +73,32 @@ return [
         [
             'title' => 'Risk Factors & Past Medical History', 'abbr' => 'RF', 'fa' => 'ریسک فاکتورها و سوابق بیماری های قلبی و بیماری های همراه',
             'fields' => [
-                'hxPrevMI_main' => ['type' => 'choice', 'label' => 'Previous MI', 'fa' => 'سابقه سکته قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'hxPrevMI_main' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Previous MI', 'fa' => 'سابقه سکته قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevMI_date' => ['type' => 'date', 'label' => 'Date', 'fa' => 'تاریخ', 'retired' => true],
-                'hxPrevHF_main' => ['type' => 'choice', 'label' => 'Previous heart failure', 'fa' => 'سابقه نارسایی قلب', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'hxPrevHF_main' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Previous heart failure', 'fa' => 'سابقه نارسایی قلب', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevHF_date' => ['type' => 'date', 'label' => 'Date', 'fa' => 'تاریخ', 'retired' => true],
-                'previous_cvd' => ['type' => 'choice', 'label' => 'Peripheral vascular disease', 'fa' => 'بیماری های عروق محیطی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
-                'hxPrevCVA_main' => ['type' => 'choice', 'label' => 'Previous CVA', 'fa' => 'سابقه CVA', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'previous_cvd' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Peripheral vascular disease', 'fa' => 'بیماری های عروق محیطی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'hxPrevCVA_main' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Previous CVA', 'fa' => 'سابقه CVA', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'DateOf_hxPrevCVA_date' => ['type' => 'date', 'label' => 'Date', 'fa' => 'تاریخ', 'retired' => true],
-                'hxCRF' => ['type' => 'choice', 'label' => 'Dialysis-dependent renal failure', 'fa' => 'نارسایی کلیه وابسته به دیالیز', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
-                'rf_htn_hx' => ['type' => 'choice', 'label' => 'Hypertension', 'fa' => 'فشارخون بالا', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
-                'rf_htn_tx' => ['type' => 'choice', 'label' => 'Treatment', 'fa' => 'درمان', 'options' => ['1' => 'Diet', '2' => 'Medication', '3' => 'Diet + medication', '4' => 'None'], 'fa_options' => ['1' => 'رژیم غذایی', '2' => 'درمان دارویی', '3' => 'رژیم غذایی + درمان دارویی', '4' => 'هیچکدام'], 'blank' => ['9'], 'show_if' => ['rf_htn_hx', '1'],
+                'hxCRF' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Dialysis-dependent renal failure', 'fa' => 'نارسایی کلیه وابسته به دیالیز', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'rf_htn_hx' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Hypertension', 'fa' => 'فشارخون بالا', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'rf_htn_tx' => ['type' => 'choice', 'label' => 'Hypertension treatment', 'fa' => 'درمان', 'options' => ['1' => 'Diet', '2' => 'Medication', '3' => 'Diet + medication', '4' => 'None'], 'fa_options' => ['1' => 'رژیم غذایی', '2' => 'درمان دارویی', '3' => 'رژیم غذایی + درمان دارویی', '4' => 'هیچکدام'], 'blank' => ['9'], 'show_if' => ['rf_htn_hx', '1'],
                     // Ticked as two checkboxes; each code is the combination it stands for.
                     'widget' => 'combine', 'combine' => ['1' => ['1'], '2' => ['2'], '3' => ['1', '2']]],
-                'rf_diabetes_hx' => ['type' => 'choice', 'label' => 'Diabetes', 'fa' => 'دیابت', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'rf_diabetes_hx' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Diabetes', 'fa' => 'دیابت', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'dm_tx_regimen' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Diet', 'fa' => 'رژیم غذایی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
                 'dm_tx_oral' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Oral medication', 'fa' => 'دارو خوراکی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
                 'dm_tx_insulin' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Insulin', 'fa' => 'انسولین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_diabetes_hx', '1']],
-                'rf_hyperchol_hx' => ['type' => 'choice', 'label' => 'Hypercholesterolemia', 'fa' => 'هیپرکلسترولمی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'rf_hyperchol_hx' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Hypercholesterolemia', 'fa' => 'هیپرکلسترولمی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'hyperchol_tx_regimen' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Diet', 'fa' => 'رژیم غذایی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
                 'hyperchol_tx_statin' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Statin', 'fa' => 'مصرف استاتین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1']],
                 'hyperchol_tx_non_statin' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Non-statin medication', 'fa' => 'مصرف داروی غیر استاتین', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9'], 'show_if' => ['rf_hyperchol_hx', '1'], 'retired' => true],
                 'rf_smoking' => ['type' => 'choice', 'label' => 'Smoking', 'fa' => 'سیگار', 'options' => ['1' => 'Current smoker', '2' => 'Former smoker', '3' => 'Never smoked'], 'blank' => ['9']],
-                'rf_hookah' => ['type' => 'choice', 'label' => 'Hookah', 'fa' => 'مصرف قلیان', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'rf_opium' => ['type' => 'choice', 'label' => 'Opium', 'fa' => 'مصرف تریاک', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'rf_alcohol' => ['type' => 'choice', 'label' => 'Alcohol', 'fa' => 'مصرف الکل', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'rf_opioides' => ['type' => 'choice', 'label' => 'Other narcotics', 'fa' => 'مصرف سایر مخدرها', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'cad_family_hx' => ['type' => 'choice', 'label' => 'Family history of heart disease', 'fa' => 'سابقه فامیلی بیماری قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
+                'rf_hookah' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Hookah', 'fa' => 'مصرف قلیان', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'rf_opium' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Opium', 'fa' => 'مصرف تریاک', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'rf_alcohol' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Alcohol', 'fa' => 'مصرف الکل', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'rf_opioides' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Other narcotics', 'fa' => 'مصرف سایر مخدرها', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'cad_family_hx' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Family history of heart disease', 'fa' => 'سابقه فامیلی بیماری قلبی', 'options' => ['1' => 'Yes', '2' => 'Unknown', '3' => 'No'], 'blank' => ['9']],
                 'cad_family_hx_father' => ['type' => 'boolean', 'label' => 'Father', 'fa' => 'سابقه بیماری قلبی پدر', 'show_if' => ['cad_family_hx', '1']],
                 'cad_family_hx_mother' => ['type' => 'boolean', 'label' => 'Mother', 'fa' => 'سابقه بیماری قلبی مادر', 'show_if' => ['cad_family_hx', '1']],
                 'cad_family_hx_brother' => ['type' => 'boolean', 'label' => 'Brother', 'fa' => 'سابقه بیماری قلبی برادر', 'show_if' => ['cad_family_hx', '1']],
@@ -108,11 +109,11 @@ return [
         [
             'title' => 'Post Surgical History', 'abbr' => 'PSH', 'fa' => 'سابقه پروسیجرهای قبلی',
             'fields' => [
-                'HxPCI' => ['type' => 'choice', 'label' => 'PCI', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'icd' => ['type' => 'choice', 'label' => 'ICD implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'crt' => ['type' => 'choice', 'label' => 'crt implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'pace' => ['type' => 'choice', 'label' => 'PPM implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'cabg' => ['type' => 'choice', 'label' => 'CABG', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'HxPCI' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'PCI', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'icd' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'ICD implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'crt' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'crt implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'pace' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'PPM implantation', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'cabg' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'CABG', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'other_procedures' => ['type' => 'multiline', 'label' => 'Other procedures', 'fa' => 'پروسیجرهای دیگر'],
             ],
         ],
@@ -131,16 +132,16 @@ return [
         [
             'title' => 'Physical Signs', 'abbr' => 'PE', 'fa' => 'نشانه ها',
             'fields' => [
-                'signs_jvp' => ['type' => 'choice', 'label' => 'Elevated JVP', 'fa' => 'JVP بالا', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_rales' => ['type' => 'choice', 'label' => 'Rales', 'fa' => 'رال ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_wheeze' => ['type' => 'choice', 'label' => 'Wheeze', 'fa' => 'ویز ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_decreasedbreathsounds' => ['type' => 'choice', 'label' => 'Decreased breath sounds', 'fa' => 'کاهش صدای ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_systolicsouffle' => ['type' => 'choice', 'label' => 'Systolic murmur', 'fa' => 'سوفل سیستولی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_diastolicsouffle' => ['type' => 'choice', 'label' => 'Diastolic murmur', 'fa' => 'سوفل دیاستولی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_ascites' => ['type' => 'choice', 'label' => 'Ascites', 'fa' => 'آسیت', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_peripheraledema' => ['type' => 'choice', 'label' => 'Peripheral edema', 'fa' => 'ادم محیطی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_s3' => ['type' => 'choice', 'label' => 'S3', 'fa' => 'صدای سوم قلب', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
-                'signs_coldextremities' => ['type' => 'choice', 'label' => 'Cold extremities', 'fa' => 'انتهاهای سرد', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_jvp' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Elevated JVP', 'fa' => 'JVP بالا', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_rales' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Rales', 'fa' => 'رال ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_wheeze' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Wheeze', 'fa' => 'ویز ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_decreasedbreathsounds' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Decreased breath sounds', 'fa' => 'کاهش صدای ریوی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_systolicsouffle' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Systolic murmur', 'fa' => 'سوفل سیستولی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_diastolicsouffle' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Diastolic murmur', 'fa' => 'سوفل دیاستولی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_ascites' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Ascites', 'fa' => 'آسیت', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_peripheraledema' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Peripheral edema', 'fa' => 'ادم محیطی', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_s3' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'S3', 'fa' => 'صدای سوم قلب', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
+                'signs_coldextremities' => ['type' => 'choice', 'widget' => 'checkbox', 'label' => 'Cold extremities', 'fa' => 'انتهاهای سرد', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'signs_others' => ['type' => 'multiline', 'label' => 'Other signs', 'fa' => 'نشانه های دیگر'],
             ],
         ],
@@ -308,7 +309,8 @@ return [
         [
             'title' => 'Discharge Medications', 'abbr' => 'Meds', 'fa' => 'داروهای موقع ترخیص',
             'fields' => [
-                'drugDischarge' => ['type' => 'multiline', 'label' => 'Discharge medications', 'fa' => 'داروی های موقع ترخیص'],
+                // Drugs picked from the drug catalog are added to the text as lines.
+                'drugDischarge' => ['type' => 'multiline', 'insert' => 'drugs', 'label' => 'Discharge medications', 'fa' => 'داروی های موقع ترخیص'],
             ],
         ],
         [
