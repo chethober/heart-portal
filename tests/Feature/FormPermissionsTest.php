@@ -48,7 +48,7 @@ test('a member without a procedure cannot open, record or list it', function (st
 
     // The other procedures are unaffected.
     $other = collect(array_keys(Procedures::MODELS))->first(fn (string $key) => $key !== $procedure);
-    $this->actingAs($this->nurse)->get("/dashboard/procedures/{$other}/create")->assertOk();
+    $this->actingAs($this->nurse)->get("/dashboard/procedures/{$other}/create")->assertRedirect();
 })->with('procedures');
 
 test('signing needs the form\'s finalize permission', function () {
@@ -66,8 +66,10 @@ test('echo access is its own permission', function () {
 
     $this->actingAs($this->nurse)->get("/dashboard/studies/{$study->id}")->assertForbidden();
     $this->actingAs($this->nurse)->get('/dashboard/studies/create')->assertForbidden();
-    // The dashboard home is the echo form only for those who may record echo.
-    $this->actingAs($this->nurse)->get('/dashboard')->assertRedirect(route('worklist'));
+    // The patient landing page stays available; restricted study types are omitted.
+    $this->actingAs($this->nurse)->get('/dashboard')->assertOk()
+        ->assertDontSee(route('studies.create', ['patient' => $this->patient->id]), false)
+        ->assertDontSee('value="echo"', false);
 });
 
 test('admissions are guarded by the admission permissions', function () {

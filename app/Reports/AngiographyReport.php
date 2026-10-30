@@ -88,6 +88,10 @@ final class AngiographyReport extends ProcedureReport
         if ($types !== '') {
             $text .= " ({$types})";
         }
+        $indications = $this->yesCaptions(['indication_stable_angina', 'indication_st_elevated_mi', 'indication_non_st_elevated_mi', 'indication_unstable_angina', 'indication_cardiomyopathy', 'indication_heart_failure', 'indication_valvular_disease', 'indication_arrhythmia', 'indication_positive_stress_test', 'indication_cardiogenic_shock', 'indication_cardiac_arrest']);
+        if ($indications !== []) {
+            $text .= ', for '.$this->join($indications);
+        }
         if ($date = $this->text('DateOf_Date_of_angiography')) {
             $text .= ", on {$date}";
         }

@@ -30,7 +30,7 @@ test('heart\'s ICD codes map to the diagnosis list', function () {
 });
 
 test('the discharge summary records final diagnoses from the list and prints their codes', function () {
-    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
         ->assertSee('name="final_diagnosis_codes[]"', false)
         ->assertSee('Acute NSTEMI');
 

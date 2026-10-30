@@ -1,7 +1,7 @@
 {{--
     Drug catalog search above a text field (partials/field, "insert" => "drugs"): a picked drug is
-    added to the text as its own line, "Atorvastatin 40 mg tablet — 1 tablet PO QHS", with the
-    dose, route and frequency the catalog (or the user's last prescription of it) suggests. The
+    added to the text as its own line with the suggested dose, route, frequency, duration and
+    instructions from the catalog or the user's last prescription of it. The
     line is plain text and can be edited like the rest. The search box itself is not posted.
 
     @var string $name
@@ -21,8 +21,11 @@
                 :style="'padding: 6px 10px; font-size: 14px; cursor: pointer;' + (i === active ? ' background: #eef2ff;' : '')">
                 <span x-text="drug.label"></span>
                 <span style="color: #6b7280;" dir="auto" x-text="drug.local_name ? ' — ' + drug.local_name : ''"></span>
+                <span x-show="directions(drug)" style="display: block; margin-top: 2px; font-size: 12px; color: #4b5563;" dir="auto"
+                      x-text="'Recommended dose / usage: ' + directions(drug)"></span>
             </li>
         </template>
     </ul>
+    <p style="margin: 2px 0 0; font-size: 12px; color: #6b7280;">Selecting a medication adds its recommended dose and usage when available. Review and edit the directions below.</p>
     <p x-show="q.trim() !== '' && q.trim().length < 2" x-cloak style="margin: 2px 0 0; font-size: 12px; color: #6b7280;">Type at least 2 letters to search.</p>
 </div>

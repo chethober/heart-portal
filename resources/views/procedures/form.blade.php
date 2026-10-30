@@ -20,11 +20,29 @@
     use App\Support\Procedures;
 
     // Retired fields are kept in the table but no longer shown; "top" sections join the patient row.
+    $sharedDateField = config('procedures.'.$procedure.'.date_field');
     $sections = collect(Procedures::sections($procedure))
-        ->map(fn (array $section) => [...$section, 'fields' => array_filter($section['fields'], fn (array $field) => ! ($field['retired'] ?? false))])
+        ->map(fn (array $section) => [...$section, 'fields' => array_filter($section['fields'], fn (array $field, string $name) => ! ($field['retired'] ?? false) && $name !== $sharedDateField, ARRAY_FILTER_USE_BOTH)])
         ->filter(fn (array $section) => $section['fields'] !== []);
     $top = array_merge([], ...$sections->filter(fn (array $section) => $section['top'] ?? false)->pluck('fields')->all());
     $sections = $sections->reject(fn (array $section) => $section['top'] ?? false)->values()->all();
+    // Keep the clinical field definitions and report vessel names; combine grafts in the editor.
+    if ($procedure === 'angiography') {
+        $tabs = [];
+        $grafts = null;
+        foreach ($sections as $section) {
+            if (str_contains($section['title'], ' on ')) {
+                $grafts ??= count($tabs);
+                $tabs[$grafts] ??= ['title' => 'Grafts', 'collapse' => true, 'fields' => []];
+                foreach ($section['fields'] as $name => $field) {
+                    $tabs[$grafts]['fields'][$name] = [...$field, 'panel' => $section['title']];
+                }
+            } else {
+                $tabs[] = $section;
+            }
+        }
+        $sections = $tabs;
+    }
     $fields = Procedures::formFields($procedure);
     $value = fn (string $name) => old($name, $values[$name] ?? null);
     $rtl = Procedures::dir($procedure) === 'rtl';
@@ -68,33 +86,17 @@
              section: {{ $active }},
              previewUrl: @js(route('procedures.preview', $procedure)),
              // Unsaved drafts are kept per patient tab in this browser, like the echo form's.
-             storageKey: @js($study ? null : 'procedureForm_patients_v1:'.$procedure.':'.auth()->user()->hospital_id.':'.auth()->id()),
+             storageKey: @js($study ? null : 'procedureForm_patients_v1:'.$procedure.':'.auth()->user()->hospital_id.':'.auth()->id().':'.($patientContext['patient_id'] ?? 'legacy')),
              // A form arriving with values (a patient link, or failed validation) opens them in a new tab.
-             arrivedWithValues: @js(! $study && (filled($value('nationalID')) || $errors->any())),
+             arrivedWithValues: @js($errors->any()),
+             sharedValues: @js(collect($values)->only([...config('echo.patient_fields'), 'admission_id', $sharedDateField])->all()),
          })">
     <div id="app-layout" :class="{ 'preview-active': preview }">
     <div id="form-container">
         @unless ($study)
-            {{-- Multi-patient tabs: one unsaved draft per patient, saved in this browser as you type. --}}
-            <div class="patient-bar-wrapper">
-                <div id="patientTabsContainer" class="patient-tabs-container">
-                    <template x-for="(tab, index) in tabs" :key="tab.id">
-                        <div class="patient-tab" :class="{ 'active': tab.id === activeTab }">
-                            <span class="patient-tab-title" x-text="tabTitle(tab, index)" x-on:click="switchTab(tab.id)"></span>
-                            <button type="button" class="patient-tab-close" title="Remove patient draft" x-show="tabs.length > 1" x-on:click.stop="removeTab(tab.id)">&times;</button>
-                        </div>
-                    </template>
-                </div>
-                <button type="button" class="add-patient-btn" x-on:click="addTab()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>New Patient</span>
-                </button>
-            </div>
+            @include('clinical.partials.patient-taskbar')
         @endunless
-        <form method="POST" id="procedureForm" x-ref="form" action="{{ $study ? route('procedures.update', [$procedure, $study]) : route('procedures.store', $procedure) }}"
+        <form method="POST" id="procedureForm" x-ref="form" action="{{ $study ? route('procedures.update', [$procedure, $study]) : route('procedures.store', [$procedure, ...array_filter(['context' => request('context')])]) }}"
               autocomplete="off" x-on:input.debounce.400ms="refresh(); autosave()" x-on:change="refresh(); autosave(); mark()" x-on:submit="submitted()">
             @csrf
             @if ($study)
@@ -127,18 +129,17 @@
             @endif
 
             <div class="form-section-header" style="border:0;margin-bottom:4px">{{ $title }}</div>
+            @include('clinical.partials.patient-summary', ['sharedValues' => $values, 'sharedDateField' => $sharedDateField])
             <div class="row">
-                @include('clinical.partials.patient-fields', ['values' => $values, 'admissions' => $admissions ?? collect(), 'admission' => $value('admission_id') ?? request('admission')])
                 @foreach ($top as $name => $field)
                     @include('procedures.partials.field', ['sub' => false, 'children' => []])
                 @endforeach
             </div>
 
             {{-- One chip per section, green once something in it is filled in, red with an error. --}}
-            <div class="section-nav-wrapper">
-                {{-- Sections with short names ("abbr") fit on one line; the full title shows on hover. --}}
-                @php $abbreviated = collect($sections)->every(fn (array $section) => isset($section['abbr'])); @endphp
-                <div class="section-nav-container {{ $abbreviated ? 'is-one-line' : '' }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
+            <div class="section-nav-wrapper is-scrollable" data-scroll-tabs>
+                <button type="button" class="section-scroll-arrow" data-scroll-direction="-1" aria-label="Scroll tabs left" disabled>&lsaquo;</button>
+                <div class="section-nav-container is-one-line" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
                     @foreach ($sections as $index => $section)
                         @php $hasErrors = collect($section['fields'])->keys()->contains(fn ($name) => $errors->has($name)); @endphp
                         <button type="button" class="section-nav-btn" title="{{ $section['title'] }}"
@@ -148,6 +149,7 @@
                         </button>
                     @endforeach
                 </div>
+                <button type="button" class="section-scroll-arrow" data-scroll-direction="1" aria-label="Scroll tabs right" disabled>&rsaquo;</button>
             </div>
 
             @foreach ($sections as $index => $section)
@@ -182,7 +184,7 @@
                             if ($box && $last !== null && $list[$last]['booleans'] && $list[$last]['parent'] === $parent) {
                                 $list[$last]['fields'][$name] = $field;
                             } else {
-                                $list[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'parent' => $parent,
+                                $list[] = ['booleans' => $box, 'group' => $field['panel'] ?? $field['group'] ?? null, 'parent' => $parent,
                                     'caption' => $box ? $section['fields'][$parent]['label'] : null, 'fields' => [$name => $field]];
                             }
                             unset($list);
@@ -192,10 +194,10 @@
                             continue;
                         }
                         $last = array_key_last($items);
-                        if ($box && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['group'] ?? null)) {
+                        if ($box && $last !== null && $items[$last]['booleans'] && $items[$last]['group'] === ($field['panel'] ?? $field['group'] ?? null)) {
                             $items[$last]['fields'][$name] = $field;
                         } else {
-                            $items[] = ['booleans' => $box, 'group' => $field['group'] ?? null, 'fields' => [$name => $field]];
+                            $items[] = ['booleans' => $box, 'group' => $field['panel'] ?? $field['group'] ?? null, 'fields' => [$name => $field]];
                             $last = array_key_last($items);
                         }
                         if ($box) {
@@ -209,6 +211,12 @@
                     $groups = collect($items)->chunkWhile(fn (array $item, int $key, $chunk) => $item['group'] === $chunk->last()['group'])->values();
                     $collapse = $section['collapse'] ?? false;
                     $openGroup = $groups->search(fn ($chunk) => $chunk->contains(fn (array $item) => collect($item['fields'])->keys()->contains(fn ($name) => $errors->has($name))));
+                    if ($collapse && $openGroup === false) {
+                        $errorPanel = collect($section['fields'])->filter(fn (array $field, string $name) => $errors->has($name))->first()['panel'] ?? null;
+                        if ($errorPanel !== null) {
+                            $openGroup = $groups->search(fn ($chunk) => $chunk->first()['group'] === $errorPanel);
+                        }
+                    }
                 @endphp
                 <div id="sec-{{ $index }}" class="form-section {{ $index === $active ? 'active' : '' }}" data-section="{{ $index }}" :class="{ 'active': section === {{ $index }} }"
                      @if ($section['collapse'] ?? false) x-data="{ part: @js($openGroup === false ? null : $openGroup) }" @endif>
@@ -287,7 +295,7 @@
     </div>
     </div>
 
-    @include('clinical.partials.patient-lookup')
+
     <script>
         /**
          * The procedure form's behaviour, matching the echo form: show_if values (v), the open
@@ -325,7 +333,7 @@
                 loadTabs() {
                     if (! options.storageKey) return;
                     const saved = this.store();
-                    this.tabs = saved.tabs.length ? saved.tabs : [this.newTab()];
+                    this.tabs = saved.tabs.length ? saved.tabs : [this.newTab(this.values())];
                     this.activeTab = this.tabs.some((tab) => tab.id === saved.active) ? saved.active : this.tabs[0].id;
 
                     if (options.arrivedWithValues) {
@@ -399,6 +407,7 @@
                     this.persist();
                 },
                 fill(data) {
+                    data = { ...data, ...options.sharedValues };
                     Array.from(this.form.elements).forEach((el) => {
                         if (! el.name || ['_token', '_method', 'amendment_reason'].includes(el.name) || el.type === 'button' || el.type === 'submit') return;
                         if (el.type === 'checkbox' && el.name.endsWith('[]')) {
@@ -467,7 +476,7 @@
 
         /**
          * Drug catalog search for a text field (partials/drug-insert): a picked drug is added to
-         * the field as a line, followed by the dose, route and frequency suggested for it.
+         * the field as a line, followed by its suggested dose and usage directions.
          */
         function drugInsert(searchUrl, target) {
             return {
@@ -485,9 +494,16 @@
                     this.results = (await response.json()).data;
                     this.active = 0;
                 },
+                directions(drug) {
+                    const routes = @js(\App\Support\Prescribing::ROUTES);
+                    const frequencies = @js(\App\Support\Prescribing::FREQUENCIES);
+                    const dose = [drug.dose, drug.dose ? drug.unit : null].filter(Boolean).join(' ');
+                    return [dose, routes[drug.route] ?? drug.route, frequencies[drug.frequency] ?? drug.frequency,
+                        drug.duration ? 'for ' + drug.duration : null, drug.instructions].filter(Boolean).join(' — ');
+                },
                 pick(drug) {
-                    const dose = [drug.dose, drug.unit, drug.route, drug.frequency].filter(Boolean).join(' ');
-                    const line = drug.label + (dose ? ' — ' + dose : '');
+                    const directions = this.directions(drug);
+                    const line = drug.label + (directions ? ' — ' + directions : '');
                     const field = document.getElementById(target);
                     field.value = field.value.replace(/\s+$/, '') + (field.value.trim() ? '\n' : '') + line;
                     field.dispatchEvent(new Event('input', { bubbles: true }));

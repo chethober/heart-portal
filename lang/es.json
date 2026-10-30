@@ -542,5 +542,13 @@
     "Whoops!": "¡Vaya!",
     "Regards,": "Saludos,",
     "All rights reserved.": "Todos los derechos reservados.",
-    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Si tiene problemas para hacer clic en el botón \":actionText\", copie y pegue la URL siguiente\nen su navegador:"
+    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Si tiene problemas para hacer clic en el botón \":actionText\", copie y pegue la URL siguiente\nen su navegador:",
+    "Start study": "Iniciar estudio",
+    "Admission number": "Número de ingreso",
+    "Patient details": "Datos del paciente",
+    "Date of study": "Fecha del estudio",
+    "Select gender": "Seleccione el sexo",
+    "No admission found.": "No se encontró ningún ingreso.",
+    "New Patient": "Nuevo paciente",
+    "Close": "Cerrar"
 }

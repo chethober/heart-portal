@@ -44,7 +44,7 @@ function storeAngiography(User $user, array $overrides = []): AngiographyStudy
 }
 
 test('the form is built from the heart field list', function () {
-    $this->actingAs($this->tech)->get('/dashboard/procedures/angiography/create')
+    $this->actingAs($this->tech)->get(startStudyUrl($this->tech, 'angiography'))
         ->assertOk()
         ->assertSee('Coronary Angiography')
         ->assertSee('Vessl patency')
@@ -72,7 +72,7 @@ test('clinical staff record a draft and the patient is created', function () {
 test('a new study can be started from a known patient', function () {
     storeAngiography($this->tech);
 
-    $this->actingAs($this->tech)->get('/dashboard/procedures/angiography/create?nationalID=0012345678')
+    $this->actingAs($this->tech)->followingRedirects()->get('/dashboard/procedures/angiography/create?nationalID=0012345678')
         ->assertOk()
         ->assertSee('value="Rezaei"', false);
 
@@ -211,7 +211,7 @@ test('a patient not yet on record can be started from the patient search', funct
         ->assertOk()
         ->assertSee(route('procedures.create', ['angiography', 'nationalID' => '0099999999']), false);
 
-    $this->actingAs($this->tech)->get('/dashboard/procedures/angiography/create?nationalID=0099999999')
+    $this->actingAs($this->tech)->followingRedirects()->get('/dashboard/procedures/angiography/create?nationalID=0099999999')
         ->assertOk()
         ->assertSee('value="0099999999"', false);
 });
@@ -223,4 +223,27 @@ test('angiography actions appear in the audit log', function () {
     $this->actingAs($admin)->get('/dashboard/audit')
         ->assertOk()
         ->assertSee('angiography.created');
+});
+
+test('indications allow multiple selections and can be edited and cleared', function () {
+    $study = storeAngiography($this->tech, ['indication_stable_angina' => '1', 'indication_positive_stress_test' => '1']);
+
+    expect($study->indication_stable_angina)->toBeTrue()
+        ->and($study->indication_positive_stress_test)->toBeTrue()
+        ->and($study->indication_heart_failure)->toBeNull();
+    $this->get("/dashboard/procedures/angiography/{$study->id}")
+        ->assertOk()->assertSee('Stable Angina')->assertSee('Positive Stress Test (High Risk Patient)');
+    $this->get("/dashboard/procedures/angiography/{$study->id}/edit")
+        ->assertOk()->assertSee('name="indication_stable_angina" value="1" checked', false);
+
+    $other = User::factory()->for(Hospital::factory())->role(Role::Doctor)->create();
+    $this->actingAs($other)->get("/dashboard/procedures/angiography/{$study->id}")->assertNotFound();
+    $this->put("/dashboard/procedures/angiography/{$study->id}", angiographyPayload(['indication_stable_angina' => '0']))->assertNotFound();
+    expect($study->fresh()->indication_stable_angina)->toBeTrue();
+
+    $this->actingAs($this->tech)->put("/dashboard/procedures/angiography/{$study->id}", angiographyPayload())->assertRedirect();
+    expect($study->fresh()->indication_stable_angina)->toBeNull()
+        ->and($study->fresh()->indication_positive_stress_test)->toBeNull();
+    $this->post('/dashboard/procedures/angiography', angiographyPayload(['indication_arrhythmia' => 'invalid']))
+        ->assertSessionHasErrors('indication_arrhythmia');
 });

@@ -17,7 +17,7 @@ test('nurses record and edit drafts but cannot sign or see the audit log', funct
     $nurse = User::factory()->for($this->hospital)->role(Role::Nurse)->create();
     $study = AngiographyStudy::factory()->for(Patient::factory()->for($this->hospital))->create(['created_by' => $nurse->id]);
 
-    $this->actingAs($nurse)->get('/dashboard/procedures/angiography/create')->assertOk();
+    $this->actingAs($nurse)->get('/dashboard/procedures/angiography/create')->assertRedirect(route('dashboard'));
     $this->actingAs($nurse)->get("/dashboard/procedures/angiography/{$study->id}/edit")->assertOk();
     $this->actingAs($nurse)->post("/dashboard/procedures/angiography/{$study->id}/finalize")->assertForbidden();
     $this->actingAs($nurse)->get('/dashboard/audit')->assertForbidden();

@@ -33,7 +33,7 @@ Route::get('/hospital/pending', HospitalPendingController::class)->middleware(['
 // Every signed-in form, search and report lives under /dashboard.
 Route::prefix('dashboard')->group(function () {
     Route::middleware(['auth', 'verified'])->group(function () {
-        // The echo form for staff who record studies; everyone else is sent to their first section.
+        // Step 1 of a new study (the patient) for staff who record studies; everyone else is sent to their first section.
         Route::get('/', DashboardController::class)->middleware('two-factor')->name('dashboard');
 
         // Platform administration (no access to patient data).
@@ -44,6 +44,10 @@ Route::prefix('dashboard')->group(function () {
 
         // Everything below requires an active member of an approved hospital.
         Route::middleware(['hospital.active', 'two-factor'])->group(function () {
+            // Step 1 submitted: opens the chosen study form for the patient.
+            Route::post('/start-study', [DashboardController::class, 'start'])->name('studies.start');
+            Route::delete('/start-study/{context}', [DashboardController::class, 'close'])->name('studies.close');
+
             Route::get('/users/{user}/signature', [SignatureController::class, 'show'])->name('users.signature');
             Route::post('/profile/signature', [SignatureController::class, 'update'])->middleware('can:sign-reports')->name('profile.signature');
             Route::get('/audit', [AuditLogController::class, 'index'])->middleware('permission:audit.view')->name('audit.index');
