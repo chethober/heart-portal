@@ -54,7 +54,8 @@
 
     function layoutRow(row, width) {
         const gap = parseFloat(getComputedStyle(row).columnGap) || 12;
-        const fit = Math.max(1, Math.min(MAX_COLS, Math.floor((width + gap) / (MIN_WIDTH + gap))));
+        const maxCols = Number(row.dataset.maxCols) || MAX_COLS;
+        const fit = Math.max(1, Math.min(maxCols, Math.floor((width + gap) / (MIN_WIDTH + gap))));
         let run = [];
         // Spread the run over as few lines as fit, as evenly as possible: 14 fields at four
         // across make lines of 4, 4, 3 and 3 rather than 4, 4, 4 and 2.
@@ -119,6 +120,49 @@
         app.querySelectorAll('.field[data-follows]').forEach((field) => {
             const cell = document.getElementById(field.dataset.follows)?.closest('.field');
             if (cell && cell !== field) { field.classList.add('is-sub'); cell.append(field); }
+        });
+        app.querySelectorAll('[data-scroll-tabs]').forEach((wrapper) => {
+            const track = wrapper.querySelector('.section-nav-container');
+            const arrows = wrapper.querySelectorAll('[data-scroll-direction]');
+            function update() {
+                // Measure with the arrows removed so the controls themselves cannot cause overflow.
+                wrapper.classList.remove('has-overflow');
+                const overflowing = track.scrollWidth > track.clientWidth + 1;
+                wrapper.classList.toggle('has-overflow', overflowing);
+                const bounds = track.getBoundingClientRect();
+                const tabs = Array.from(track.children);
+                const left = Math.min(...tabs.map((tab) => tab.getBoundingClientRect().left));
+                const right = Math.max(...tabs.map((tab) => tab.getBoundingClientRect().right));
+                arrows.forEach((arrow) => {
+                    arrow.disabled = Number(arrow.dataset.scrollDirection) < 0
+                        ? left >= bounds.left - 1 : right <= bounds.right + 1;
+                });
+            }
+            function reveal() {
+                const active = track.querySelector('.active');
+                if (!active) return;
+                const bounds = track.getBoundingClientRect();
+                const tab = active.getBoundingClientRect();
+                const offset = tab.left < bounds.left ? tab.left - bounds.left
+                    : tab.right > bounds.right ? tab.right - bounds.right : 0;
+                if (offset) track.scrollBy({ left: offset, behavior: 'instant' });
+                update();
+            }
+            arrows.forEach((arrow) => arrow.addEventListener('click', () => {
+                track.scrollBy({ left: Number(arrow.dataset.scrollDirection) * track.clientWidth * 0.75, behavior: 'instant' });
+            }));
+            track.addEventListener('scroll', update, { passive: true });
+            track.addEventListener('focusin', (event) => {
+                const tab = event.target.closest('.section-nav-btn');
+                if (!tab) return;
+                const bounds = track.getBoundingClientRect();
+                const rect = tab.getBoundingClientRect();
+                if (rect.left < bounds.left) track.scrollBy({ left: rect.left - bounds.left });
+                else if (rect.right > bounds.right) track.scrollBy({ left: rect.right - bounds.right });
+            });
+            new MutationObserver(reveal).observe(track, { subtree: true, attributes: true, attributeFilter: ['class'] });
+            new ResizeObserver(reveal).observe(track);
+            reveal();
         });
         let queued = false;
         const schedule = () => {

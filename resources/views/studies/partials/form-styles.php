@@ -8,6 +8,7 @@
 <style>
   #echo-app {
     --gap: 12px;
+    background: #fff;
     color: #111827;
     line-height: 1.4;
   }
@@ -212,13 +213,13 @@
   }
 
   #echo-app .ef-btn-primary {
-    background: #1f2937;
+    background: #4f46e5;
     border: 1px solid transparent;
     color: #fff;
   }
 
   #echo-app .ef-btn-primary:hover {
-    background: #374151;
+    background: #4338ca;
   }
 
   #echo-app .ef-btn-secondary {
@@ -364,6 +365,46 @@
     flex: 1 0 auto;
     gap: 4px;
     padding: 6px 8px;
+  }
+
+  #echo-app .section-nav-wrapper.is-scrollable {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    direction: ltr;
+  }
+
+  #echo-app .is-scrollable > .section-nav-container {
+    flex: 1;
+    min-width: 0;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  #echo-app .section-scroll-arrow {
+    display: none;
+    flex: 0 0 44px;
+    height: 44px;
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    background: #fff;
+    color: #4f46e5;
+    font-size: 26px;
+    touch-action: manipulation;
+  }
+
+  #echo-app .has-overflow > .section-scroll-arrow {
+    display: block;
+  }
+
+  #echo-app .section-scroll-arrow:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  #echo-app .section-scroll-arrow:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
   }
 
   #echo-app .section-nav-container.is-measuring {
@@ -527,7 +568,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #1f2937;
+    background: #4f46e5;
     color: #fff;
     border: 0;
     border-radius: 0.375rem;
@@ -543,7 +584,7 @@
   }
 
   #echo-app .add-patient-btn:hover {
-    background: #374151;
+    background: #4338ca;
   }
 
   /* Form sections (one visible at a time) */
@@ -732,7 +773,7 @@
   }
 
   #echo-app .modal-btn {
-    background-color: #1f2937;
+    background-color: #4f46e5;
     color: #fff;
     border: none;
     border-radius: 0.375rem;
@@ -745,7 +786,7 @@
     min-height: 42px;
   }
 
-  #echo-app .modal-btn:hover { background-color: #374151; }
+  #echo-app .modal-btn:hover { background-color: #4338ca; }
   #echo-app .modal-btn.success-btn { background-color: #16a34a; }
   #echo-app .modal-btn.success-btn:hover { background-color: #15803d; }
   #echo-app .modal-btn.error-btn { background-color: #dc2626; }

@@ -58,7 +58,8 @@ trait HasPatientFields
     {
         return [
             function (Validator $validator) {
-                $known = [...array_keys($this->rules()), '_token', '_method'];
+                // ?context= is the taskbar tab a new study was started in (StudyContext).
+                $known = [...array_keys($this->rules()), '_token', '_method', 'context'];
 
                 foreach (array_diff(array_keys($this->all()), $known) as $unknown) {
                     $validator->errors()->add($unknown, __('Unknown field :field.', ['field' => $unknown]));

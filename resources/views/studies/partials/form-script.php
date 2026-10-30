@@ -12,9 +12,11 @@ $study ??= null;
 ?>
   <script>
     const ECHO_ROUTES = <?= json_encode([
-        'store' => route('studies.store'),
+        'initialPatient' => $initialPatient ?? null,
+        // Saving closes the study's taskbar tab.
+        'store' => route('studies.store', array_filter(['context' => request('context')])),
         'preview' => route('studies.preview'),
-        'storageScope' => auth()->user()->hospital_id.':'.auth()->id(),
+        'storageScope' => auth()->user()->hospital_id.':'.auth()->id().':'.($patientContext['patient_id'] ?? 'legacy'),
         'edit' => $study ? [
             'url' => route('studies.update', $study),
             'data' => $study->toFormArray(),
@@ -216,7 +218,7 @@ $study ??= null;
       let store = getPatientsStore();
       // Migration from old single-patient autosave if exists
       const oldRaw = localStorage.getItem('echoForm_autosave_v1');
-      if (oldRaw && Object.keys(store).length === 0) {
+      if (!ECHO_ROUTES.initialPatient && oldRaw && Object.keys(store).length === 0) {
         try {
           const oldData = JSON.parse(oldRaw);
           const defaultId = 'p_default';
@@ -408,6 +410,10 @@ $study ??= null;
         return;
       }
       initMultiPatientStore();
+      if (ECHO_ROUTES.initialPatient) {
+        loadEditData({ ...Object.fromEntries(new FormData(form)), ...ECHO_ROUTES.initialPatient });
+        saveToLocal();
+      }
     }
 
     // Fill the form from a saved study. Values that are not one of a select's

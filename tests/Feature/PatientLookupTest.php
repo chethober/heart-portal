@@ -56,18 +56,16 @@ test('the lookup needs patient access', function () {
     $this->actingAs($platformAdmin)->getJson('/dashboard/patients/lookup?nationalID=0012345679')->assertForbidden();
 });
 
-test('every study form has the same patient fields, lookup, tabs, local drafts and live preview', function () {
-    $pages = ['/dashboard/studies/create', ...array_map(fn (string $key) => "/dashboard/procedures/{$key}/create", array_keys(Procedures::MODELS))];
-
-    foreach ($pages as $page) {
-        $response = $this->actingAs($this->nurse)->get($page)->assertOk();
-        foreach (['first_name', 'last_name', 'nationalID', 'dob', 'phone_number', 'gender', 'admission_id'] as $field) {
-            $response->assertSee('name="'.$field.'"', false);
-        }
-        $response->assertSee('window.patientLookup', false)
-            ->assertSee('New Patient')
-            ->assertSee('Save Locally')
-            ->assertSee('Live Preview');
+test('the patient lookup lives on the dashboard patient step, not the study forms', function () {
+    $response = $this->actingAs($this->nurse)->get('/dashboard')->assertOk();
+    foreach (['first_name', 'last_name', 'nationalID', 'dob', 'phone_number', 'gender', 'study_date', 'admission_number'] as $field) {
+        $response->assertSee('name="'.$field.'"', false);
+    }
+    $response->assertSee('window.patientLookup =', false)->assertSee('id="patient-admissions"', false);
+    foreach (['echo', ...array_keys(Procedures::MODELS)] as $form) {
+        $this->get(startStudyUrl($this->nurse, $form))->assertOk()
+            ->assertDontSee('window.patientLookup =', false)->assertDontSee('role="tablist"', false)
+            ->assertSee('Save Locally')->assertSee('Live Preview');
     }
 });
 

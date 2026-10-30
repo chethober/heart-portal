@@ -5,7 +5,16 @@
 
     @var \Illuminate\Support\Collection<int, array{booleans: bool, group: string|null, caption?: string|null, fields: array<string, array<string, mixed>>}> $items
 --}}
+@php $lastPanelHeading = null; @endphp
 @foreach ($items as $item)
+    @php
+        $itemField = Arr::first($item['fields']);
+        $panelHeading = isset($itemField['panel']) ? ($itemField['group'] ?? null) : null;
+    @endphp
+    @if ($panelHeading !== null && $panelHeading !== $lastPanelHeading)
+        <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $panelHeading }}</div>
+    @endif
+    @php $lastPanelHeading = $panelHeading; @endphp
     @if (count($item['fields']) > 1 || (Arr::first($item['fields'])['widget'] ?? null) === 'checkbox')
         @include('procedures.partials.checkbox-group', ['fields' => $item['fields'], 'caption' => $item['caption'] ?? null])
         @continue

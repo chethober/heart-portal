@@ -11,16 +11,20 @@
      * @var \Closure $visible
      * @var \Illuminate\Support\Collection<string, string> $watched
      */
+    $caption ??= Arr::first($fields)['caption'] ?? null;
     $conditions = collect($fields)->map(fn (array $field) => $visible($field))->unique();
     $shared = $conditions->count() === 1 ? $conditions->first() : null;
-    $dropdown = count($fields) >= 5 && collect($fields)->every(fn (array $field) => $field['type'] === 'boolean');
+    $dropdown = (Arr::first($fields)['group_widget'] ?? null) === 'dropdown'
+        || (count($fields) >= 5 && collect($fields)->every(fn (array $field) => $field['type'] === 'boolean'));
 @endphp
 
-<div class="field cx-group-field" @if ($shared) x-show="{{ $shared }}" x-cloak @endif>
+<div class="field {{ (Arr::first($fields)['group_widget'] ?? null) === 'single' || (Arr::first($fields)['group_width'] ?? null) === 'field' ? '' : 'cx-group-field' }}" @if ($shared) x-show="{{ $shared }}" x-cloak @endif>
     @if ($caption ?? null)
         <label>{{ $caption }}</label>
     @endif
-    @if ($dropdown)
+    @if ((Arr::first($fields)['group_widget'] ?? null) === 'single')
+        @include('procedures.partials.single-group')
+    @elseif ($dropdown)
         <div class="cx-dropdown cx-group-dropdown" x-data="checkboxGroup()" :class="{ 'is-open': open }"
              x-on:change="count()" x-on:choices-sync.window="count()"
              x-on:click.outside="close()" x-on:keydown.escape.prevent="close(true)" x-on:focusout="if (! $el.contains($event.relatedTarget)) close()">

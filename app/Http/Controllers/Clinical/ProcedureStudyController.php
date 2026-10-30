@@ -13,6 +13,7 @@ use App\Support\Diagnoses;
 use App\Support\Forms;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
+use App\Support\StudyContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,18 +30,16 @@ class ProcedureStudyController extends Controller
     /**
      * New study form; ?nationalID= fills in the patient (and a known patient's demographics).
      */
-    public function create(Request $request, string $procedure): View
+    public function create(Request $request, string $procedure): View|RedirectResponse
     {
         abort_unless(Forms::allows($request->user(), $procedure, 'create'), 403);
-
-        $nationalID = trim((string) $request->query('nationalID', ''));
-        $patient = $nationalID !== '' ? Patient::whereNationalId($nationalID)->first() : null;
-
-        if ($patient) {
-            Audit::record('patient.viewed', $patient);
+        $context = StudyContext::get($request, $procedure);
+        if (! $context) {
+            return redirect()->route('dashboard', $request->only(['nationalID', 'admission']));
         }
 
-        return $this->form($procedure, values: $patient?->toFormArray() ?? ['nationalID' => $nationalID], patient: $patient);
+        return $this->form($procedure, values: StudyContext::values($context), patient: $context['patient'])
+            ->with('patientContext', $context);
     }
 
     public function store(ProcedureStudyRequest $request, string $procedure): RedirectResponse
@@ -59,6 +58,7 @@ class ProcedureStudyController extends Controller
 
             return $study;
         });
+        StudyContext::forget($request, $request->string('context')->toString());
 
         return redirect()->route('procedures.show', [$procedure, $study])->with('status', __('Study saved.'));
     }

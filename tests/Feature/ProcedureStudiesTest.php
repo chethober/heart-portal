@@ -47,7 +47,7 @@ beforeEach(function () {
 test('each heart form records, reports and signs a study', function (string $procedure) {
     [$payload, $label] = procedurePayload($procedure);
 
-    $this->actingAs($this->nurse)->get("/dashboard/procedures/{$procedure}/create")
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, $procedure))
         ->assertOk()
         ->assertSee('dir="'.Procedures::dir($procedure).'"', false);
     $this->actingAs($this->nurse)->post("/dashboard/procedures/{$procedure}", $payload)->assertRedirect();
@@ -84,11 +84,11 @@ test('each heart form is hidden from other hospitals', function (string $procedu
     expect(Procedures::model($procedure)::count())->toBe(0);
 })->with('procedures');
 
-test('the New Study menu lists echo and every heart form', function () {
-    $response = $this->actingAs($this->nurse)->get('/dashboard/patients')->assertOk()->assertSee(route('studies.create'));
+test('the shared patient step lists echo and every heart form', function () {
+    $response = $this->actingAs($this->nurse)->get('/dashboard')->assertOk()->assertSee('value="echo"', false);
 
     foreach (array_keys(Procedures::MODELS) as $procedure) {
-        $response->assertSee(route('procedures.create', $procedure))->assertSee(Procedures::label($procedure));
+        $response->assertSee('value="'.$procedure.'"', false)->assertSee(Procedures::label($procedure));
     }
 });
 
@@ -101,7 +101,7 @@ test('staff who cannot record studies get no New Study menu', function () {
 test('each heart form previews its report live without saving', function (string $procedure) {
     [$payload, $label] = procedurePayload($procedure);
 
-    $this->actingAs($this->nurse)->get("/dashboard/procedures/{$procedure}/create")
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, $procedure))
         ->assertOk()
         ->assertSee(str_replace('/', '\\/', route('procedures.preview', $procedure)), false)
         ->assertSee('Live Report Preview')
@@ -158,7 +158,7 @@ test('saving a discharge summary keeps its retired complication fields and its w
 });
 
 test('the history\'s complaint boxes are only shown and kept in Auto mode, which a new summary starts in', function () {
-    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()->getContent();
     expect($html)->toMatch('/<option value="auto" selected/')
         ->toContain('x-show="v[&#039;history_mode&#039;] === &#039;auto&#039;"');
 
@@ -176,7 +176,7 @@ test('the history\'s complaint boxes are only shown and kept in Auto mode, which
 });
 
 test('the history\'s complaints are one checkbox each, and dyspnea class shows only with dyspnea on exertion in Auto mode', function () {
-    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()->getContent();
     expect($html)->toContain('<input type="checkbox" name="clinicalcomplaint_syncope" value="1"')
         ->not->toContain('<select id="f-clinicalcomplaint_syncope"')
         ->toContain('x-on:change="v[\'clinicalcomplaint_asthmainactivity\'] = $event.target.checked ? \'1\' : \'\'"')
@@ -238,14 +238,14 @@ test('the discharge risk factors (but smoking), surgical history and signs are c
 });
 
 test('discharge medications can be added from the medications list', function () {
-    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
         ->assertSee('x-data="drugInsert('.Js::from(route('drugs.search')), false)
         ->assertSee('placeholder="Add from the medications list…"', false)
         ->assertSee('<textarea id="f-drugDischarge" name="drugDischarge"', false);
 });
 
 test('the discharge form folds each part of Others under its heading, one open at a time', function () {
-    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()->getContent();
     expect($html)->toContain('x-data="{ part: null }"')
         ->toContain('class="collapse-trigger" :aria-expanded="part === 0" x-on:click="part = part === 0 ? null : 0">Other Non-invasive Tests</button>')
         ->toContain('>HF Specific</button>')
@@ -253,13 +253,13 @@ test('the discharge form folds each part of Others under its heading, one open a
 
     // A part with an error opens.
     [$payload] = procedurePayload('discharge');
-    $html = $this->actingAs($this->nurse)->from('/dashboard/procedures/discharge/create')->followingRedirects()
+    $html = $this->actingAs($this->nurse)->from(startStudyUrl($this->nurse, 'discharge'))->followingRedirects()
         ->post('/dashboard/procedures/discharge', [...$payload, 'exercise_stress_test' => 'nope'])->getContent();
     expect($html)->toContain('x-data="{ part: 0 }"');
 });
 
 test('the final diagnosis list shows once three letters are typed', function () {
-    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
         ->assertSee('<div x-show="searching" x-cloak', false)
         ->assertSee('name="final_diagnosis_codes[]"', false);
 });
@@ -284,7 +284,7 @@ test('the discharge form groups its sections and leaves out risk factor dates an
 });
 
 test('the discharge form is in English while its report keeps heart\'s Persian wording', function () {
-    $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))
         ->assertOk()
         ->assertSee('title="Risk Factors &amp; Past Medical History"', false)
         ->assertSee('<span class="btn-abbr">RF</span>', false)
@@ -299,7 +299,7 @@ test('the discharge form is in English while its report keeps heart\'s Persian w
 
 test('بومی / غیر بومی is a two-way toggle without heart\'s Unknown code', function () {
     // Two options and no forced dropdown, so choice-inputs.js draws a toggle.
-    $html = $this->actingAs($this->nurse)->get('/dashboard/procedures/discharge/create')->assertOk()->getContent();
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()->getContent();
     expect($html)->toMatch('/<select id="f-bomi"[^>]*>/')
         ->not->toMatch('/<select id="f-bomi"[^>]*data-widget="dropdown"/');
     expect(config('procedures.discharge.sections.0.fields.bomi.options'))->toBe(['1' => 'Local', '2' => 'Non-local'])

@@ -31,18 +31,7 @@ final class NavigationLinks
         $echo = Forms::allows($user, 'echo', 'create');
         $procedures = Forms::procedures($user, 'create');
         if ($echo || $procedures !== []) {
-            // The dashboard home is the echo form; the other forms come from the heart system.
-            $links[] = [
-                ...self::link(__('New Study'), [$echo ? 'dashboard' : 'procedures.create', 'studies.create', 'procedures.create'], routeParameters: $echo ? [] : [$procedures[0]]),
-                'children' => [
-                    ...($echo ? [['label' => __('Echocardiography'), 'url' => route('studies.create'), 'active' => request()->routeIs('dashboard', 'studies.create')]] : []),
-                    ...array_map(fn (string $key) => [
-                        'label' => __(Procedures::label($key)),
-                        'url' => route('procedures.create', $key),
-                        'active' => request()->routeIs('procedures.create') && request()->route('procedure') === $key,
-                    ], $procedures),
-                ],
-            ];
+            $links[] = self::link(__('New Study'), ['dashboard', 'studies.create', 'procedures.create']);
         }
         if ($user->can('patients.view')) {
             // Drafts of the forms this member may open.

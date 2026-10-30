@@ -24,21 +24,10 @@
     <div id="echo-app" dir="ltr" lang="en">
     <div id="app-layout">
     <div id="form-container">
-      <!-- Multi-Patient Tab Bar Toolbar -->
       @unless ($editing)
-      <div class="patient-bar-wrapper">
-        <div id="patientTabsContainer" class="patient-tabs-container"></div>
-        <button type="button" class="add-patient-btn" onclick="addNewPatientTab()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>New Patient</span>
-        </button>
-      </div>
-      @else
-      <div id="patientTabsContainer" class="hidden"></div>
+        @include('clinical.partials.patient-taskbar')
       @endunless
+      <div id="patientTabsContainer" class="hidden"></div>
 
       <form id="echoForm" autocomplete="off">
       <input type="hidden" name="_token" value="{{ csrf_token() }}" />
@@ -60,41 +49,12 @@
       </div>
       @endif
 
-    <div class="row">
-      @include('clinical.partials.patient-fields')
-
-      <div class="field">
-        <label for="Echo_indication">Echo indication</label>
-        <select id="Echo_indication" name="Echo_indication">
-          <option value="None">None</option>
-          <option value="Chest pain">Chest pain</option>
-          <option value="Dyspnea">Dyspnea</option>
-          <option value="Palpitation">Palpitation</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="echo_date">Date of Echo</label>
-        <input id="echo_date" name="echo_date" type="text" class="no-voice" />
-        <span id="echo_date-display"></span>
-      </div>
-      <div class="field hidden" id="other_Echo_indication_wrap" data-follows="Echo_indication">
-        <label for="other_Echo_indication">other Echo indication</label>
-        <input id="other_Echo_indication" name="other_Echo_indication" type="text" />
-      </div>
-
-      <div class="field" style="flex:1 1 100%">
-        <label for="History_diseases">History of diseases</label>
-        <textarea id="History_diseases" name="History_diseases" style="min-height: 40px;"></textarea>
-      </div>
-    </div>
-
-
+    @include('clinical.partials.patient-summary', ['sharedValues' => $study ? [...$study->toFormArray(), 'admission_id' => $study->admission_id] : ($initialPatient ?? [])])
 
     <!-- Section Navigation Bar -->
     <div class="section-nav-wrapper">
       <div class="section-nav-container">
-        <button type="button" class="section-nav-btn active" data-target="sec-patient-info" title="Patient information">
+        <button type="button" class="section-nav-btn active" data-target="sec-patient-info" title="Clinical details">
           <span class="btn-abbr">Info</span>
         </button>
         <button type="button" class="section-nav-btn" data-target="sec-lv" title="Left Ventricle">
@@ -134,7 +94,17 @@
     </div>
 
     <div id="sec-patient-info" class="form-section active">
-      <div class="form-section-header">Patient information</div>
+      <div class="form-section-header">Clinical details</div>
+    <div class="row">
+      <div class="field" style="flex:1 1 100%">
+        <label for="History_diseases">History of diseases</label>
+        <textarea id="History_diseases" name="History_diseases" style="min-height: 40px;"></textarea>
+      </div>
+    </div>
+
+
+
+
       <div class="row" style="margin-top:8px">
         <div class="field"><label for="BP">BP (mmHg)</label><input id="BP" name="BP" type="text" />
         </div>
@@ -175,6 +145,21 @@
         <div class="field hidden" id="other_Echo_type_wrap" data-follows="Echo_type">
           <label for="other_Echo_type">Other Echo type</label>
           <input id="other_Echo_type" name="other_Echo_type" type="text" />
+        </div>
+
+        <div class="field">
+          <label for="Echo_indication">Echo indication</label>
+          <select id="Echo_indication" name="Echo_indication">
+            <option value="None">None</option>
+            <option value="Chest pain">Chest pain</option>
+            <option value="Dyspnea">Dyspnea</option>
+            <option value="Palpitation">Palpitation</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field hidden" id="other_Echo_indication_wrap" data-follows="Echo_indication">
+          <label for="other_Echo_indication">other Echo indication</label>
+          <input id="other_Echo_indication" name="other_Echo_indication" type="text" />
         </div>
       </div>
     </div>
@@ -921,5 +906,5 @@
     </div>
 
     @include('studies.partials.form-script')
-    @include('clinical.partials.patient-lookup')
+
 </x-dashboard-layout>

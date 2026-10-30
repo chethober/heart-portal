@@ -213,24 +213,13 @@ test('the admission page lists the studies recorded during it', function () {
         ->assertSee(e(route('procedures.create', ['rhc', 'nationalID' => '0012345678', 'admission' => $admission->id])), false);
 });
 
-test('procedure forms offer the patient\'s admissions', function () {
-    $admission = Admission::factory()->for($this->patient)->create(['ward' => 'CCU', 'admitted_on' => '1405/07/01']);
-    Admission::factory()->for(Patient::factory()->for($this->hospital))->create(['admitted_on' => '1399/01/01']);
-
-    $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/create?nationalID=0012345678&admission={$admission->id}")
-        ->assertOk()
-        ->assertSee('<select id="admission_id" name="admission_id"', false)
-        ->assertSee('<option value="'.$admission->id.'" selected>1405/07/01 · CCU', false)
-        ->assertDontSee('1399/01/01');
-
-    // Unknown patient: the ?admission= link is still carried.
-    $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/create?admission={$admission->id}")
-        ->assertSee('<option value="'.$admission->id.'" selected>Admission #'.$admission->id.'</option>', false);
-
-    $study = AngiographyStudy::create(['hospital_id' => $this->hospital->id, 'patient_id' => $this->patient->id, 'admission_id' => $admission->id]);
-    $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/{$study->id}/edit")
-        ->assertOk()
-        ->assertSee('<option value="'.$admission->id.'" selected>', false);
+test('admission study links open the shared patient step with the correct admission number', function () {
+    $admission = Admission::factory()->for($this->patient)->create(['his_id' => 'ADM4455', 'ward' => 'CCU', 'admitted_on' => '1405/07/01']);
+    $this->actingAs($this->nurse)->followingRedirects()->get("/dashboard/procedures/angiography/create?nationalID=0012345678&admission={$admission->id}")
+        ->assertOk()->assertSee('id="patientForm"', false)->assertSee('value="ADM4455"', false);
+    $this->get("/dashboard?admission={$admission->id}")->assertOk()->assertSee('value="Rezaei"', false);
+    $intruder = User::factory()->role(Role::Nurse)->create();
+    $this->actingAs($intruder)->get("/dashboard?admission={$admission->id}")->assertNotFound();
 });
 
 test('the worklist lists procedure drafts with echo studies', function () {

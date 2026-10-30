@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -69,4 +70,16 @@ function signatureImage(int $width, int $height, string $type = 'png'): string
 function drawnSignature(int $width = 300, int $height = 100): array
 {
     return ['drawn_signature' => 'data:image/png;base64,'.base64_encode(signatureImage($width, $height))];
+}
+
+/** Submit the dashboard patient step (step 1) and return the study form URL it opens. */
+function startStudyUrl(User $user, string $study = 'echo', array $overrides = []): string
+{
+    return test()->actingAs($user)->post(route('studies.start'), [
+        'first_name' => 'Ali', 'last_name' => 'Rezaei', 'nationalID' => '0012345678',
+        'dob' => '1350/01/01', 'gender' => 'Male', 'phone_number' => '09121234567',
+        'study_date' => '1405/07/09', 'admission_number' => '',
+        'study' => $study,
+        ...$overrides,
+    ])->assertSessionHasNoErrors()->assertRedirect()->headers->get('Location');
 }

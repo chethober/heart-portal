@@ -12,8 +12,13 @@
     @var array<string, list<string>> $children  Dependent fields by the field they depend on.
     @var bool $sub  Drawn inside another field's cell.
 --}}
+@php
+    $segmentNames = $procedure === 'angiography' && str_ends_with($name, '_Vessel_patency')
+        ? array_values(array_filter($children[$name] ?? [], fn (string $child) => ($fields[$child]['show_if'][1] ?? null) === '3'))
+        : [];
+@endphp
 <div class="field {{ $sub ?? false ? 'is-sub' : '' }}" @if ($visible($field)) x-show="{{ $visible($field) }}" x-cloak @endif
-     @if (in_array($field['type'], ['multiline', 'diagnoses'], true)) style="flex: 1 1 100%" @endif>
+     @if ($segmentNames !== [] || in_array($field['type'], ['multiline', 'diagnoses'], true)) style="flex: 1 1 100%" @endif>
     @if ($field['type'] === 'diagnoses')
         <label>{{ $field['label'] }}</label>
         @include('clinical.partials.diagnosis-picker', ['name' => $name, 'selected' => old($name, $values[$name] ?? [])])
@@ -39,6 +44,10 @@
                 </select>
                 @break
             @case('multiline')
+                @if (($field['widget'] ?? null) === 'multi-text')
+                    @include('procedures.partials.multi-text')
+                    @break
+                @endif
                 @if (($field['insert'] ?? null) === 'drugs' && auth()->user()->can('prescriptions.create'))
                     @include('procedures.partials.drug-insert')
                 @endif
@@ -58,7 +67,14 @@
         @endswitch
     @endif
     @error($name) <span class="small" style="color:#dc2626">{{ $message }}</span> @enderror
-    @foreach (collect($children[$name] ?? [])->chunkWhile(fn (string $child, int $key, $chunk) => ($fields[$child]['widget'] ?? null) === 'checkbox' && ($fields[$chunk->last()]['widget'] ?? null) === 'checkbox') as $chunk)
+    @if ($segmentNames !== [])
+        <div class="row" data-max-cols="5" x-show="v['{{ $name }}'] === '3'" x-cloak style="margin-top: 10px">
+            @foreach ($segmentNames as $segmentName)
+                @include('procedures.partials.field', ['name' => $segmentName, 'field' => $fields[$segmentName], 'sub' => false])
+            @endforeach
+        </div>
+    @endif
+    @foreach (collect(array_diff($children[$name] ?? [], $segmentNames))->chunkWhile(fn (string $child, int $key, $chunk) => ($fields[$child]['widget'] ?? null) === 'checkbox' && ($fields[$chunk->last()]['widget'] ?? null) === 'checkbox') as $chunk)
         @if (($fields[$chunk->first()]['widget'] ?? null) === 'checkbox')
             <div class="field is-sub" @if ($visible($fields[$chunk->first()])) x-show="{{ $visible($fields[$chunk->first()]) }}" x-cloak @endif>
                 <div class="cx-group" role="group">

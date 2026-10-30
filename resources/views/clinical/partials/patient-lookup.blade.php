@@ -1,10 +1,8 @@
 {{--
-    Registered-patient check for the study forms: when a national ID is typed, asks the server
-    (patients.lookup) whether it belongs to a patient of this hospital. A registered patient's
-    details are filled in and their admissions offered; a new one is flagged as such, and an ID
-    whose check digit is wrong is warned about (non-Iranian IDs may still be saved).
-    Forms that fill themselves from a script call window.patientLookup.check(false, admissionId)
-    after loading values, which refreshes the admissions without overwriting the details.
+    Registered-patient check for the dashboard patient step: when a national ID is typed, asks the
+    server (patients.lookup) whether it belongs to a patient of this hospital. A registered
+    patient's details are filled in and their admission numbers offered; a new one is flagged as
+    such, and an ID whose check digit is wrong is warned about (non-Iranian IDs may still be saved).
 --}}
 <script>
     window.patientLookup = (function () {
@@ -12,8 +10,7 @@
         const fields = ['first_name', 'last_name', 'dob', 'phone_number', 'gender'];
         const input = document.getElementById('nationalID');
         const status = document.getElementById('nationalID-status');
-        const select = document.getElementById('admission_id');
-        const wrapper = document.getElementById('admission_field');
+        const admissionList = document.getElementById('patient-admissions');
         let timer = null;
         let last = null;
 
@@ -30,19 +27,16 @@
             }
         }
 
-        function setAdmissions(admissions, selected) {
-            if (!select) return;
-            const keep = selected ?? (select.dataset.selected || select.value);
-            select.length = 1;
-            admissions.forEach((admission) => select.add(new Option(admission.label, admission.id)));
-            select.value = admissions.some((admission) => String(admission.id) === String(keep)) ? String(keep) : '';
-            select.dataset.selected = '';
-            if (wrapper) wrapper.hidden = admissions.length === 0;
+        // The patient's admission numbers, offered as suggestions for the admission number field.
+        function setAdmissions(admissions) {
+            if (!admissionList) return;
+            admissionList.replaceChildren(...admissions.filter((admission) => admission.number)
+                .map((admission) => new Option(admission.label, admission.number)));
         }
 
-        async function check(fill = true, selected = undefined) {
+        async function check(fill = true) {
             const id = digits(input.value.trim());
-            if (id.length < 5) { show('', ''); setAdmissions([], selected); last = null; return; }
+            if (id.length < 5) { show('', ''); setAdmissions([]); last = null; return; }
             if (id === last && fill) return;
             last = id;
 
@@ -67,11 +61,11 @@
                         }
                     });
                 }
-                setAdmissions(result.patient.admissions, selected);
+                setAdmissions(result.patient.admissions);
                 show('Registered patient: ' + result.patient.first_name + ' ' + result.patient.last_name + (fill ? ' — details filled in.' : '.'), '#15803d', result.patient.url);
             } else {
-                // Not registered yet: an admission it was opened for (?admission=) is kept as is.
-                show(result.valid ? 'New patient — they will be registered when the study is saved.' : 'Check the national ID: its check digit is not valid.', result.valid ? '#4b5563' : '#b45309');
+                setAdmissions([]);
+                show(result.valid ? 'New patient — they will be registered when you start a study.' : 'Check the national ID: its check digit is not valid.', result.valid ? '#4b5563' : '#b45309');
             }
         }
 
@@ -81,6 +75,6 @@
             if (input.value.trim() !== '') check(false);
         }
 
-        return { check: (fill, selected) => input && check(fill, selected) };
+        return { check: (fill) => input && check(fill) };
     })();
 </script>

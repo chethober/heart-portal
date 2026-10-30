@@ -127,6 +127,7 @@ class PatientController extends Controller
                 'admissions' => $patient->admissions()->with('wardRecord')->orderByDesc('admitted_on')->orderByDesc('id')->get()
                     ->map(fn (Admission $admission) => [
                         'id' => $admission->id,
+                        'number' => $admission->his_id,
                         'label' => $admission->summary().($admission->isDischarged() ? ' (discharged '.$admission->discharged_on.')' : ''),
                     ]),
             ] : null,

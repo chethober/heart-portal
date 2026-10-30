@@ -12,6 +12,7 @@ use App\Models\Patient;
 use App\Services\EchoCalculations;
 use App\Support\Audit;
 use App\Support\PatientRecords;
+use App\Support\StudyContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,9 +23,14 @@ use Illuminate\View\View;
 
 class EchoStudyController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
-        return view('studies.form');
+        $context = StudyContext::get($request, 'echo');
+        if (! $context) {
+            return redirect()->route('dashboard', $request->only(['patient', 'nationalID', 'admission']));
+        }
+
+        return view('studies.form', ['initialPatient' => StudyContext::values($context), 'patientContext' => $context]);
     }
 
     public function store(StoreEchoStudyRequest $request): JsonResponse
@@ -41,6 +47,7 @@ class EchoStudyController extends Controller
 
             return $study;
         });
+        StudyContext::forget($request, $request->string('context')->toString());
 
         return response()->json([
             'success' => true,

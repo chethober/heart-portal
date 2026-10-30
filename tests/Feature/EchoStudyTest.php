@@ -137,7 +137,7 @@ test('hospital admins can view but not create studies', function () {
 
 test('form page loads', function () {
     // The form lives inside the dashboard: its navigation is shown and the old navbar is gone.
-    $this->actingAs($this->tech)->get('/dashboard/studies/create')
+    $this->actingAs($this->tech)->get(startStudyUrl($this->tech))
         ->assertOk()
         ->assertSee('echoForm', false)
         ->assertSee(route('patients.index'), false)
