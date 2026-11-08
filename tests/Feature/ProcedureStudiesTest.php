@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Enums\StudyStatus;
 use App\Models\Admission;
+use App\Models\AngiographyStudy;
 use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\Scopes\HospitalScope;
@@ -242,6 +243,59 @@ test('discharge medications can be added from the medications list', function ()
         ->assertSee('x-data="drugInsert('.Js::from(route('drugs.search')), false)
         ->assertSee('placeholder="Add from the medications list…"', false)
         ->assertSee('<textarea id="f-drugDischarge" name="drugDischarge"', false);
+});
+
+test('the discharge procedures have an Extract button for the procedure types the user may view', function () {
+    $response = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk();
+
+    $response->assertSee('x-data="procedureExtract('.Js::from(['angiography' => route('procedures.latest-summary', 'angiography')]).', '.Js::from('f-angiography_coronersFor').')"', false)
+        ->assertSee('x-data="procedureExtract('.Js::from(['angioplasty' => route('procedures.latest-summary', 'angioplasty')]).', '.Js::from('f-angioplasty_coronersFor').')"', false)
+        ->assertSee('x-data="procedureExtract('.Js::from(['rhc' => route('procedures.latest-summary', 'rhc')]).', '.Js::from('f-heart_katetrismFor').')"', false)
+        // "Other" picks the procedure type to extract from.
+        ->assertSee('aria-label="Procedure type"', false);
+
+    $this->nurse->revokePermissionTo('angioplasty.view');
+    $this->actingAs($this->nurse->fresh())->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
+        ->assertDontSee(route('procedures.latest-summary', 'angioplasty'));
+});
+
+test('Extract fetches the summary of the patient\'s latest study of the procedure type', function () {
+    $patient = Patient::factory()->for($this->hospital)->create(['national_id' => '0012345678']);
+    AngiographyStudy::factory()->for($patient)->create(['result_legacy' => '4', 'created_at' => now()->subWeek()]);
+    $latest = AngiographyStudy::factory()->for($patient)->create(['result_legacy' => '6', 'DateOf_Date_of_angiography' => '1405/08/01', 'resulttt' => 'Candidate for CABG']);
+
+    $study = $this->actingAs($this->nurse)->getJson(route('procedures.latest-summary', ['angiography', 'nationalID' => '0012345678']))
+        ->assertOk()
+        ->json('study');
+
+    expect($study['id'])->toBe($latest->id)
+        ->and($study['date'])->toBe('1405/08/01')
+        ->and($study['status'])->toBe('draft')
+        ->and($study['summary'])->toContain('Result: Three-vessel CAD (3VD) + Candidate for CABG')
+        ->and($study['summary'])->not->toContain('One-vessel');
+
+    // No study of that type for the patient, or no such patient.
+    $this->actingAs($this->nurse)->getJson(route('procedures.latest-summary', ['angioplasty', 'nationalID' => '0012345678']))->assertOk()->assertJson(['study' => null]);
+    $this->actingAs($this->nurse)->getJson(route('procedures.latest-summary', ['angiography', 'nationalID' => '0099999999']))->assertOk()->assertJson(['study' => null]);
+    $this->actingAs($this->nurse)->getJson(route('procedures.latest-summary', ['angiography', 'nationalID' => '']))->assertStatus(422);
+
+    $this->nurse->revokePermissionTo('angiography.view');
+    $this->actingAs($this->nurse->fresh())->getJson(route('procedures.latest-summary', ['angiography', 'nationalID' => '0012345678']))->assertForbidden();
+});
+
+test('Extract never reads another hospital\'s procedures', function () {
+    $foreign = Patient::factory()->for(Hospital::factory())->create(['national_id' => '0012345678']);
+    AngiographyStudy::factory()->for($foreign)->create(['result_legacy' => '6']);
+
+    $this->actingAs($this->nurse)->getJson(route('procedures.latest-summary', ['angiography', 'nationalID' => '0012345678']))
+        ->assertOk()
+        ->assertJson(['study' => null]);
+
+    // The same patient here: only this hospital's own study is found.
+    $patient = Patient::factory()->for($this->hospital)->create(['national_id' => '0012345678']);
+    $own = AngiographyStudy::factory()->for($patient)->create(['result_legacy' => '4', 'created_at' => now()->subYear()]);
+
+    expect($this->actingAs($this->nurse)->getJson(route('procedures.latest-summary', ['angiography', 'nationalID' => '0012345678']))->json('study.id'))->toBe($own->id);
 });
 
 test('the discharge form folds each part of Others under its heading, one open at a time', function () {

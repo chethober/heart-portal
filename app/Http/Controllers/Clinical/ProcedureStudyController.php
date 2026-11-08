@@ -14,6 +14,7 @@ use App\Support\Forms;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
 use App\Support\StudyContext;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -133,6 +134,39 @@ class ProcedureStudyController extends Controller
             'hospital' => $request->user()->hospital,
             'admission' => $request->filled('admission_id') ? Admission::find((int) $request->input('admission_id')) : null,
         ]);
+    }
+
+    /**
+     * The summary of the patient's latest {procedure} study (by national ID), for another form to
+     * extract: the discharge summary fills its procedure results from it. Null when the patient
+     * has none, or none with anything in its summary.
+     */
+    public function latestSummary(Request $request, string $procedure): JsonResponse
+    {
+        abort_unless(Forms::allows($request->user(), $procedure, 'view') && ProcedureReport::supports($procedure), 403);
+
+        $nationalID = Patient::normalizeNationalId(trim((string) $request->query('nationalID', '')));
+        abort_unless(preg_match('/^[0-9A-Za-z]{1,32}$/', $nationalID) === 1, 422);
+
+        $patient = Patient::whereNationalId($nationalID)->first();
+        $study = $patient ? Procedures::model($procedure)::query()
+            ->where('patient_id', $patient->id)
+            ->latest()
+            ->orderByDesc('id')
+            ->first() : null;
+        $summary = $study ? ProcedureReport::for($procedure, $study->setRelation('patient', $patient)->toReportArray())?->summaryText() : null;
+
+        if ($study) {
+            Audit::record("{$procedure}.viewed", $study, ['extracted' => true]);
+        }
+
+        return response()->json(['study' => $study && $summary !== null && $summary !== '' ? [
+            'id' => $study->id,
+            'date' => $study->performedOn() ?? $study->created_at->toDateString(),
+            'status' => $study->status->value,
+            'summary' => $summary,
+            'url' => route('procedures.show', [$procedure, $study]),
+        ] : null]);
     }
 
     public function edit(string $procedure, ProcedureStudy $procedureStudy): View

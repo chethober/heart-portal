@@ -12,6 +12,8 @@ final class AngioplastyReport extends ProcedureReport
 {
     public const PROCEDURE = 'angioplasty';
 
+    protected const SUMMARY = ['Coronary vessels planned for PCI', 'Final result', 'PCI induced complication', 'Recommendation'];
+
     private const TERRITORIES = ['t1', 't2', 't3'];
 
     public function titles(): array

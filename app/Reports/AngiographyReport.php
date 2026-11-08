@@ -18,6 +18,8 @@ final class AngiographyReport extends ProcedureReport
 {
     public const PROCEDURE = 'angiography';
 
+    protected const SUMMARY = ['Findings', 'Additional findings', 'LV angiography', 'Result', 'Procedure related complication', 'Recommendation'];
+
     private const PATENCY_STENOSIS = '3';
 
     /**

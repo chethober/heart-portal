@@ -514,6 +514,47 @@
             };
         }
 
+        /**
+         * "Extract" for a text field (partials/procedure-extract): asks for the summary of the
+         * patient's latest study of the chosen procedure and adds it to the field, headed by the
+         * procedure and its date. The patient is the form's national ID.
+         */
+        function procedureExtract(urls, target) {
+            return {
+                source: Object.keys(urls)[0],
+                busy: false,
+                message: '',
+                failed: false,
+                labels: @js(collect(\App\Support\Procedures::MODELS)->keys()->mapWithKeys(fn (string $key) => [$key => \App\Support\Procedures::label($key)])),
+                say(message, failed = false) {
+                    this.message = message;
+                    this.failed = failed;
+                },
+                async extract() {
+                    const nationalID = (document.getElementById('nationalID')?.value || '').trim();
+                    if (! nationalID) return this.say('Choose the patient first.', true);
+                    this.busy = true;
+                    this.say('');
+                    try {
+                        const response = await fetch(urls[this.source] + '?nationalID=' + encodeURIComponent(nationalID), { headers: { Accept: 'application/json' } });
+                        if (! response.ok) return this.say('Could not fetch the procedure.', true);
+                        const study = (await response.json()).study;
+                        if (! study) return this.say('No ' + this.labels[this.source] + ' with a result found for this patient.', true);
+                        const field = document.getElementById(target);
+                        const text = this.labels[this.source] + ' (' + study.date + '):\n' + study.summary;
+                        field.value = field.value.replace(/\s+$/, '') + (field.value.trim() ? '\n\n' : '') + text;
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                        field.dispatchEvent(new Event('change', { bubbles: true }));
+                        this.say('Added from ' + this.labels[this.source] + ' of ' + study.date + (study.status === 'draft' ? ' (draft).' : '.'));
+                    } catch (e) {
+                        this.say('Could not fetch the procedure.', true);
+                    } finally {
+                        this.busy = false;
+                    }
+                },
+            };
+        }
+
         /** A dropdown of checkboxes (partials/checkbox-group), summarising what is ticked. */
         function checkboxGroup() {
             return {

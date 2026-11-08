@@ -279,13 +279,13 @@
       <details>
         <summary>LV Wall Motion</summary>
         <div style="margin-top:8px">
-          <div style="display: flex; flex-direction: row; align-items: center; gap: 20px; margin-bottom: 10px; flex-wrap: wrap;">
-            <label for="lv_rwma_checked" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; user-select: none;">
-              <input type="checkbox" id="lv_rwma_checked" name="lv_rwma_checked" value="1" style="margin: 0; width: auto;" />
-              <span>Include in report</span>
+          <div class="cx-group is-compact" role="group" style="margin-bottom: 10px;">
+            <label class="cx-chip" for="lv_rwma_checked">
+              <input type="checkbox" id="lv_rwma_checked" name="lv_rwma_checked" value="1" />
+              <span>RWMA</span>
             </label>
-            <label for="lv_global_hypokinesia" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; user-select: none;">
-              <input type="checkbox" id="lv_global_hypokinesia" name="lv_global_hypokinesia" value="1" style="margin: 0; width: auto;" />
+            <label class="cx-chip" for="lv_global_hypokinesia">
+              <input type="checkbox" id="lv_global_hypokinesia" name="lv_global_hypokinesia" value="1" />
               <span>Global hypokinesia</span>
             </label>
           </div>

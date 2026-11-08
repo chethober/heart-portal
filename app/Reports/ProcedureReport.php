@@ -40,6 +40,15 @@ abstract class ProcedureReport
     ];
 
     /**
+     * Section titles and line labels of the narrative that make up the short summary another
+     * form (the discharge summary's procedure results) extracts with summaryText(). A section
+     * title takes all of its lines.
+     *
+     * @var list<string>
+     */
+    protected const SUMMARY = [];
+
+    /**
      * @var array<string, array<string, mixed>>
      */
     protected readonly array $fields;
@@ -135,6 +144,26 @@ abstract class ProcedureReport
             $this->build(),
             fn (array $section) => $section['lines'] !== [] || ! empty($section['table']),
         ));
+    }
+
+    /**
+     * The narrative's key findings as plain text, one "Label: text" line each (SUMMARY), for
+     * pasting into another report. Empty when none of them is filled in.
+     */
+    final public function summaryText(): string
+    {
+        $lines = [];
+
+        foreach ($this->sections() as $section) {
+            $whole = $section['title'] !== null && in_array($section['title'], static::SUMMARY, true);
+            foreach ($section['lines'] as $line) {
+                if ($whole || ($line['label'] !== null && in_array($line['label'], static::SUMMARY, true))) {
+                    $lines[] = $line['label'] !== null ? $line['label'].': '.$line['text'] : $line['text'];
+                }
+            }
+        }
+
+        return implode("\n", $lines);
     }
 
     /**
