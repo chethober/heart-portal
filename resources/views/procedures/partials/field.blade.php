@@ -7,7 +7,7 @@
     "1" code), or "combine": checkboxes whose combination picks the code (config "combine").
     A text with "insert" => "drugs" gets a drug catalog search whose picks are added to it.
     A text with "extract" => [procedures] gets an "Extract" button that copies the summary of the
-    patient's latest study of one of those procedures into it.
+    patient's studies of one of those procedures, with their dates, into it.
 
     @var string $name
     @var array<string, mixed> $field

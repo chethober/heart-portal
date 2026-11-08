@@ -21,8 +21,9 @@
 | draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
 | (checkboxes whose combination picks the code); "insert" => "drugs" adds a drug
 | catalog search to a text field, whose picks are added to the text as lines;
-| "extract" lists the procedures whose latest study of the patient an "Extract"
-| button can copy the summary of into a text field (ProcedureReport::SUMMARY); a
+| "extract" lists the procedures whose studies of the patient an "Extract" button
+| copies the summaries of, with their dates, into a text field
+| (ProcedureReport::SUMMARY); a
 | "retired" field is kept (import, export, report) but no longer shown in the form
 | or changed by it; "nest" => false lays out the fields shown for a field's value
 | in the section as usual instead of inside that field's cell.
