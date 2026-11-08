@@ -11,6 +11,8 @@ final class RhcReport extends ProcedureReport
 {
     public const PROCEDURE = 'rhc';
 
+    protected const SUMMARY = ['Haemodynamics', 'Result', 'Recommendation'];
+
     /**
      * Sites in heart's order, with the measurements its form records for each.
      */

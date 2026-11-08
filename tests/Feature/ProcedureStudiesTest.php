@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Enums\StudyStatus;
 use App\Models\Admission;
+use App\Models\AngiographyStudy;
 use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\Scopes\HospitalScope;
@@ -242,6 +243,61 @@ test('discharge medications can be added from the medications list', function ()
         ->assertSee('x-data="drugInsert('.Js::from(route('drugs.search')), false)
         ->assertSee('placeholder="Add from the medications list…"', false)
         ->assertSee('<textarea id="f-drugDischarge" name="drugDischarge"', false);
+});
+
+test('the discharge procedures have an Extract button for the procedure types the user may view', function () {
+    $response = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk();
+
+    $response->assertSee('x-data="procedureExtract('.Js::from(['angiography' => route('procedures.summaries', 'angiography')]).', '.Js::from('f-angiography_coronersFor').')"', false)
+        ->assertSee('x-data="procedureExtract('.Js::from(['angioplasty' => route('procedures.summaries', 'angioplasty')]).', '.Js::from('f-angioplasty_coronersFor').')"', false)
+        ->assertSee('x-data="procedureExtract('.Js::from(['rhc' => route('procedures.summaries', 'rhc')]).', '.Js::from('f-heart_katetrismFor').')"', false)
+        // "Other" picks the procedure type to extract from.
+        ->assertSee('aria-label="Procedure type"', false);
+
+    $this->nurse->revokePermissionTo('angioplasty.view');
+    $this->actingAs($this->nurse->fresh())->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
+        ->assertDontSee(route('procedures.summaries', 'angioplasty'));
+});
+
+test('Extract fetches the summaries of all the patient\'s studies of the procedure type, with dates, oldest first', function () {
+    $patient = Patient::factory()->for($this->hospital)->create(['national_id' => '0012345678']);
+    // Recorded later but performed earlier: ordered by the procedure date.
+    $first = AngiographyStudy::factory()->for($patient)->create(['result_legacy' => '4', 'DateOf_Date_of_angiography' => '1404/12/5']);
+    $second = AngiographyStudy::factory()->for($patient)->create(['result_legacy' => '6', 'DateOf_Date_of_angiography' => '1405/08/01', 'resulttt' => 'Candidate for CABG', 'created_at' => now()->subWeek()]);
+    AngiographyStudy::factory()->for($patient)->create(['lad_Vessel_patency' => null, 'DateOf_Date_of_angiography' => '1405/08/02']); // nothing to summarise
+
+    $studies = $this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '0012345678']))
+        ->assertOk()
+        ->json('studies');
+
+    expect(array_column($studies, 'id'))->toBe([$first->id, $second->id])
+        ->and(array_column($studies, 'date'))->toBe(['1404/12/5', '1405/08/01'])
+        ->and($studies[0]['status'])->toBe('draft')
+        ->and($studies[0]['summary'])->toContain('Result: One-vessel CAD (1VD)')
+        ->and($studies[1]['summary'])->toContain('Result: Three-vessel CAD (3VD) + Candidate for CABG');
+
+    // No study of that type for the patient, or no such patient.
+    $this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angioplasty', 'nationalID' => '0012345678']))->assertOk()->assertExactJson(['studies' => []]);
+    $this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '0099999999']))->assertOk()->assertExactJson(['studies' => []]);
+    $this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '']))->assertStatus(422);
+
+    $this->nurse->revokePermissionTo('angiography.view');
+    $this->actingAs($this->nurse->fresh())->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '0012345678']))->assertForbidden();
+});
+
+test('Extract never reads another hospital\'s procedures', function () {
+    $foreign = Patient::factory()->for(Hospital::factory())->create(['national_id' => '0012345678']);
+    AngiographyStudy::factory()->for($foreign)->create(['result_legacy' => '6']);
+
+    $this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '0012345678']))
+        ->assertOk()
+        ->assertExactJson(['studies' => []]);
+
+    // The same patient here: only this hospital's own study is found.
+    $patient = Patient::factory()->for($this->hospital)->create(['national_id' => '0012345678']);
+    $own = AngiographyStudy::factory()->for($patient)->create(['result_legacy' => '4']);
+
+    expect(array_column($this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '0012345678']))->json('studies'), 'id'))->toBe([$own->id]);
 });
 
 test('the discharge form folds each part of Others under its heading, one open at a time', function () {

@@ -20,7 +20,10 @@
 | "collapse" section folds each group under its heading, one open at a time; "widget"
 | draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
 | (checkboxes whose combination picks the code); "insert" => "drugs" adds a drug
-| catalog search to a text field, whose picks are added to the text as lines; a
+| catalog search to a text field, whose picks are added to the text as lines;
+| "extract" lists the procedures whose studies of the patient an "Extract" button
+| copies the summaries of, with their dates, into a text field
+| (ProcedureReport::SUMMARY); a
 | "retired" field is kept (import, export, report) but no longer shown in the form
 | or changed by it; "nest" => false lays out the fields shown for a field's value
 | in the section as usual instead of inside that field's cell.
@@ -257,16 +260,16 @@ return [
                 'medication_treatment' => ['type' => 'boolean', 'label' => 'Medical therapy', 'fa' => 'درمان داروئی'],
                 'medication_treatmentFor' => ['type' => 'multiline', 'label' => 'In-hospital medications', 'fa' => 'نام داروهای زمان بستری', 'show_if' => ['medication_treatment', '1']],
                 'angiography_coroners' => ['type' => 'boolean', 'label' => 'Coronary angiography', 'fa' => 'آنژیوگرافی عروق کرونر'],
-                'angiography_coronersFor' => ['type' => 'multiline', 'label' => 'Angiography result', 'fa' => 'نتیجه آنژیوگرافی', 'show_if' => ['angiography_coroners', '1']],
+                'angiography_coronersFor' => ['type' => 'multiline', 'extract' => ['angiography'], 'label' => 'Angiography result', 'fa' => 'نتیجه آنژیوگرافی', 'show_if' => ['angiography_coroners', '1']],
                 'angioplasty_coroners' => ['type' => 'boolean', 'label' => 'Coronary angioplasty', 'fa' => 'آنژیوپلاستی عروق کرونر'],
-                'angioplasty_coronersFor' => ['type' => 'multiline', 'label' => 'Angioplasty result', 'fa' => 'نتیجه آنژیوپلاستی', 'show_if' => ['angioplasty_coroners', '1']],
+                'angioplasty_coronersFor' => ['type' => 'multiline', 'extract' => ['angioplasty'], 'label' => 'Angioplasty result', 'fa' => 'نتیجه آنژیوپلاستی', 'show_if' => ['angioplasty_coroners', '1']],
                 'heart_katetrism' => ['type' => 'boolean', 'label' => 'Cardiac catheterization', 'fa' => 'کاتتریسم قلبی'],
-                'heart_katetrismFor' => ['type' => 'multiline', 'label' => 'Details', 'fa' => 'توضیحات', 'show_if' => ['heart_katetrism', '1']],
+                'heart_katetrismFor' => ['type' => 'multiline', 'extract' => ['rhc'], 'label' => 'Details', 'fa' => 'توضیحات', 'show_if' => ['heart_katetrism', '1']],
                 'heart_device' => ['type' => 'boolean', 'label' => 'Device implantation', 'fa' => 'تعبیه device'],
-                'heart_deviceFor' => ['type' => 'multiline', 'label' => 'Details', 'fa' => 'توضیحات', 'show_if' => ['heart_device', '1']],
+                'heart_deviceFor' => ['type' => 'multiline', 'extract' => ['intervention'], 'label' => 'Details', 'fa' => 'توضیحات', 'show_if' => ['heart_device', '1']],
                 'ablationArythmie' => ['type' => 'boolean', 'label' => 'ablation arythmie'],
-                'ablationArythmieFor' => ['type' => 'multiline', 'label' => 'Details', 'fa' => 'توضیحات', 'show_if' => ['ablationArythmie', '1']],
-                'other_treatmentPrpcedure' => ['type' => 'multiline', 'label' => 'Other', 'fa' => 'سایر'],
+                'ablationArythmieFor' => ['type' => 'multiline', 'extract' => ['intervention'], 'label' => 'Details', 'fa' => 'توضیحات', 'show_if' => ['ablationArythmie', '1']],
+                'other_treatmentPrpcedure' => ['type' => 'multiline', 'extract' => ['peripheral', 'intervention', 'angiography', 'angioplasty', 'rhc'], 'label' => 'Other', 'fa' => 'سایر'],
             ],
         ],
         [

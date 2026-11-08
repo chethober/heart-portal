@@ -1287,6 +1287,11 @@
     font-size: 0.875rem;
   }
 
+  /* Chips sized to their text rather than sharing the line (the echo form's wall-motion boxes). */
+  #echo-app .cx-group.is-compact > label.cx-chip {
+    flex: none;
+  }
+
   #echo-app .cx-group > label.cx-chip input[type="checkbox"] {
     margin: 0;
   }

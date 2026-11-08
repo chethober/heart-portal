@@ -78,6 +78,7 @@ Route::prefix('dashboard')->group(function () {
 
                 // Procedures ported from heart (angiography, ...); authorized like echo studies.
                 Route::post('/procedures/{procedure}/preview', [ProcedureStudyController::class, 'preview'])->name('procedures.preview');
+                Route::get('/procedures/{procedure}/summaries', [ProcedureStudyController::class, 'summaries'])->middleware('throttle:60,1')->name('procedures.summaries');
                 Route::get('/procedures/{procedure}/{procedureStudy}', [ProcedureStudyController::class, 'show'])->name('procedures.show');
                 Route::delete('/procedures/{procedure}/{procedureStudy}', [ProcedureStudyController::class, 'destroy'])->name('procedures.destroy');
                 Route::get('/procedures/{procedure}/{procedureStudy}/edit', [ProcedureStudyController::class, 'edit'])->name('procedures.edit');

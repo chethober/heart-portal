@@ -1560,8 +1560,10 @@ $study ??= null;
       }
       bullets.push(`• ${lvEfText}`);
 
-      // 3. LV diastolic
-      bullets.push(`• ${resolved.lvDia}`);
+      // 3. LV diastolic (only when abnormal: a normal finding is left out of the summary)
+      if (resolved.lvDia && !/^normal\b/i.test(resolved.lvDia)) {
+        bullets.push(`• ${resolved.lvDia}`);
+      }
 
       // 4. LV Wall Motion
       const rwmaChecked = !!getSummaryFieldVal('lv_rwma_checked');
@@ -1608,8 +1610,6 @@ $study ??= null;
       } else if (rwmaChecked && rwmaFindings.length > 0) {
         const rwmaText = rwmaFindings.join(', ');
         bullets.push(`• ${rwmaText.charAt(0).toUpperCase() + rwmaText.slice(1)}${withText}`);
-      } else {
-        bullets.push('• No regional wall motion abnormality');
       }
 
       // 5. RV size

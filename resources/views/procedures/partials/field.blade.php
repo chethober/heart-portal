@@ -6,6 +6,8 @@
     A choice's "widget" can draw it as a "dropdown" whatever its size, a "checkbox" (ticked = the
     "1" code), or "combine": checkboxes whose combination picks the code (config "combine").
     A text with "insert" => "drugs" gets a drug catalog search whose picks are added to it.
+    A text with "extract" => [procedures] gets an "Extract" button that copies the summary of the
+    patient's studies of one of those procedures, with their dates, into it.
 
     @var string $name
     @var array<string, mixed> $field
@@ -50,6 +52,10 @@
                 @endif
                 @if (($field['insert'] ?? null) === 'drugs' && auth()->user()->can('prescriptions.create'))
                     @include('procedures.partials.drug-insert')
+                @endif
+                @php $sources = array_values(array_filter($field['extract'] ?? [], fn (string $source) => \App\Support\Forms::allows(auth()->user(), $source, 'view'))); @endphp
+                @if ($sources !== [])
+                    @include('procedures.partials.procedure-extract', ['sources' => $sources])
                 @endif
                 <textarea id="f-{{ $name }}" name="{{ $name }}" style="min-height: 60px">{{ $value($name) }}</textarea>
                 @break

@@ -10,6 +10,8 @@ final class InterventionReport extends ProcedureReport
 {
     public const PROCEDURE = 'intervention';
 
+    protected const SUMMARY = ['Description of procedure', 'Final result', 'Complications'];
+
     public function titles(): array
     {
         return ['گزارش مداخله قلبی', 'Cardiac Intervention Report'];
