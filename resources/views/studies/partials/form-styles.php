@@ -380,6 +380,18 @@
     min-width: 0;
     overscroll-behavior-x: contain;
     scrollbar-width: thin;
+    --fade-left: #000;
+    --fade-right: #000;
+    -webkit-mask-image: linear-gradient(to right, var(--fade-left), #000 24px, #000 calc(100% - 24px), var(--fade-right));
+    mask-image: linear-gradient(to right, var(--fade-left), #000 24px, #000 calc(100% - 24px), var(--fade-right));
+  }
+
+  #echo-app .more-left > .section-nav-container {
+    --fade-left: transparent;
+  }
+
+  #echo-app .more-right > .section-nav-container {
+    --fade-right: transparent;
   }
 
   #echo-app .section-scroll-arrow {

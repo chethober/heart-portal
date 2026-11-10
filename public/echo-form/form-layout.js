@@ -125,18 +125,23 @@
             const track = wrapper.querySelector('.section-nav-container');
             const arrows = wrapper.querySelectorAll('[data-scroll-direction]');
             function update() {
-                // Measure with the arrows removed so the controls themselves cannot cause overflow.
-                wrapper.classList.remove('has-overflow');
-                const overflowing = track.scrollWidth > track.clientWidth + 1;
-                wrapper.classList.toggle('has-overflow', overflowing);
+                // Decide on the arrows without hiding them to measure: doing that on every scroll
+                // widened the track for a moment, which clamped the scroll position short of the
+                // end and made the tabs jump under the arrows. The tabs grow to fill the track, so
+                // while they overflow scrollWidth is their natural width; it needs the arrows if it
+                // is wider than the whole bar.
+                const room = wrapper.classList.contains('has-overflow') ? wrapper.clientWidth : track.clientWidth;
+                const overflowing = track.scrollWidth > room + 1;
+                if (wrapper.classList.contains('has-overflow') !== overflowing) wrapper.classList.toggle('has-overflow', overflowing);
                 const bounds = track.getBoundingClientRect();
                 const tabs = Array.from(track.children);
                 const left = Math.min(...tabs.map((tab) => tab.getBoundingClientRect().left));
                 const right = Math.max(...tabs.map((tab) => tab.getBoundingClientRect().right));
-                arrows.forEach((arrow) => {
-                    arrow.disabled = Number(arrow.dataset.scrollDirection) < 0
-                        ? left >= bounds.left - 1 : right <= bounds.right + 1;
-                });
+                const more = { '-1': overflowing && left < bounds.left - 1, '1': overflowing && right > bounds.right + 1 };
+                arrows.forEach((arrow) => { arrow.disabled = ! more[arrow.dataset.scrollDirection]; });
+                // Fade the edge a tab is cut off at, so it reads as scrolled away rather than overlapped.
+                wrapper.classList.toggle('more-left', more['-1']);
+                wrapper.classList.toggle('more-right', more['1']);
             }
             function reveal() {
                 const active = track.querySelector('.active');
