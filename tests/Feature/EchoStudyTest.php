@@ -140,6 +140,8 @@ test('form page loads', function () {
     $this->actingAs($this->tech)->get(startStudyUrl($this->tech))
         ->assertOk()
         ->assertSee('echoForm', false)
+        // The section titles sit on one line, scrolling sideways when the screen is too narrow.
+        ->assertSee('section-nav-container is-one-line', false)
         ->assertSee(route('patients.index'), false)
         ->assertDontSee('app-navbar', false)
         ->assertDontSee('id="doctor"', false);
