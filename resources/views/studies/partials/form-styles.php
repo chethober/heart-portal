@@ -339,7 +339,8 @@
     width: 100%;
   }
 
-  /* Wraps instead of scrolling; form-layout.js shares the buttons out evenly over the lines (--cols). */
+  /* Wraps; form-layout.js shares the buttons out evenly over the lines (--cols). A bar marked
+     .is-one-line (the echo and procedure forms) stays on one line and scrolls sideways instead. */
   #echo-app .section-nav-container {
     display: flex;
     flex-wrap: wrap;

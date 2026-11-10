@@ -52,8 +52,9 @@
     @include('clinical.partials.patient-summary', ['sharedValues' => $study ? [...$study->toFormArray(), 'admission_id' => $study->admission_id] : ($initialPatient ?? [])])
 
     <!-- Section Navigation Bar -->
-    <div class="section-nav-wrapper">
-      <div class="section-nav-container">
+    <div class="section-nav-wrapper is-scrollable" data-scroll-tabs>
+      <button type="button" class="section-scroll-arrow" data-scroll-direction="-1" aria-label="Scroll tabs left" disabled>&lsaquo;</button>
+      <div class="section-nav-container is-one-line">
         <button type="button" class="section-nav-btn active" data-target="sec-patient-info" title="Clinical details">
           <span class="btn-abbr">Info</span>
         </button>
@@ -91,6 +92,7 @@
           <span class="btn-abbr">Notes</span>
         </button>
       </div>
+      <button type="button" class="section-scroll-arrow" data-scroll-direction="1" aria-label="Scroll tabs right" disabled>&rsaquo;</button>
     </div>
 
     <div id="sec-patient-info" class="form-section active">
