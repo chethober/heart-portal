@@ -51,6 +51,7 @@ return [
         'other_des_lv' => 'text',
         'lv_rwma_checked' => 'boolean',
         'lv_global_hypokinesia' => 'boolean',
+        'lv_septal_motion_lbbb' => 'boolean',
         'lv_rest' => 'text', // legacy, not in current form
         'lv_Basal_Anterior' => 'text', // legacy, not in current form
         'lv_Basal_anteroseptum' => 'text', // legacy, not in current form

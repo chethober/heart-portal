@@ -18,8 +18,6 @@ final class AngiographyReport extends ProcedureReport
 {
     public const PROCEDURE = 'angiography';
 
-    protected const SUMMARY = ['Findings', 'Additional findings', 'LV angiography', 'Result', 'Procedure related complication', 'Recommendation'];
-
     private const PATENCY_STENOSIS = '3';
 
     /**
@@ -34,6 +32,25 @@ final class AngiographyReport extends ProcedureReport
         '6' => 'Three-vessel CAD (3VD)',
         '7' => 'Multi-vessel CAD',
     ];
+
+    /**
+     * The result and the recommendation on one line, as the discharge summary writes them:
+     * "آنژیوگرافی عروق کرونر انجام شد Three-vessel CAD (3VD) • Recommendation: CABG".
+     */
+    protected function buildSummary(): string
+    {
+        $result = $this->result();
+        $recommendation = $this->recommendations();
+        if ($result === null && $recommendation === null) {
+            return '';
+        }
+
+        return $this->join([
+            'آنژیوگرافی عروق کرونر انجام شد',
+            $result,
+            $recommendation !== null ? '• Recommendation: '.$recommendation : null,
+        ], ' ');
+    }
 
     public function titles(): array
     {

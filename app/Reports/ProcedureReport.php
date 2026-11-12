@@ -42,7 +42,7 @@ abstract class ProcedureReport
     /**
      * Section titles and line labels of the narrative that make up the short summary another
      * form (the discharge summary's procedure results) extracts with summaryText(). A section
-     * title takes all of its lines.
+     * title takes all of its lines. A report may build its summary itself instead (buildSummary()).
      *
      * @var list<string>
      */
@@ -147,18 +147,28 @@ abstract class ProcedureReport
     }
 
     /**
-     * The narrative's key findings as plain text, one "Label: text" line each (SUMMARY), for
-     * pasting into another report. Empty when none of them is filled in.
+     * The narrative's key findings as plain text, for pasting into another report (the discharge
+     * summary's procedure results). Empty when none of them is filled in.
      */
     final public function summaryText(): string
     {
+        return trim($this->buildSummary());
+    }
+
+    /**
+     * By default the SUMMARY lines, one "Label: text" line each; with a single SUMMARY entry,
+     * just its text.
+     */
+    protected function buildSummary(): string
+    {
         $lines = [];
+        $labelled = count(static::SUMMARY) > 1;
 
         foreach ($this->sections() as $section) {
             $whole = $section['title'] !== null && in_array($section['title'], static::SUMMARY, true);
             foreach ($section['lines'] as $line) {
                 if ($whole || ($line['label'] !== null && in_array($line['label'], static::SUMMARY, true))) {
-                    $lines[] = $line['label'] !== null ? $line['label'].': '.$line['text'] : $line['text'];
+                    $lines[] = $line['label'] !== null && ($labelled || $whole) ? $line['label'].': '.$line['text'] : $line['text'];
                 }
             }
         }

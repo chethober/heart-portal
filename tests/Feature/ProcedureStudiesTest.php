@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Enums\StudyStatus;
 use App\Models\Admission;
 use App\Models\AngiographyStudy;
+use App\Models\EchoStudy;
 use App\Models\Hospital;
 use App\Models\Patient;
 use App\Models\Scopes\HospitalScope;
@@ -273,8 +274,8 @@ test('Extract fetches the summaries of all the patient\'s studies of the procedu
     expect(array_column($studies, 'id'))->toBe([$first->id, $second->id])
         ->and(array_column($studies, 'date'))->toBe(['1404/12/5', '1405/08/01'])
         ->and($studies[0]['status'])->toBe('draft')
-        ->and($studies[0]['summary'])->toContain('Result: One-vessel CAD (1VD)')
-        ->and($studies[1]['summary'])->toContain('Result: Three-vessel CAD (3VD) + Candidate for CABG');
+        ->and($studies[0]['summary'])->toBe('آنژیوگرافی عروق کرونر انجام شد One-vessel CAD (1VD)')
+        ->and($studies[1]['summary'])->toBe('آنژیوگرافی عروق کرونر انجام شد Three-vessel CAD (3VD) + Candidate for CABG');
 
     // No study of that type for the patient, or no such patient.
     $this->actingAs($this->nurse)->getJson(route('procedures.summaries', ['angioplasty', 'nationalID' => '0012345678']))->assertOk()->assertExactJson(['studies' => []]);
@@ -283,6 +284,42 @@ test('Extract fetches the summaries of all the patient\'s studies of the procedu
 
     $this->nurse->revokePermissionTo('angiography.view');
     $this->actingAs($this->nurse->fresh())->getJson(route('procedures.summaries', ['angiography', 'nationalID' => '0012345678']))->assertForbidden();
+});
+
+test('the discharge echo findings extract the summaries of the patient\'s echo studies', function () {
+    $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
+        ->assertSee('x-data="procedureExtract('.Js::from(['echo' => route('studies.summaries')]).', '.Js::from('f-important_result_summary').')"', false);
+
+    $patient = Patient::factory()->for($this->hospital)->create(['national_id' => '0022222222']);
+    $later = EchoStudy::factory()->for($patient)->create(['echo_date' => '1405/08/01', 'summary' => "• Moderate LV enlargement\n• EF: 35%"]);
+    $earlier = EchoStudy::factory()->for($patient)->create(['echo_date' => '1405/02/01', 'summary' => '• Normal study']);
+    EchoStudy::factory()->for($patient)->create(['summary' => null]); // nothing to extract
+
+    $studies = $this->actingAs($this->nurse)->getJson(route('studies.summaries', ['nationalID' => '0022222222']))->assertOk()->json('studies');
+    expect(array_column($studies, 'id'))->toBe([$earlier->id, $later->id])
+        ->and(array_column($studies, 'date'))->toBe(['1405/02/01', '1405/08/01'])
+        ->and($studies[1]['summary'])->toBe("• Moderate LV enlargement\n• EF: 35%")
+        ->and($studies[1]['url'])->toBe(route('studies.show', $later));
+
+    $this->actingAs($this->nurse)->getJson(route('studies.summaries', ['nationalID' => '']))->assertStatus(422);
+    $this->nurse->revokePermissionTo('echo.view');
+    $this->actingAs($this->nurse->fresh())->getJson(route('studies.summaries', ['nationalID' => '0022222222']))->assertForbidden();
+    $this->actingAs($this->nurse->fresh())->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
+        ->assertDontSee(route('studies.summaries'));
+});
+
+test('echo Extract never reads another hospital\'s echo studies', function () {
+    $foreign = Patient::factory()->for(Hospital::factory())->create(['national_id' => '0012345678']);
+    EchoStudy::factory()->for($foreign)->create(['summary' => 'Foreign study']);
+
+    $this->actingAs($this->nurse)->getJson(route('studies.summaries', ['nationalID' => '0012345678']))
+        ->assertOk()
+        ->assertExactJson(['studies' => []]);
+
+    $patient = Patient::factory()->for($this->hospital)->create(['national_id' => '0012345678']);
+    $own = EchoStudy::factory()->for($patient)->create();
+
+    expect(array_column($this->actingAs($this->nurse)->getJson(route('studies.summaries', ['nationalID' => '0012345678']))->json('studies'), 'id'))->toBe([$own->id]);
 });
 
 test('Extract never reads another hospital\'s procedures', function () {

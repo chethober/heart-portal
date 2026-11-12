@@ -145,3 +145,24 @@ test('a signed procedure report shows the signature it was signed with, only to 
     // The version must have been signed by the user in the URL.
     $this->actingAs($doctor)->get(route('users.signature', [$colleague, 'procedure_version' => $version->id]))->assertNotFound();
 });
+
+test('the summary the discharge summary extracts is each procedure\'s result', function () {
+    // Angiography: the result and the recommendation, in the discharge summary's wording.
+    expect(ProcedureReport::for('angiography', ['lad_Vessel_patency' => '3', 'lad_proximal_part_segment' => '2', 'lad_prox_Stenotic' => '3', 'result_legacy' => '6', 'recommend_cabg' => '1'])->summaryText())
+        ->toBe('آنژیوگرافی عروق کرونر انجام شد Three-vessel CAD (3VD) • Recommendation: CABG')
+        ->and(ProcedureReport::for('angiography', ['recommend_cabg' => '1'])->summaryText())->toBe('آنژیوگرافی عروق کرونر انجام شد • Recommendation: CABG')
+        ->and(ProcedureReport::for('angiography', ['lad_Vessel_patency' => '3'])->summaryText())->toBe('');
+
+    // Angioplasty: the result of PCI only.
+    expect(ProcedureReport::for('angioplasty', ['t1_territory_of_intervention' => '2', 't1_Result_Of_PCI_1' => '1', 'recommendation' => 'Follow up'])->summaryText())
+        ->toBe('successful PCI on LAD');
+
+    // Right heart catheterization: the result only.
+    expect(ProcedureReport::for('rhc', ['right_heart_result' => 'Severe pulmonary hypertension', 'right_heart_recommendation' => 'Refer', 'cardiac_output' => 4])->summaryText())
+        ->toBe('Severe pulmonary hypertension.');
+
+    // Peripheral angiography and cardiac intervention: the final result only.
+    foreach (['peripheral', 'intervention'] as $procedure) {
+        expect(ProcedureReport::for($procedure, ['Description_procedure' => 'Stenting', 'Final_result' => 'Successful'])->summaryText())->toBe('Successful');
+    }
+});

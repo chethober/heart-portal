@@ -10,7 +10,7 @@ final class InterventionReport extends ProcedureReport
 {
     public const PROCEDURE = 'intervention';
 
-    protected const SUMMARY = ['Description of procedure', 'Final result', 'Complications'];
+    protected const SUMMARY = ['Final result'];
 
     public function titles(): array
     {
