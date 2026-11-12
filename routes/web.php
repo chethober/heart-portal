@@ -69,6 +69,7 @@ Route::prefix('dashboard')->group(function () {
                 Route::get('/statistics', StatisticsController::class)->name('statistics');
                 Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
                 Route::get('/patients/lookup', [PatientController::class, 'lookup'])->middleware('throttle:60,1')->name('patients.lookup');
+                Route::get('/studies/summaries', [EchoStudyController::class, 'summaries'])->middleware('throttle:60,1')->name('studies.summaries');
                 Route::get('/studies/{study}', [EchoStudyController::class, 'show'])->name('studies.show');
                 Route::delete('/studies/{study}', [EchoStudyController::class, 'destroy'])->name('studies.destroy');
                 // Authorization for these depends on the study's status; see EchoStudyPolicy.

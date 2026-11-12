@@ -525,7 +525,7 @@
                 busy: false,
                 message: '',
                 failed: false,
-                labels: @js(collect(\App\Support\Procedures::MODELS)->keys()->mapWithKeys(fn (string $key) => [$key => \App\Support\Procedures::label($key)])),
+                labels: @js(['echo' => 'Echo', ...collect(\App\Support\Procedures::MODELS)->keys()->mapWithKeys(fn (string $key) => [$key => \App\Support\Procedures::label($key)])->all()]),
                 say(message, failed = false) {
                     this.message = message;
                     this.failed = failed;

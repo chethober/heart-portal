@@ -889,7 +889,9 @@ if (! function_exists('generateSummary')) {
 
         // 1.5 LV Wall Motion
         // Show LV Wall Motion section if checkbox is checked
-        if (shouldDisplay($report['lv_rwma_checked'] ?? null) || shouldDisplay($report['lv_global_hypokinesia'] ?? null)) {
+        $hasLbbb = ! empty($report['lv_septal_motion_lbbb']);
+        $hasRwmaOrGlobal = shouldDisplay($report['lv_rwma_checked'] ?? null) || shouldDisplay($report['lv_global_hypokinesia'] ?? null);
+        if ($hasRwmaOrGlobal || $hasLbbb) {
             $rwmaSegments = [
                 ['field' => 'lv_Basal_Anterior', 'label' => 'basal anterior', 'territory' => 'LAD'],
                 ['field' => 'lv_Basal_anteroseptum', 'label' => 'basal anteroseptal', 'territory' => 'LAD'],
@@ -951,40 +953,32 @@ if (! function_exists('generateSummary')) {
 
             $hasGlobal = ! empty($report['lv_global_hypokinesia']);
 
+            $content = null;
             if ($hasGlobal && ! empty($rwmaFindings)) {
                 $rwmaUnderlined = array_map(function ($f) {
                     return ensureUnderlinedIfAbnormal($f);
                 }, $rwmaFindings);
                 $content = 'There is '.ensureUnderlinedIfAbnormal('global hypokinesia').', with '.implode(', ', $rwmaUnderlined).$withSuffix.'.';
-                $sections[] = [
-                    'title' => 'LV Wall Motion',
-                    'content' => $content,
-                    'allow_html' => true,
-                ];
             } elseif ($hasGlobal) {
                 $content = 'There is '.ensureUnderlinedIfAbnormal('global hypokinesia').$withSuffix.'.';
-                $sections[] = [
-                    'title' => 'LV Wall Motion',
-                    'content' => $content,
-                    'allow_html' => true,
-                ];
             } elseif (! empty($rwmaFindings)) {
                 $rwmaUnderlined = array_map(function ($f) {
                     return ensureUnderlinedIfAbnormal($f);
                 }, $rwmaFindings);
                 $content = 'There is '.ucfirst(implode(', ', $rwmaUnderlined)).$withSuffix.'.';
-                $sections[] = [
-                    'title' => 'LV Wall Motion',
-                    'content' => $content,
-                    'allow_html' => true,
-                ];
-            } else {
-                $sections[] = [
-                    'title' => 'LV Wall Motion',
-                    'content' => 'There is no RWMA.',
-                    'allow_html' => true,
-                ];
+            } elseif ($hasRwmaOrGlobal) {
+                $content = 'There is no RWMA.';
             }
+
+            if ($hasLbbb) {
+                $content = trim(($content ?? '').' There is '.ensureUnderlinedIfAbnormal('abnormal septal motion due to LBBB').'.');
+            }
+
+            $sections[] = [
+                'title' => 'LV Wall Motion',
+                'content' => $content,
+                'allow_html' => true,
+            ];
         }
 
         // 2. Right Ventricle (RV)

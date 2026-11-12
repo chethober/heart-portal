@@ -11,10 +11,10 @@ use App\Reports\ProcedureReport;
 use App\Support\Audit;
 use App\Support\Diagnoses;
 use App\Support\Forms;
-use App\Support\JalaliDate;
 use App\Support\PatientRecords;
 use App\Support\Procedures;
 use App\Support\StudyContext;
+use App\Support\StudySummaries;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -152,31 +152,16 @@ class ProcedureStudyController extends Controller
         $patient = Patient::whereNationalId($nationalID)->first();
         $studies = $patient ? Procedures::model($procedure)::query()->where('patient_id', $patient->id)->get() : collect();
 
-        $summaries = $studies
-            ->map(function (ProcedureStudy $study) use ($procedure, $patient) {
-                $summary = ProcedureReport::for($procedure, $study->setRelation('patient', $patient)->toReportArray())?->summaryText() ?? '';
-                $recorded = JalaliDate::format($study->created_at, 'yyyy/MM/dd');
-                $date = $study->performedOn() ?: $recorded;
-                // Jalali dates as entered ("1405/7/9") sort by their numbers, then by when recorded.
-                $day = preg_match('#^(\d{4})/(\d{1,2})/(\d{1,2})$#', $date, $m) || preg_match('#^(\d{4})/(\d{1,2})/(\d{1,2})$#', $recorded, $m)
-                    ? sprintf('%04d%02d%02d', $m[1], $m[2], $m[3]) : '00000000';
-
-                return $summary === '' ? null : [
-                    'id' => $study->id,
-                    'date' => $date,
-                    'status' => $study->status->value,
-                    'summary' => $summary,
-                    'url' => route('procedures.show', [$procedure, $study]),
-                    'order' => sprintf('%s-%012d-%012d', $day, $study->created_at->getTimestamp(), $study->id),
-                ];
-            })
-            ->filter()
-            ->sortBy('order')
-            ->values();
-
         $studies->each(fn (ProcedureStudy $study) => Audit::record("{$procedure}.viewed", $study, ['extracted' => true]));
 
-        return response()->json(['studies' => $summaries->map(fn (array $study) => collect($study)->except('order')->all())->all()]);
+        return StudySummaries::response($studies->map(fn (ProcedureStudy $study) => [
+            'id' => $study->id,
+            'date' => $study->performedOn(),
+            'created_at' => $study->created_at,
+            'status' => $study->status->value,
+            'summary' => ProcedureReport::for($procedure, $study->setRelation('patient', $patient)->toReportArray())?->summaryText() ?? '',
+            'url' => route('procedures.show', [$procedure, $study]),
+        ]));
     }
 
     public function edit(string $procedure, ProcedureStudy $procedureStudy): View

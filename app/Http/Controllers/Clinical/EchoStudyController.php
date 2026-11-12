@@ -11,8 +11,10 @@ use App\Models\EchoStudyVersion;
 use App\Models\Patient;
 use App\Services\EchoCalculations;
 use App\Support\Audit;
+use App\Support\Forms;
 use App\Support\PatientRecords;
 use App\Support\StudyContext;
+use App\Support\StudySummaries;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,6 +57,33 @@ class EchoStudyController extends Controller
             'id' => $study->id,
             'url' => route('studies.show', $study),
         ], 201);
+    }
+
+    /**
+     * The summaries of all the patient's echo studies (by national ID), each with its date,
+     * oldest first, for another form to extract: the discharge summary fills its echo findings
+     * from them. Studies with no summary are left out.
+     */
+    public function summaries(Request $request): JsonResponse
+    {
+        abort_unless(Forms::allows($request->user(), 'echo', 'view'), 403);
+
+        $nationalID = Patient::normalizeNationalId(trim((string) $request->query('nationalID', '')));
+        abort_unless(preg_match('/^[0-9A-Za-z]{1,32}$/', $nationalID) === 1, 422);
+
+        $patient = Patient::whereNationalId($nationalID)->first();
+        $studies = $patient ? $patient->studies()->get() : collect();
+
+        $studies->each(fn (EchoStudy $study) => Audit::record('study.viewed', $study, ['extracted' => true]));
+
+        return StudySummaries::response($studies->map(fn (EchoStudy $study) => [
+            'id' => $study->id,
+            'date' => $study->echo_date,
+            'created_at' => $study->created_at,
+            'status' => $study->status->value,
+            'summary' => (string) $study->getAttribute('summary'),
+            'url' => route('studies.show', $study),
+        ]));
     }
 
     public function show(Request $request, EchoStudy $study): View

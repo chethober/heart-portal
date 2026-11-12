@@ -1570,7 +1570,8 @@ $study ??= null;
       const globalHypoChecked = !!getSummaryFieldVal('lv_global_hypokinesia');
       let rwmaFindings = [];
 
-      if ((rwmaChecked || globalHypoChecked) && typeof RWMA_TERRITORIES !== 'undefined') {
+      // Segment findings only when RWMA is ticked (global hypokinesia alone leaves them out).
+      if (rwmaChecked && typeof RWMA_TERRITORIES !== 'undefined') {
         const territoryMap = {
           'LAD': [],
           'RCA': [],
@@ -1607,9 +1608,13 @@ $study ??= null;
         bullets.push(`• Global hypokinesia, with ${rwmaFindings.join(', ')}${withText}`);
       } else if (globalHypoChecked) {
         bullets.push(`• Global hypokinesia${withText}`);
-      } else if (rwmaChecked && rwmaFindings.length > 0) {
+      } else if (rwmaFindings.length > 0) {
         const rwmaText = rwmaFindings.join(', ');
         bullets.push(`• ${rwmaText.charAt(0).toUpperCase() + rwmaText.slice(1)}${withText}`);
+      }
+
+      if (getSummaryFieldVal('lv_septal_motion_lbbb')) {
+        bullets.push('• Abnormal septal motion due to LBBB');
       }
 
       // 5. RV size

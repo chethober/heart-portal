@@ -10,7 +10,7 @@ final class PeripheralReport extends ProcedureReport
 {
     public const PROCEDURE = 'peripheral';
 
-    protected const SUMMARY = ['Description of procedure', 'Final result', 'Recommendation', 'Complication'];
+    protected const SUMMARY = ['Final result'];
 
     public function titles(): array
     {

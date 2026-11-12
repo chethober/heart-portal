@@ -146,3 +146,50 @@ test('form page loads', function () {
         ->assertDontSee('app-navbar', false)
         ->assertDontSee('id="doctor"', false);
 });
+
+test('abnormal septal motion due to LBBB is saved and reported in the LV wall motion', function () {
+    $this->actingAs($this->tech)->postJson('/dashboard/studies', echoPayload(['lv_rwma_checked' => null, 'lv_septal_motion_lbbb' => '1']))->assertCreated();
+    $study = EchoStudy::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->lv_septal_motion_lbbb)->toBeTrue();
+
+    $this->actingAs($this->tech)->get("/dashboard/studies/{$study->id}")->assertOk()
+        ->assertSeeText('LV Wall Motion')
+        ->assertSeeText('There is abnormal septal motion due to LBBB.')
+        ->assertDontSeeText('There is no RWMA.');
+
+    // With RWMA ticked and no abnormal segment, both are reported.
+    $study->update(['lv_rwma_checked' => true]);
+    $this->actingAs($this->tech)->get("/dashboard/studies/{$study->id}")->assertOk()
+        ->assertSeeText('There is no RWMA. There is abnormal septal motion due to LBBB.');
+});
+
+test('the echo form lays out indication, body size, valves and pericardium as asked', function () {
+    $html = $this->actingAs($this->tech)->get(startStudyUrl($this->tech))->assertOk()->getContent();
+    $at = fn (string $needle) => strpos($html, $needle);
+
+    // Echo indication is the first field of the clinical details, in two rows of four small
+    // fields (Echo indication, BP, HR, Rhythm / Height, Weight, O2 sat, Echo type), then the history.
+    $order = ['Echo_indication', 'BP', 'HR', 'Rhythm', 'Height', 'Weight', 'O2_sat', 'Echo_type', 'History_diseases'];
+    $positions = array_map(fn (string $id) => $at('id="'.$id.'"'), $order);
+    expect($positions)->toBe(collect($positions)->sort()->values()->all())
+        ->and(substr_count(substr($html, $positions[0], $positions[8] - $positions[0]), '<div class="row"'))->toBe(0);
+
+    // The LBBB box is beside RWMA and global hypokinesia.
+    expect($at('id="lv_septal_motion_lbbb"'))->toBeGreaterThan($at('id="lv_global_hypokinesia"'))
+        ->and($at('id="lv_septal_motion_lbbb"'))->toBeLessThan($at('id="rwma-segments"'));
+
+    // Each valve: its type and the abnormality description on one row, the measurements on the next.
+    foreach (['mv' => 'mv_PE_Velocity', 'av' => 'av_peakvelocity', 'pv' => 'pv_stenosis1', 'tv' => 'tv_PE_Velocity'] as $valve => $first) {
+        expect($html)->toMatch('/name="'.$valve.'_abnormality_description" type="text" \/>\s*<\/div>\s*<\/div>\s*<div class="row">\s*<div class="field">\s*<label for="'.$first.'">/')
+            ->and($html)->not->toContain('id="'.$valve.'_abnormality_container" data-follows');
+    }
+    // The pulmonary valve's velocity follows its stenosis and regurgitation.
+    expect($at('id="pv_stenosis1"'))->toBeLessThan($at('id="pv_regurgitant"'))
+        ->and($at('id="pv_regurgitant"'))->toBeLessThan($at('id="pv_PV_velocity"'))
+        ->and($at('id="pv_PV_velocity"'))->toBeLessThan($at('id="pv_PV_ACCT"'));
+
+    // The pericardium's choices are dropdowns.
+    foreach (['pre_Morphology', 'pre_Pericardial_effusion', 'pre_Hemodynamic'] as $name) {
+        expect($html)->toContain('<select id="'.$name.'" name="'.$name.'" data-widget="dropdown">');
+    }
+});

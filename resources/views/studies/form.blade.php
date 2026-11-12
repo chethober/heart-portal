@@ -97,58 +97,7 @@
 
     <div id="sec-patient-info" class="form-section active">
       <div class="form-section-header">Clinical details</div>
-    <div class="row">
-      <div class="field" style="flex:1 1 100%">
-        <label for="History_diseases">History of diseases</label>
-        <textarea id="History_diseases" name="History_diseases" style="min-height: 40px;"></textarea>
-      </div>
-    </div>
-
-
-
-
       <div class="row" style="margin-top:8px">
-        <div class="field"><label for="BP">BP (mmHg)</label><input id="BP" name="BP" type="text" />
-        </div>
-        <div class="field"><label for="HR">HR (beat/min)</label><input id="HR" name="HR" type="number" step="1" /></div>
-        <div class="field"><label for="Height">Height (cm)</label><input id="Height" name="Height" type="number" />
-        </div>
-
-        <div class="field">
-          <label for="Rhythm">Rhythm</label>
-          <select id="Rhythm" name="Rhythm">
-            <option value="None">None</option>
-            <option value="Sinus">Sinus</option>
-            <option value="AF">AF</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="field hidden" id="other_Rhythm_wrap" data-follows="Rhythm">
-          <label for="other_Rhythm">other Rhythm</label>
-          <input id="other_Rhythm" name="other_Rhythm" type="text" />
-        </div>
-
-        <div class="field"><label for="O2_sat">O2 sat (%)</label><input id="O2_sat" name="O2_sat" type="number"
-            step="1" /></div>
-        <div class="field"><label for="Weight">Weight (kg)</label><input id="Weight" name="Weight" type="number"
-            step="1" /></div>
-        <div class="field">
-          <label for="Echo_type">Echo type</label>
-          <select id="Echo_type" name="Echo_type">
-            <option value="None">None</option>
-            <option value="Transthoracic echocardiography (TTE)">Transthoracic echocardiography (TTE)</option>
-            <option value="Transesophageal echocardiography (TEE)">Transesophageal echocardiography (TEE)</option>
-            <option value="Stress echocardiography">Stress echocardiography</option>
-            <option value="Contrast echocardiography">Contrast echocardiography</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <div class="field hidden" id="other_Echo_type_wrap" data-follows="Echo_type">
-          <label for="other_Echo_type">Other Echo type</label>
-          <input id="other_Echo_type" name="other_Echo_type" type="text" />
-        </div>
-
         <div class="field">
           <label for="Echo_indication">Echo indication</label>
           <select id="Echo_indication" name="Echo_indication">
@@ -162,6 +111,45 @@
         <div class="field hidden" id="other_Echo_indication_wrap" data-follows="Echo_indication">
           <label for="other_Echo_indication">other Echo indication</label>
           <input id="other_Echo_indication" name="other_Echo_indication" type="text" />
+        </div>
+        <div class="field"><label for="BP">BP (mmHg)</label><input id="BP" name="BP" type="text" /></div>
+        <div class="field"><label for="HR">HR (beat/min)</label><input id="HR" name="HR" type="number" step="1" /></div>
+        <div class="field">
+          <label for="Rhythm">Rhythm</label>
+          <select id="Rhythm" name="Rhythm" data-widget="dropdown">
+            <option value="None">None</option>
+            <option value="Sinus">Sinus</option>
+            <option value="AF">AF</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field hidden" id="other_Rhythm_wrap" data-follows="Rhythm">
+          <label for="other_Rhythm">other Rhythm</label>
+          <input id="other_Rhythm" name="other_Rhythm" type="text" />
+        </div>
+
+        <div class="field"><label for="Height">Height (cm)</label><input id="Height" name="Height" type="number" /></div>
+        <div class="field"><label for="Weight">Weight (kg)</label><input id="Weight" name="Weight" type="number" step="1" /></div>
+        <div class="field"><label for="O2_sat">O2 sat (%)</label><input id="O2_sat" name="O2_sat" type="number" step="1" /></div>
+        <div class="field">
+          <label for="Echo_type">Echo type</label>
+          <select id="Echo_type" name="Echo_type">
+            <option value="None">None</option>
+            <option value="Transthoracic echocardiography (TTE)">Transthoracic echocardiography (TTE)</option>
+            <option value="Transesophageal echocardiography (TEE)">Transesophageal echocardiography (TEE)</option>
+            <option value="Stress echocardiography">Stress echocardiography</option>
+            <option value="Contrast echocardiography">Contrast echocardiography</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field hidden" id="other_Echo_type_wrap" data-follows="Echo_type">
+          <label for="other_Echo_type">Other Echo type</label>
+          <input id="other_Echo_type" name="other_Echo_type" type="text" />
+        </div>
+
+        <div class="field" style="flex:1 1 100%">
+          <label for="History_diseases">History of diseases</label>
+          <textarea id="History_diseases" name="History_diseases" style="min-height: 40px;"></textarea>
         </div>
       </div>
     </div>
@@ -289,6 +277,10 @@
             <label class="cx-chip" for="lv_global_hypokinesia">
               <input type="checkbox" id="lv_global_hypokinesia" name="lv_global_hypokinesia" value="1" />
               <span>Global hypokinesia</span>
+            </label>
+            <label class="cx-chip" for="lv_septal_motion_lbbb">
+              <input type="checkbox" id="lv_septal_motion_lbbb" name="lv_septal_motion_lbbb" value="1" />
+              <span>Abnormal septal motion due to LBBB</span>
             </label>
           </div>
           <div class="small">Select status for each segment (Normal / Mild hypokinesia / Severe hypokinesia / Akinesia /
@@ -477,10 +469,13 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="mv_abnormality_container" data-follows="mv_mvls" style="display: none;">
+        <div class="field" id="mv_abnormality_container" style="display: none;">
           <label for="mv_abnormality_description">Abnormality Description</label>
           <input id="mv_abnormality_description" name="mv_abnormality_description" type="text" />
         </div>
+      </div>
+
+      <div class="row">
 
         <div class="field">
           <label for="mv_PE_Velocity">Peak E Velocity (m/s)</label>
@@ -534,10 +529,13 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="av_abnormality_container" data-follows="av_Aortic_valve" style="display: none;">
+        <div class="field" id="av_abnormality_container" style="display: none;">
           <label for="av_abnormality_description">Abnormality Description</label>
           <input id="av_abnormality_description" name="av_abnormality_description" type="text" />
         </div>
+      </div>
+
+      <div class="row">
 
         <div class="field">
           <label for="av_peakvelocity">Peak Velocity (m/s)</label>
@@ -624,10 +622,13 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="pv_abnormality_container" data-follows="pv_Pulmonary_valve" style="display: none;">
+        <div class="field" id="pv_abnormality_container" style="display: none;">
           <label for="pv_abnormality_description">Abnormality Description</label>
           <input id="pv_abnormality_description" name="pv_abnormality_description" type="text" />
         </div>
+      </div>
+
+      <div class="row">
 
         <div class="field">
           <label for="pv_stenosis1">Stenosis</label>
@@ -638,14 +639,6 @@
             <option value="Moderate PS">Moderate PS</option>
             <option value="Severe PS">Severe PS</option>
           </select>
-        </div>
-        <div class="field">
-          <label for="pv_PV_velocity">PV Velocity (m/s)</label>
-          <input id="pv_PV_velocity" name="pv_PV_velocity" type="number" step="0.1" />
-        </div>
-        <div class="field">
-          <label for="pv_PV_ACCT">ACCT (msec)</label>
-          <input id="pv_PV_ACCT" name="pv_PV_ACCT" type="number" step="1" />
         </div>
         <div class="field">
           <label for="pv_regurgitant">Regurgitation</label>
@@ -659,6 +652,14 @@
             <option value="Moderate to Severe PR">Moderate to Severe PR</option>
             <option value="Severe PR">Severe PR</option>
           </select>
+        </div>
+        <div class="field">
+          <label for="pv_PV_velocity">PV Velocity (m/s)</label>
+          <input id="pv_PV_velocity" name="pv_PV_velocity" type="number" step="0.1" />
+        </div>
+        <div class="field">
+          <label for="pv_PV_ACCT">ACCT (msec)</label>
+          <input id="pv_PV_ACCT" name="pv_PV_ACCT" type="number" step="1" />
         </div>
 
         <div class="field" style="flex: 1 1 100%;">
@@ -681,10 +682,13 @@
             <option value="Abnormal">Abnormal</option>
           </select>
         </div>
-        <div class="field" id="tv_abnormality_container" data-follows="tv_Tricuspid_valve" style="display: none;">
+        <div class="field" id="tv_abnormality_container" style="display: none;">
           <label for="tv_abnormality_description">Abnormality Description</label>
           <input id="tv_abnormality_description" name="tv_abnormality_description" type="text" />
         </div>
+      </div>
+
+      <div class="row">
 
         <div class="field">
           <label for="tv_PE_Velocity">Peak E Velocity (m/s)</label>
@@ -776,7 +780,7 @@
       <div class="row" style="margin-top:8px">
         <div class="field">
           <label for="pre_Morphology">Morphology</label>
-          <select id="pre_Morphology" name="pre_Morphology">
+          <select id="pre_Morphology" name="pre_Morphology" data-widget="dropdown">
             <option value="Normal pericardium" selected>Normal pericardium</option>
             <option value="">none</option>
             <option value="Thickened pericardium">Thickened pericardium</option>
@@ -787,7 +791,7 @@
 
         <div class="field">
           <label for="pre_Pericardial_effusion">Pericardial effusion</label>
-          <select id="pre_Pericardial_effusion" name="pre_Pericardial_effusion">
+          <select id="pre_Pericardial_effusion" name="pre_Pericardial_effusion" data-widget="dropdown">
             <option value="No PE" selected>No PE</option>
             <option value="">none</option>
             <option value="Small PE">Small PE</option>
@@ -803,7 +807,7 @@
 
         <div class="field">
           <label for="pre_Hemodynamic">Hemodynamic</label>
-          <select id="pre_Hemodynamic" name="pre_Hemodynamic">
+          <select id="pre_Hemodynamic" name="pre_Hemodynamic" data-widget="dropdown">
             <option value="">Select hemodynamic status</option>
             <option value="with hemodynamic effect">with hemodynamic effect</option>
             <option value="without hemodynamic effect">without hemodynamic effect</option>

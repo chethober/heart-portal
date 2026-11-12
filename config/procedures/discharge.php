@@ -21,9 +21,9 @@
 | draws a choice as a "dropdown", a "checkbox" (ticked = 1) or "combine"
 | (checkboxes whose combination picks the code); "insert" => "drugs" adds a drug
 | catalog search to a text field, whose picks are added to the text as lines;
-| "extract" lists the procedures whose studies of the patient an "Extract" button
-| copies the summaries of, with their dates, into a text field
-| (ProcedureReport::SUMMARY); a
+| "extract" lists the procedures (or "echo") whose studies of the patient an
+| "Extract" button copies the summaries of, with their dates, into a text field
+| (ProcedureReport::summaryText(), an echo study's summary); a
 | "retired" field is kept (import, export, report) but no longer shown in the form
 | or changed by it; "nest" => false lays out the fields shown for a field's value
 | in the section as usual instead of inside that field's cell.
@@ -205,7 +205,7 @@ return [
                 'ecg_rbbb' => ['type' => 'choice', 'label' => 'RBBB', 'group' => 'ECG Findings', 'options' => ['0' => 'No', '1' => 'Yes'], 'blank' => ['9']],
                 'ecg_other' => ['type' => 'multiline', 'label' => 'Other ECG Findings', 'group' => 'ECG Findings'],
                 'ef' => ['type' => 'number', 'label' => 'LVEF - Ejection Fraction (Echo)'],
-                'important_result_summary' => ['type' => 'multiline', 'label' => 'Summary of important echo findings', 'fa' => 'خلاصه یافته های مهم اکو'],
+                'important_result_summary' => ['type' => 'multiline', 'extract' => ['echo'], 'label' => 'Summary of important echo findings', 'fa' => 'خلاصه یافته های مهم اکو'],
             ],
         ],
         [
