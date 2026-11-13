@@ -27,6 +27,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # Read-only, so Caddy can serve the public disk (hospital logos) at /storage.
+      - storage:/var/www/html/storage:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:

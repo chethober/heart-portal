@@ -107,6 +107,9 @@ demo accounts without an authenticator app.
 - Keep `TWO_FACTOR_ENFORCED=true`.
 - For a demo deployment, `php artisan app:seed-demo` creates the demo hospital and accounts with
   random passwords, printed once (re-run to reset them), and adds the heart demo patients.
+  `php artisan app:seed-clinics /path/to/echo` does the same for the legacy echo clinics
+  (`hadmin@`, `doctor@` and `nurse@<clinic>.echo.test`) and copies each clinic's report logos
+  from its folder in an echo checkout.
 - Back up the database **and** `APP_KEY` — encrypted fields cannot be read without the key.
 
 ## Configuration

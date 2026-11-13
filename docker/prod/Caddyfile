@@ -8,6 +8,11 @@
 		Referrer-Policy strict-origin-when-cross-origin
 		-Server
 	}
+	# The public disk (hospital logos) lives in the shared storage volume; serve only that folder.
+	handle_path /storage/* {
+		root * /var/www/html/storage/app/public
+		file_server
+	}
 	php_fastcgi app:9000
 	file_server
 }
