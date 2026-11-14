@@ -64,7 +64,7 @@
                 ['Admissions and wards', 'Record admissions and discharges, see who is on each ward, and import admissions from the hospital information system.', 'M3 21h18M6 21V10h12v11M9 14h6M12 3v4m-2-2h4'],
                 ['E-prescriptions', 'Doctors sign prescriptions from a shared drug catalog; a QR code on the printout lets pharmacies verify it is genuine.', 'M9 3h6v4H9zM7 5H5v16h14V5h-2M9 12h6m-6 4h4'],
                 ['Audit trail', 'Logins, patient lookups, views, edits, signatures and staff changes are recorded in an append-only log that hospital admins can review.', 'M12 8v4l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
-                ['Open source', 'AGPL-3.0 licensed. Run it on your own servers, inspect every line, and contribute improvements back.', 'M10 20l4-16M6 16l-4-4 4-4m12 0 4 4-4 4'],
+                ['Open source', 'MIT licensed. Run it on your own servers, inspect every line, and contribute improvements back.', 'M10 20l4-16M6 16l-4-4 4-4m12 0 4 4-4 4'],
             ])
             <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($features as [$title, $text, $icon])

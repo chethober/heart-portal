@@ -8,7 +8,7 @@ Technicians enter measurements once, the platform grades them against guideline 
 doctors sign the report, and every step is audited.
 
 [![CI](https://github.com/chethober/heart-portal/actions/workflows/ci.yml/badge.svg)](https://github.com/chethober/heart-portal/actions/workflows/ci.yml)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
@@ -117,7 +117,7 @@ demo accounts without an authenticator app.
 | `TWO_FACTOR_ISSUER` | `APP_NAME` | Name shown in authenticator apps |
 | `ECHO_DISPLAY_TIMEZONE` | `Asia/Tehran` | Timezone for signing times and audit entries |
 | `APP_LOCALE` | `en` | Interface language when the browser asks for none we support |
-| `APP_SOURCE_URL` | this repository | "Source code" link in the footer (AGPL §13) — point it at your fork if you modify the code |
+| `APP_SOURCE_URL` | this repository | "Source code" link in the footer — point it at your fork if you modify the code |
 
 Clinical fields are whitelisted in [`config/echo.php`](config/echo.php).
 
@@ -208,8 +208,7 @@ provided without warranty; see the license.
 
 ## License
 
-Copyright © 2026 chethober and contributors.
+Copyright © 2026 CHTH.
 
-Licensed under the [GNU Affero General Public License v3.0 or later](LICENSE). If you run a
-modified version as a network service, you must make its source code available to its users.
+Licensed under the [MIT License](LICENSE).
 Bundled third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

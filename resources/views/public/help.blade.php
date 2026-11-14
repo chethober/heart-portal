@@ -209,7 +209,7 @@
                 <h3>{{ __('I lost my phone and my recovery codes.') }}</h3>
                 <p>{{ __('Contact your hospital admin or the platform operator to have two-factor login reset after verifying your identity.') }}</p>
                 <h3>{{ __('Can we run it on our own servers?') }}</h3>
-                <p>{!! __('Yes. The full source is on <a href=":url">GitHub</a> with Docker instructions. Under the AGPL-3.0 you must publish any changes you make if you offer the modified version to users over a network.', ['url' => e(config('app.source_url'))]) !!}</p>
+                <p>{!! __('Yes. The full source is on <a href=":url">GitHub</a> with Docker instructions, under the MIT License: you can use, change and share it freely.', ['url' => e(config('app.source_url'))]) !!}</p>
                 <h3>{{ __('How do I report a security problem?') }}</h3>
                 <p>{!! __('Please follow the <a href=":url">security policy</a> and report it privately rather than opening a public issue.', ['url' => e(config('app.source_url').'/blob/main/SECURITY.md')]) !!}</p>
             </section>

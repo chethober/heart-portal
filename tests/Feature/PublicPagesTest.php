@@ -12,7 +12,7 @@ test('landing page is public and links to registration, help and source', functi
         ->assertSee(route('register'))
         ->assertSee(route('help'))
         ->assertSee(config('app.source_url'))
-        ->assertSee('AGPL-3.0');
+        ->assertSee('License: MIT');
 });
 
 test('signed-in users get a dashboard link on the landing page', function () {

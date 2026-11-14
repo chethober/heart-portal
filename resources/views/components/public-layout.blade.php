@@ -86,7 +86,7 @@
                     <div class="font-semibold text-gray-900">{{ __('Open source') }}</div>
                     <a href="{{ config('app.source_url') }}" class="block hover:text-gray-900">{{ __('Source code') }}</a>
                     <a href="{{ config('app.source_url') }}/blob/main/SECURITY.md" class="block hover:text-gray-900">{{ __('Report a vulnerability') }}</a>
-                    <a href="https://www.gnu.org/licenses/agpl-3.0.html" class="block hover:text-gray-900" rel="license">{{ __('License: AGPL-3.0') }}</a>
+                    <a href="{{ config('app.source_url') }}/blob/main/LICENSE" class="block hover:text-gray-900" rel="license">{{ __('License: MIT') }}</a>
                 </div>
             </div>
         </footer>

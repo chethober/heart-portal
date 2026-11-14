@@ -20,9 +20,8 @@ return [
     | Source Code URL
     |--------------------------------------------------------------------------
     |
-    | Linked from every page. The AGPL-3.0 requires offering the source of the
-    | running version to its network users, so point this at your fork if you
-    | deploy modified code.
+    | Linked from every page. Point this at your fork if you deploy modified
+    | code.
     |
     */
 

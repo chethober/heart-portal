@@ -47,4 +47,4 @@ Use the imperative mood and explain *why* in the body when it isn't obvious, e.g
 ## License of contributions
 
 By contributing you agree that your contributions are licensed under the project's
-[AGPL-3.0-or-later](LICENSE) license.
+[MIT](LICENSE) license.
