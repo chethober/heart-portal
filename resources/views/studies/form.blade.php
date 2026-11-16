@@ -631,6 +631,10 @@
       <div class="row">
 
         <div class="field">
+          <label for="pv_PV_velocity">Peak Velocity (m/s)</label>
+          <input id="pv_PV_velocity" name="pv_PV_velocity" type="number" step="0.1" />
+        </div>
+        <div class="field">
           <label for="pv_stenosis1">Stenosis</label>
           <select id="pv_stenosis1" name="pv_stenosis1">
             <option value="None">None</option>
@@ -652,10 +656,6 @@
             <option value="Moderate to Severe PR">Moderate to Severe PR</option>
             <option value="Severe PR">Severe PR</option>
           </select>
-        </div>
-        <div class="field">
-          <label for="pv_PV_velocity">PV Velocity (m/s)</label>
-          <input id="pv_PV_velocity" name="pv_PV_velocity" type="number" step="0.1" />
         </div>
         <div class="field">
           <label for="pv_PV_ACCT">ACCT (msec)</label>

@@ -252,8 +252,11 @@ test('the discharge procedures have an Extract button for the procedure types th
     $response->assertSee('x-data="procedureExtract('.Js::from(['angiography' => route('procedures.summaries', 'angiography')]).', '.Js::from('f-angiography_coronersFor').')"', false)
         ->assertSee('x-data="procedureExtract('.Js::from(['angioplasty' => route('procedures.summaries', 'angioplasty')]).', '.Js::from('f-angioplasty_coronersFor').')"', false)
         ->assertSee('x-data="procedureExtract('.Js::from(['rhc' => route('procedures.summaries', 'rhc')]).', '.Js::from('f-heart_katetrismFor').')"', false)
-        // "Other" picks the procedure type to extract from.
-        ->assertSee('aria-label="Procedure type"', false);
+        // "Other" has a row with its own Extract button for each procedure type, not a picker.
+        ->assertDontSee('aria-label="Procedure type"', false);
+    foreach (['peripheral', 'intervention', 'angiography', 'angioplasty', 'rhc'] as $source) {
+        $response->assertSee('x-data="procedureExtract('.Js::from([$source => route('procedures.summaries', $source)]).', '.Js::from('f-other_treatmentPrpcedure').')"', false);
+    }
 
     $this->nurse->revokePermissionTo('angioplasty.view');
     $this->actingAs($this->nurse->fresh())->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()

@@ -179,14 +179,15 @@ test('the echo form lays out indication, body size, valves and pericardium as as
         ->and($at('id="lv_septal_motion_lbbb"'))->toBeLessThan($at('id="rwma-segments"'));
 
     // Each valve: its type and the abnormality description on one row, the measurements on the next.
-    foreach (['mv' => 'mv_PE_Velocity', 'av' => 'av_peakvelocity', 'pv' => 'pv_stenosis1', 'tv' => 'tv_PE_Velocity'] as $valve => $first) {
+    foreach (['mv' => 'mv_PE_Velocity', 'av' => 'av_peakvelocity', 'pv' => 'pv_PV_velocity', 'tv' => 'tv_PE_Velocity'] as $valve => $first) {
         expect($html)->toMatch('/name="'.$valve.'_abnormality_description" type="text" \/>\s*<\/div>\s*<\/div>\s*<div class="row">\s*<div class="field">\s*<label for="'.$first.'">/')
             ->and($html)->not->toContain('id="'.$valve.'_abnormality_container" data-follows');
     }
-    // The pulmonary valve's velocity follows its stenosis and regurgitation.
-    expect($at('id="pv_stenosis1"'))->toBeLessThan($at('id="pv_regurgitant"'))
-        ->and($at('id="pv_regurgitant"'))->toBeLessThan($at('id="pv_PV_velocity"'))
-        ->and($at('id="pv_PV_velocity"'))->toBeLessThan($at('id="pv_PV_ACCT"'));
+    // The pulmonary valve's peak velocity leads its row like the other valves; ACCT follows regurgitation.
+    expect($at('id="pv_PV_velocity"'))->toBeLessThan($at('id="pv_stenosis1"'))
+        ->and($at('id="pv_stenosis1"'))->toBeLessThan($at('id="pv_regurgitant"'))
+        ->and($at('id="pv_regurgitant"'))->toBeLessThan($at('id="pv_PV_ACCT"'))
+        ->and($html)->toContain('<label for="pv_PV_velocity">Peak Velocity (m/s)</label>');
 
     // The pericardium's choices are dropdowns.
     foreach (['pre_Morphology', 'pre_Pericardial_effusion', 'pre_Hemodynamic'] as $name) {

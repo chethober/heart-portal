@@ -516,7 +516,7 @@
 
         /**
          * "Extract" for a text field (partials/procedure-extract): asks for the summaries of all the
-         * patient's studies of the chosen procedure and adds them to the field, oldest first, each
+         * patient's studies of its row's procedure and adds them to the field, oldest first, each
          * headed by the procedure and its date. The patient is the form's national ID.
          */
         function procedureExtract(urls, target) {

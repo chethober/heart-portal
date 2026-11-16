@@ -1604,13 +1604,17 @@ $study ??= null;
       if (lvWith === '1') withText = ', with preserved tissue thickness';
       else if (lvWith === '2') withText = ', with thinning and loss of tissue';
 
-      if (globalHypoChecked && rwmaFindings.length > 0) {
-        bullets.push(`• Global hypokinesia, with ${rwmaFindings.join(', ')}${withText}`);
+      // A ticked RWMA box is always named, with its segments when any are marked.
+      const rwmaText = rwmaChecked
+        ? (rwmaFindings.length > 0 ? `RWMA: ${rwmaFindings.join(', ')}` : 'RWMA')
+        : '';
+
+      if (globalHypoChecked && rwmaText) {
+        bullets.push(`• Global hypokinesia, with ${rwmaText}${withText}`);
       } else if (globalHypoChecked) {
         bullets.push(`• Global hypokinesia${withText}`);
-      } else if (rwmaFindings.length > 0) {
-        const rwmaText = rwmaFindings.join(', ');
-        bullets.push(`• ${rwmaText.charAt(0).toUpperCase() + rwmaText.slice(1)}${withText}`);
+      } else if (rwmaText) {
+        bullets.push(`• ${rwmaText}${withText}`);
       }
 
       if (getSummaryFieldVal('lv_septal_motion_lbbb')) {
