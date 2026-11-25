@@ -48,7 +48,7 @@
     $rtl = Procedures::dir($procedure) === 'rtl';
 
     // Only the fields others depend on need to be tracked in the browser.
-    $watched = collect($fields)->pluck('show_if.0')->filter()->unique()
+    $watched = collect($fields)->pluck('show_if.0')->merge(collect($fields)->pluck('reveal_after'))->filter()->unique()
         ->mapWithKeys(fn (string $name) => [$name => (string) ($value($name) ?? '')]);
     // A field is shown only while the field it depends on is shown too.
     $visible = function (array $field) use (&$visible, $fields): ?string {

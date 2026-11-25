@@ -2,18 +2,30 @@
     The fields of one group of a section (form.blade.php). Fields in one of the procedure's
     "disclosure_groups" (config/procedures/{procedure}.php, e.g. an angiography vessel's "Vessel
     characteristics") are folded behind a dropdown button that reveals them on demand, with a
-    count of how many are filled in; the rest are drawn as they are (group-run).
+    count of how many are filled in. Fields with "reveal_after" (a field's name) are drawn in a
+    block shown once that field has a value other than "0" (none), e.g. a PCI territory's lesion
+    fields; nothing is cleared when it hides again. The rest are drawn as they are (group-run).
 
     @var \Illuminate\Support\Collection<int, array{booleans: bool, group: string|null, caption?: string|null, fields: array<string, array<string, mixed>>}> $items
 --}}
 @php
     $disclosureGroups = config('procedures.'.$procedure.'.disclosure_groups', []);
     $disclosureOf = fn (array $item): ?string => in_array(Arr::first($item['fields'])['group'] ?? null, $disclosureGroups, true) ? Arr::first($item['fields'])['group'] : null;
-    $runs = $items->chunkWhile(fn (array $item, int $key, $chunk) => $disclosureOf($item) === $disclosureOf($chunk->last()))->values();
+    $revealOf = fn (array $item): ?string => Arr::first($item['fields'])['reveal_after'] ?? null;
+    $runs = $items->chunkWhile(fn (array $item, int $key, $chunk) => $disclosureOf($item) === $disclosureOf($chunk->last()) && $revealOf($item) === $revealOf($chunk->last()))->values();
 @endphp
 @foreach ($runs as $run)
     @php $disclosure = $disclosureOf($run->first()); @endphp
-    @if ($disclosure === null)
+    @php $revealAfter = $revealOf($run->first()); @endphp
+    @if ($revealAfter !== null)
+        @php
+            $hasErrors = $run->contains(fn (array $item) => collect($item['fields'])->keys()->contains(fn ($name) => $errors->has($name)));
+            $revealed = $hasErrors || ! in_array((string) $value($revealAfter), ['', '0'], true);
+        @endphp
+        <div class="row" style="margin-bottom: 0" x-show="{{ $hasErrors ? 'true || ' : '' }}! ['', '0'].includes(v['{{ $revealAfter }}'] ?? '')" {{ $revealed ? '' : 'x-cloak' }}>
+            @include('procedures.partials.group-run', ['items' => $run, 'headings' => true])
+        </div>
+    @elseif ($disclosure === null)
         @include('procedures.partials.group-run', ['items' => $run, 'headings' => true])
     @else
         @php $hasErrors = $run->contains(fn (array $item) => collect($item['fields'])->keys()->contains(fn ($name) => $errors->has($name))); @endphp

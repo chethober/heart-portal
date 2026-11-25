@@ -69,6 +69,9 @@ All notable changes to this project are documented here. The format follows
   codes, filtered by date and status. Exports are recorded in the audit log.
 
 ### Changed
+- Coronary angioplasty (PCI): each territory's lesion fields (description of lesion through post
+  procedural TIMI flow) appear only once a territory is chosen, stents after the first and the
+  bifurcation fields (*Bifurcating lesion*) are folded behind dropdown buttons opened on demand.
 - Coronary angiography: each vessel's (and graft's) *Vessel characteristics* fields are folded behind
   a dropdown button that reveals them on demand, showing how many are filled in.
 - Cath-lab forms and their reports now look and work like the echo form and report: a section bar
