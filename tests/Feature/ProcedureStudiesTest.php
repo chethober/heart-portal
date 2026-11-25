@@ -351,6 +351,60 @@ test('the discharge form folds each part of Others under its heading, one open a
     expect($html)->toContain('x-data="{ part: 0 }"');
 });
 
+test('the angiography form folds every Vessel characteristics group behind a dropdown', function () {
+    $sections = collect(Procedures::sections('angiography'));
+    $expected = $sections->sum(fn (array $section) => collect($section['fields'])
+        ->contains(fn (array $field) => ! ($field['retired'] ?? false) && ($field['group'] ?? null) === 'Vessel characteristics') ? 1 : 0);
+
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'angiography'))->assertOk()->getContent();
+
+    // One closed dropdown per vessel and graft, and no always-visible heading left behind.
+    expect($expected)->toBeGreaterThan(15)
+        ->and(substr_count($html, 'class="disclosure-part"'))->toBe($expected)
+        ->and(substr_count($html, '<span>Vessel characteristics <span class="disclosure-count"'))->toBe($expected)
+        ->and($html)->not->toContain('class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">Vessel characteristics<')
+        ->and($html)->not->toContain('margin-bottom: 8px">Vessel characteristics<')
+        ->and($html)->toContain('x-data="{ open: false, set: 0,');
+
+    // Each dropdown's fields are inside it and hidden until it is opened; they still post.
+    $start = strpos($html, 'class="disclosure-part"');
+    $panel = substr($html, $start, strpos($html, 'class="disclosure-part"', $start + 1) - $start);
+    expect($panel)->toContain('x-show="open"')->toContain('name="lm_Vessle_size"')->toContain('name="lm_TIMI_Flow"')
+        ->not->toContain('name="lm_Vessel_patency"')->not->toContain('name="lm_grade"');
+    expect($html)->toContain('name="svgom_Vessle_size"')->toContain('name="limalad_Run_off"');
+
+    // The vessel patency and stenosis fields stay visible outside the dropdown.
+    $patency = strpos($html, 'name="lm_Vessel_patency"');
+    $dropdown = strpos($html, 'class="disclosure-part"');
+    expect($patency)->toBeLessThan($dropdown);
+});
+
+test('a vessel characteristics dropdown with an error opens, others stay closed', function () {
+    [$payload] = procedurePayload('angiography');
+    $expected = collect(Procedures::sections('angiography'))->filter(fn (array $section) => collect($section['fields'])
+        ->contains(fn (array $field) => ! ($field['retired'] ?? false) && ($field['group'] ?? null) === 'Vessel characteristics'))->count();
+    $html = $this->actingAs($this->nurse)->from(startStudyUrl($this->nurse, 'angiography'))->followingRedirects()
+        ->post('/dashboard/procedures/angiography', [...$payload, 'lad_TIMI_Flow' => 'nope'])->getContent();
+
+    expect(substr_count($html, 'x-data="{ open: true, set: 0,'))->toBe(1)
+        ->and(substr_count($html, 'x-data="{ open: false, set: 0,'))->toBe($expected - 1);
+});
+
+test('the vessel characteristics dropdown posts and saves its fields, and another hospital cannot reach the study', function () {
+    [$payload] = procedurePayload('angiography');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/angiography', [...$payload, 'lad_TIMI_Flow' => '4', 'lad_Calcification' => '3'])->assertSessionHasNoErrors()->assertRedirect();
+    $study = AngiographyStudy::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->lad_TIMI_Flow)->toBe('4')->and($study->lad_Calcification)->toBe('3');
+
+    $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/angiography/{$study->id}/edit")->assertOk()->getContent();
+    expect($html)->toContain('<option value="4" selected>3</option>');
+
+    $outsider = User::factory()->for(Hospital::factory())->role(Role::Nurse)->create();
+    $this->actingAs($outsider)->get("/dashboard/procedures/angiography/{$study->id}/edit")->assertNotFound();
+    $this->actingAs($outsider)->put("/dashboard/procedures/angiography/{$study->id}", [...$payload, 'lad_TIMI_Flow' => '1'])->assertNotFound();
+    expect($study->fresh()->lad_TIMI_Flow)->toBe('4');
+});
+
 test('the final diagnosis list shows once three letters are typed', function () {
     $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'discharge'))->assertOk()
         ->assertSee('<div x-show="searching" x-cloak', false)

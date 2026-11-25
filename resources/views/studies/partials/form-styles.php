@@ -645,7 +645,8 @@
   }
 
   /* A "collapse" section's groups: one folded part per heading, one open at a time. */
-  #echo-app .collapse-part {
+  #echo-app .collapse-part,
+  #echo-app .disclosure-part {
     flex: 1 1 100%;
     border: 1px solid #e5e7eb;
     border-radius: 0.375rem;
@@ -676,7 +677,8 @@
     transition: transform 0.15s ease;
   }
 
-  #echo-app .collapse-part.is-open .collapse-trigger::after {
+  #echo-app .collapse-part.is-open .collapse-trigger::after,
+  #echo-app .disclosure-part.is-open .collapse-trigger::after {
     transform: rotate(180deg);
   }
 
@@ -685,8 +687,20 @@
     outline-offset: -2px;
   }
 
-  #echo-app .collapse-part > .row {
+  #echo-app .collapse-part > .row,
+  #echo-app .disclosure-part > .row {
     padding: 0 12px 12px;
+  }
+
+  /* A group of fields folded behind a dropdown button, shown on demand (config "disclosure_groups"). */
+  #echo-app .disclosure-part {
+    background: #f9fafb;
+  }
+
+  #echo-app .disclosure-part .disclosure-count {
+    margin-inline-start: 4px;
+    color: #6b7280;
+    font-weight: 500;
   }
 
   @keyframes tabFadeIn {

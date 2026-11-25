@@ -232,7 +232,7 @@
                                     </div>
                                 </div>
                             @else
-                                @if ($group !== null)
+                                @if ($group !== null && ! in_array($group, config('procedures.'.$procedure.'.disclosure_groups', []), true))
                                     <div class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">{{ $group }}</div>
                                 @endif
                                 @include('procedures.partials.group-items', ['items' => $chunk])
