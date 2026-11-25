@@ -5,6 +5,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- Right heart catheterization form: the Registration tab is gone (an imported registry code is kept
+  and still printed), a new Indication tab offers a dropdown (evaluation before heart transplant,
+  for cause of pulmonary hypertension, before valve surgery, or other, which reveals a text field
+  beside it), and Result and Recommendation each have their own tab.
+
 ### Added
 - Multi-hospital platform: hospital self-registration with platform-admin approval, staff
   invitations, roles (platform admin, hospital admin, doctor, nurse / technician).

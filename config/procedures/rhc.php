@@ -22,14 +22,21 @@ return [
     'date_field' => 'DateOf_entrance_date',
     'sections' => [
         [
-            'title' => 'Registration',
+            'title' => 'Indication',
             'fields' => [
-                'qID' => ['type' => 'text', 'label' => 'Registry Code'],
+                'indication' => ['type' => 'choice', 'label' => 'Indication', 'widget' => 'dropdown', 'nest' => false, 'options' => [
+                    '1' => 'Evaluation before heart transplant',
+                    '2' => 'Evaluation for cause of pulmonary hypertension',
+                    '3' => 'Evaluation before valve surgery',
+                    '99' => 'Other',
+                ]],
+                'indication_other' => ['type' => 'text', 'label' => 'Other indication', 'show_if' => ['indication', '99']],
             ],
         ],
         [
             'title' => 'Right heart catheterization',
             'fields' => [
+                'qID' => ['type' => 'text', 'label' => 'Registry Code', 'retired' => true],
                 'Access' => ['type' => 'text', 'label' => 'Access'],
                 'catheter' => ['type' => 'text', 'label' => 'catheter'],
                 'bsa' => ['type' => 'number', 'label' => 'BSA'],
@@ -68,12 +75,22 @@ return [
                 'cardiac_index' => ['type' => 'number', 'label' => 'CARDIAC INDEX'],
                 'pvr' => ['type' => 'number', 'label' => 'PVR'],
                 'svr' => ['type' => 'number', 'label' => 'SVR'],
-                'right_heart_result' => ['type' => 'multiline', 'label' => 'RESULT'],
-                'right_heart_recommendation' => ['type' => 'multiline', 'label' => 'RECOMMENDATION'],
                 'DateOf_entrance_date' => ['type' => 'date', 'label' => 'Entrance Date'],
                 'entrance_time' => ['type' => 'time', 'label' => 'Entrance Time'],
                 'DateOf_exit_date' => ['type' => 'date', 'label' => 'Exit Date'],
                 'exit_time' => ['type' => 'time', 'label' => 'Exit Time'],
+            ],
+        ],
+        [
+            'title' => 'Result',
+            'fields' => [
+                'right_heart_result' => ['type' => 'multiline', 'label' => 'RESULT'],
+            ],
+        ],
+        [
+            'title' => 'Recommendation',
+            'fields' => [
+                'right_heart_recommendation' => ['type' => 'multiline', 'label' => 'RECOMMENDATION'],
             ],
         ],
     ],
