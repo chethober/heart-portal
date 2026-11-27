@@ -88,6 +88,15 @@ test('the RHC report tabulates pressures by site and gives the haemodynamics', f
         ->flatMap(fn ($section) => array_column($section['lines'], 'text'))->all())->toContain('3.2 Wood units');
 });
 
+test('the RHC report states the indication, or the written-in one for other', function () {
+    $lines = fn (array $data) => collect(ProcedureReport::for('rhc', $data)->sections())
+        ->flatMap(fn ($section) => array_map(fn ($line) => ($line['label'] ? $line['label'].': ' : '').$line['text'], $section['lines']))->implode("\n");
+
+    expect($lines(['indication' => '3']))->toContain('Indication: Evaluation before valve surgery')
+        ->and($lines(['indication' => '99', 'indication_other' => 'Congenital shunt work-up']))->toContain('Indication: Congenital shunt work-up')
+        ->and($lines(['Access' => 'femoral']))->not->toContain('Indication');
+});
+
 test('peripheral and intervention reports list technical details in a table', function (string $procedure, string $field) {
     $report = ProcedureReport::for($procedure, ['Access' => 'Radial', 'Indication_procedure' => 'Claudication', $field => 'Note']);
 

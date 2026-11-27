@@ -64,6 +64,7 @@ final class RhcReport extends ProcedureReport
 
         return [
             self::section('Right heart catheterization', [
+                self::line('Indication', $this->choiceOrOther('indication', 'indication_other')),
                 self::line(null, self::sentence('Right heart catheterization was done'.($via !== '' ? " {$via}" : '').' and the following results were obtained')),
             ], $table),
             self::section('Haemodynamics', [

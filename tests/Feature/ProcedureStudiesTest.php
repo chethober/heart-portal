@@ -7,6 +7,7 @@ use App\Models\AngiographyStudy;
 use App\Models\EchoStudy;
 use App\Models\Hospital;
 use App\Models\Patient;
+use App\Models\RhcStudy;
 use App\Models\Scopes\HospitalScope;
 use App\Models\User;
 use App\Reports\ProcedureReport;
@@ -401,4 +402,30 @@ test('بومی / غیر بومی is a two-way toggle without heart\'s Unknown co
     [$payload] = procedurePayload('discharge');
     $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'bomi' => '9'])->assertSessionHasErrors('bomi');
     $this->actingAs($this->nurse)->post('/dashboard/procedures/discharge', [...$payload, 'bomi' => '2'])->assertSessionHasNoErrors();
+});
+
+test('the RHC form has Indication, Result and Recommendation tabs and no Registration tab', function () {
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'rhc'))->assertOk()->getContent();
+
+    preg_match_all('/<span class="btn-abbr">([^<]*)<\/span>/', $html, $matches);
+    expect($matches[1])->toBe(['Indication', 'Right heart catheterization', 'Result', 'Recommendation'])
+        ->and($html)->not->toContain('name="qID"')
+        ->and($html)->toContain('<select id="f-indication" name="indication" x-model="v[\'indication\']"')
+        ->toContain('Evaluation for cause of pulmonary hypertension')
+        ->toContain('x-show="v[&#039;indication&#039;] === &#039;99&#039;"')
+        ->toContain('name="indication_other"')
+        ->toContain('name="right_heart_result"')
+        ->toContain('name="right_heart_recommendation"');
+});
+
+test('an RHC study keeps the written-in indication only for Other, and keeps a retired registry code', function () {
+    [$payload] = procedurePayload('rhc');
+
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/rhc', [...$payload, 'indication' => '99', 'indication_other' => 'Shunt work-up'])->assertSessionHasNoErrors()->assertRedirect();
+    $study = RhcStudy::withoutGlobalScope(HospitalScope::class)->sole();
+    $study->forceFill(['qID' => 'R-17'])->save();
+    expect($study->indication)->toBe('99')->and($study->indication_other)->toBe('Shunt work-up');
+
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/rhc/{$study->id}", [...$payload, 'indication' => '1', 'indication_other' => 'Shunt work-up'])->assertSessionHasNoErrors()->assertRedirect();
+    expect($study->fresh()->indication)->toBe('1')->and($study->fresh()->indication_other)->toBeNull()->and($study->fresh()->qID)->toBe('R-17');
 });
