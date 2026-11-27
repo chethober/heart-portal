@@ -69,6 +69,8 @@ All notable changes to this project are documented here. The format follows
   codes, filtered by date and status. Exports are recorded in the audit log.
 
 ### Changed
+- Coronary angiography: each vessel's (and graft's) *Vessel characteristics* fields are folded behind
+  a dropdown button that reveals them on demand, showing how many are filled in.
 - Cath-lab forms and their reports now look and work like the echo form and report: a section bar
   showing which sections are filled in, one section at a time, a live report preview beside the
   form, and the echo report's header, patient line, tables and signature.

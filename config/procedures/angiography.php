@@ -20,6 +20,8 @@
 return [
     'label' => 'Coronary Angiography',
     'date_field' => 'DateOf_Date_of_angiography',
+    // Groups drawn folded behind a dropdown button, opened on demand, in every section.
+    'disclosure_groups' => ['Vessel characteristics'],
     'sections' => [
         [
             'title' => 'Registration',
