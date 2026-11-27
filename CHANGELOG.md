@@ -69,6 +69,9 @@ All notable changes to this project are documented here. The format follows
   codes, filtered by date and status. Exports are recorded in the audit log.
 
 ### Changed
+- Coronary angioplasty (PCI): the *Vessel Complication* fields of the three territories and the *PCI induced
+  Complication* fields moved out of the territory tabs into their own tabs, *Comp* and *PCI R. Comp*,
+  after the territory tabs; the yes/no fields of *Indication for PCI* are checkboxes (ticked = Yes).
 - Coronary angioplasty (PCI): each territory's lesion fields (description of lesion through post
   procedural TIMI flow) appear only once a territory is chosen, stents after the first and the
   bifurcation fields (*Bifurcating lesion*) are folded behind dropdown buttons opened on demand.

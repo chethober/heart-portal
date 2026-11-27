@@ -469,6 +469,60 @@ test('the angioplasty bifurcating lesion fields are folded behind a button', fun
     expect(strpos($html, 'name="t1_postdilatation"'))->toBeLessThan($start);
 });
 
+test('the angioplasty complications have their own Comp and PCI R. Comp tabs after the territory tabs', function () {
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'angioplasty'))->assertOk()->getContent();
+
+    preg_match_all('/<span class="btn-abbr">([^<]*)<\/span>/', $html, $tabs);
+    expect($tabs[1])->toBe(['angioplasty', 'territory of intervention1', 'territory of intervention2', 'territory of intervention3', 'Comp', 'PCI R. Comp']);
+
+    $section = function (int $index) use ($html): string {
+        $start = strpos($html, "<div id=\"sec-{$index}\"");
+        $end = strpos($html, '<div id="sec-'.($index + 1).'"', $start) ?: strpos($html, '<div class="controls">', $start);
+
+        return substr($html, $start, $end - $start);
+    };
+    $vessel = ['no_reflow', 'stentThrombosis', 'vesselDissection', 'vesselPerforation', 'othervesselcomplication', 'VesselComplicationAction', 'VesselComplicationResult'];
+    $pci = ['pci_Cardiogenic_shock', 'pci_Tamponade', 'pci_Emergent_CABG', 'pci_management_complication'];
+
+    expect($section(4))->toContain('Vessel Complication');
+    foreach ([1, 2, 3] as $n) {
+        expect($section($n))->not->toContain('_no_reflow"')->not->toContain("t{$n}_VesselComplicationResult");
+        foreach ($vessel as $field) {
+            expect($section(4))->toContain("name=\"t{$n}_{$field}\"");
+        }
+    }
+    foreach ($pci as $field) {
+        expect($section(5))->toContain("name=\"{$field}\"")->and($section(3))->not->toContain("name=\"{$field}\"")->and($section(4))->not->toContain("name=\"{$field}\"");
+    }
+    // What stays in the territories' last tab is not a complication.
+    expect($section(3))->toContain('name="pci_Description_PCI"')->and($section(5))->not->toContain('name="pci_Description_PCI"');
+});
+
+test('the angioplasty indications are checkboxes, ticked only for Yes', function () {
+    $indications = ['PCI_for_elective_status', 'PCI_for_STEMI_unstable', 'PCI_for_STEMI_stable_higherthan_12hrs', 'PCI_for_STEMI_stable_after_succesful_thrombolysis',
+        'Rescue_PCI_for_STEMI_after_faild_thrombolysis', 'PCI_for_highrisk_nonSTEMI', 'PCI_for_iatrogenic_with_complication', 'Repeated_PCI_for_treating_prior_PCI_complication',
+        'staged_PCI', 'Neglected_MI'];
+    [$payload] = procedurePayload('angioplasty');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/angioplasty', [...$payload, 'PCI_for_elective_status' => '1', 'Neglected_MI' => '1', 'other_Indication' => 'Other'])
+        ->assertSessionHasNoErrors()->assertRedirect();
+    $study = AngioplastyStudy::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->PCI_for_elective_status)->toBe('1')->and($study->Neglected_MI)->toBe('1')->and($study->staged_PCI)->not->toBe('1');
+
+    // Heart's No (0) is not ticked.
+    $study->forceFill(['staged_PCI' => '0'])->save();
+    $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/angioplasty/{$study->id}/edit")->assertOk()->getContent();
+    foreach ($indications as $name) {
+        expect($html)->not->toContain('<select id="f-'.$name.'"')->and($html)->toContain('<input type="checkbox" name="'.$name.'" value="1"');
+    }
+    expect($html)->toContain('<input type="checkbox" name="PCI_for_elective_status" value="1" checked')
+        ->toContain('<input type="checkbox" name="Neglected_MI" value="1" checked')
+        ->toMatch('/<input type="checkbox" name="staged_PCI" value="1"\s*>/')
+        ->and($html)->toContain('name="other_Indication"');
+
+    $this->actingAs($this->nurse)->put("/dashboard/procedures/angioplasty/{$study->id}", [...$payload, 'staged_PCI' => '1'])->assertRedirect();
+    expect($study->fresh()->staged_PCI)->toBe('1')->and($study->fresh()->PCI_for_elective_status)->not->toBe('1');
+});
+
 test('angioplasty values in the folded and hidden parts post and save, and another hospital cannot reach the study', function () {
     [$payload] = procedurePayload('angioplasty');
     $this->actingAs($this->nurse)->post('/dashboard/procedures/angioplasty', [...$payload,
