@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Enums\StudyStatus;
 use App\Models\Admission;
 use App\Models\AngiographyStudy;
+use App\Models\AngioplastyStudy;
 use App\Models\EchoStudy;
 use App\Models\Hospital;
 use App\Models\Patient;
@@ -403,6 +404,86 @@ test('the vessel characteristics dropdown posts and saves its fields, and anothe
     $this->actingAs($outsider)->get("/dashboard/procedures/angiography/{$study->id}/edit")->assertNotFound();
     $this->actingAs($outsider)->put("/dashboard/procedures/angiography/{$study->id}", [...$payload, 'lad_TIMI_Flow' => '1'])->assertNotFound();
     expect($study->fresh()->lad_TIMI_Flow)->toBe('4');
+});
+
+test('the angioplasty form hides each territory\'s lesion fields until the territory is chosen', function () {
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'angioplasty'))->assertOk()->getContent();
+
+    foreach ([1, 2, 3] as $n) {
+        preg_match("/x-show=\"! \['', '0'\]\.includes\(v\['t{$n}_territory_of_intervention'\] \?\? ''\)\"\s+x-cloak\s*>/", $html, $found, PREG_OFFSET_CAPTURE);
+        expect($found)->not->toBeEmpty('territory '.$n.' lesion block is not hidden');
+        $start = $found[0][1];
+        $block = substr($html, $start, strpos($html, 'class="subsection-title"', $start) - $start);
+
+        foreach (['description_of_lesion', 'lesion_length', 'thrombosis', 'calcification', 'in_stent_restenosis', 'other_lesion', 'preprocedural', 'postprocedural'] as $field) {
+            expect($block)->toContain("name=\"t{$n}_{$field}\"");
+        }
+        expect($block)->not->toContain("name=\"t{$n}_territory_of_intervention\"")->not->toContain("name=\"t{$n}_guiding_catheters_name1\"");
+        // The territory itself stays visible, before the hidden block.
+        expect(strpos($html, "name=\"t{$n}_territory_of_intervention\""))->toBeLessThan($start);
+    }
+    expect(substr_count($html, "includes(v['t1_territory_of_intervention']"))->toBe(1);
+});
+
+test('a saved territory shows its lesion fields at once on edit', function () {
+    [$payload] = procedurePayload('angioplasty');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/angioplasty', [...$payload, 't2_territory_of_intervention' => '2', 't2_description_of_lesion' => '1', 't1_description_of_lesion' => '2'])->assertSessionHasNoErrors()->assertRedirect();
+    $study = AngioplastyStudy::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->t2_description_of_lesion)->toBe('1')->and($study->t1_description_of_lesion)->toBe('2');
+
+    $html = $this->actingAs($this->nurse)->get("/dashboard/procedures/angioplasty/{$study->id}/edit")->assertOk()->getContent();
+    expect($html)->toMatch("/includes\(v\['t2_territory_of_intervention'\] \?\? ''\)\"\s*>/")
+        ->and($html)->toMatch("/includes\(v\['t1_territory_of_intervention'\] \?\? ''\)\"\s+x-cloak\s*>/")
+        ->and($html)->toContain('<option value="1" selected>stenotic</option>');
+});
+
+test('the angioplasty form shows only stent 1 and folds the other stents behind buttons', function () {
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'angioplasty'))->assertOk()->getContent();
+
+    // Stents 2 and 3 of each of the three territories.
+    expect(substr_count($html, '<span>stent2 <span class="disclosure-count"'))->toBe(3)
+        ->and(substr_count($html, '<span>stent3 <span class="disclosure-count"'))->toBe(3)
+        ->and($html)->not->toContain('<span>stent1 <span class="disclosure-count"')
+        ->and($html)->toContain('class="subsection-title" style="flex: 1 1 100%; margin: 8px 0 0">stent1<');
+
+    $start = strpos($html, '<span>stent2 <span class="disclosure-count"');
+    $panel = substr($html, $start, strpos($html, 'class="disclosure-part"', $start) - $start);
+    expect($panel)->toContain('x-show="open"')->toContain('name="t1_stentType2"')->toContain('name="t1_s2_stentOverlapping"')
+        ->not->toContain('name="t1_stentType3"')->not->toContain('name="t1_stentType1"');
+    expect(strpos($html, 'name="t1_stentType1"'))->toBeLessThan($start);
+    expect($html)->toContain('name="t3_stentType3"');
+});
+
+test('the angioplasty bifurcating lesion fields are folded behind a button', function () {
+    $html = $this->actingAs($this->nurse)->get(startStudyUrl($this->nurse, 'angioplasty'))->assertOk()->getContent();
+
+    // Territory 3 has no bifurcation fields.
+    expect(substr_count($html, '<span>Bifurcating lesion <span class="disclosure-count"'))->toBe(2);
+
+    $start = strpos($html, '<span>Bifurcating lesion <span class="disclosure-count"');
+    $panel = substr($html, $start, strpos($html, 'class="subsection-title"', $start) - $start);
+    foreach (['t1_Bifurcatinglesion', 't1_Bifurcation_Stenting_Site', 't1_BifurcationStenting', 't1_nameTechnique', 't1_finalKBS'] as $field) {
+        expect($panel)->toContain("name=\"{$field}\"");
+    }
+    expect($panel)->toContain('x-show="open"')->not->toContain('name="t1_postdilatation"')->not->toContain('name="t1_Result_Of_PCI_1"');
+    expect(strpos($html, 'name="t1_postdilatation"'))->toBeLessThan($start);
+});
+
+test('angioplasty values in the folded and hidden parts post and save, and another hospital cannot reach the study', function () {
+    [$payload] = procedurePayload('angioplasty');
+    $this->actingAs($this->nurse)->post('/dashboard/procedures/angioplasty', [...$payload,
+        't1_territory_of_intervention' => '2', 't1_thrombosis' => '1', 't1_stentType2' => '2', 't1_nameOfstent2' => 'Xience',
+        't1_Bifurcatinglesion' => '1', 't1_finalKBS' => '1',
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    $study = AngioplastyStudy::withoutGlobalScope(HospitalScope::class)->sole();
+    expect($study->t1_thrombosis)->toBe('1')->and($study->t1_nameOfstent2)->toBe('Xience')
+        ->and($study->t1_Bifurcatinglesion)->toBe('1')->and($study->t1_finalKBS)->toBe('1');
+
+    $outsider = User::factory()->for(Hospital::factory())->role(Role::Nurse)->create();
+    $this->actingAs($outsider)->get("/dashboard/procedures/angioplasty/{$study->id}/edit")->assertNotFound();
+    $this->actingAs($outsider)->put("/dashboard/procedures/angioplasty/{$study->id}", [...$payload, 't1_nameOfstent2' => 'Other'])->assertNotFound();
+    expect($study->fresh()->t1_nameOfstent2)->toBe('Xience');
 });
 
 test('the final diagnosis list shows once three letters are typed', function () {
