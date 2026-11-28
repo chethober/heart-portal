@@ -26,8 +26,9 @@
                 </table>
             </div>
         @endif
+        {{-- A labelled line reads in the label's direction, its text isolated in its own (the clinical language's). --}}
         @foreach ($section['lines'] as $line)
-            <p dir="auto" style="margin: 0 0 6px; white-space: pre-line;">@if ($line['label'])<span class="label">{{ $line['label'] }}:</span> @endif{{ $line['text'] }}</p>
+            <p dir="auto" style="margin: 0 0 6px; white-space: pre-line;">@if ($line['label'])<span class="label">{{ $line['label'] }}:</span> <span dir="auto">{{ $line['text'] }}</span>@else{{ $line['text'] }}@endif</p>
         @endforeach
     </div>
 @endforeach
@@ -37,7 +38,7 @@
         <div class="report-summary">
             <div class="section-title">{{ __('Other recorded findings') }}</div>
             @foreach ($appendix as $group)
-                <p dir="auto" style="margin: 0 0 6px;"><strong>{{ $group['title'] }}:</strong> @foreach ($group['items'] as $item){{ $item['label'] }}: {{ $item['value'] }}@if (! $loop->last){{ $rtl ? '؛ ' : '; ' }}@endif @endforeach</p>
+                <p dir="auto" style="margin: 0 0 6px;"><strong>{{ $group['title'] }}:</strong> @foreach ($group['items'] as $item)<span dir="auto">{{ $item['label'] }}: {{ $item['value'] }}</span>@if (! $loop->last){{ $rtl ? '؛ ' : '; ' }}@endif @endforeach</p>
             @endforeach
         </div>
     </div>
