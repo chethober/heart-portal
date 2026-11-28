@@ -7,7 +7,8 @@ namespace App\Reports;
  * primary diagnosis, vital signs and signs, final diagnosis, the HF / MI / CABG registry sections,
  * treatments during admission, course, risk factors, previous procedures, labs, ECG, echo,
  * non-invasive tests, complications, the patient's condition at discharge, recommendations and
- * discharge medications. Persian, right to left, as heart printed it.
+ * discharge medications. Its sentences are Persian, as heart printed them; the headings follow the
+ * interface language.
  *
  * Heart also pulled the latest angiography result of the admission into the treatment list; that
  * is left out so a signed summary only depends on its own (snapshotted) data.
@@ -40,23 +41,23 @@ final class DischargeReport extends ProcedureReport
         return 'fa';
     }
 
-    public function titles(): array
+    public function title(): string
     {
-        return ['برگ خلاصه پرونده', 'Unit summary sheet'];
+        return __('Discharge Summary Sheet');
     }
 
     public function signatureBoxes(): array
     {
         return [
-            ['title' => 'مهر و امضای کارورز', 'name' => $this->text('disch_StudentId'), 'step' => 'intern'],
-            ['title' => 'مهر و امضای دستیار', 'name' => null, 'step' => 'resident'],
-            ['title' => 'مهر و امضای پزشک معالج', 'name' => null],
+            ['title' => __('Stamp and signature of the intern'), 'name' => $this->text('disch_StudentId'), 'step' => 'intern'],
+            ['title' => __('Stamp and signature of the resident'), 'name' => null, 'step' => 'resident'],
+            ['title' => __('Stamp and signature of the attending physician'), 'name' => null],
         ];
     }
 
     public function headerItems(): array
     {
-        return array_filter(['وضعیت سکونت' => $this->is('bomi', '1', '2') ? $this->text('bomi') : null]);
+        return array_filter([__('Residency status') => $this->is('bomi', '1', '2') ? $this->text('bomi') : null]);
     }
 
     protected function build(): array
@@ -64,44 +65,44 @@ final class DischargeReport extends ProcedureReport
         $died = $this->is('disch_status', self::DEATH);
 
         return [
-            self::section('شکایت اصلی بیمار و تشخیص اولیه', [
+            self::section(__('Chief complaint and initial diagnosis'), [
                 self::line(null, $this->summary()),
-                self::line('علائم حیاتی بیمار در بدو ورود', $this->vitalSigns()),
-                self::line('نشانه ها', $this->join([...$this->yesCaptions([
+                self::line(__('Vital signs on admission'), $this->vitalSigns()),
+                self::line(__('Signs'), $this->join([...$this->yesCaptions([
                     'signs_jvp', 'signs_rales', 'signs_wheeze', 'signs_decreasedbreathsounds', 'signs_systolicsouffle',
                     'signs_diastolicsouffle', 'signs_ascites', 'signs_peripheraledema', 'signs_s3', 'signs_coldextremities',
                 ]), $this->text('signs_others')]) ?: null),
-                self::line('تشخیص نهایی بیماری', $this->text('final_diagnosis_codes')),
-                self::line($this->raw('final_diagnosis_codes') !== null ? 'توضیح تشخیص نهایی' : 'تشخیص نهایی بیماری', $this->text('finalDiagnosis')),
-                self::line('توضیحات دیگر در مورد بیماری', $this->heartFailure()),
-                self::line('نحوه Reperfusion', $this->reperfusion()),
-                self::line('یافته های آنژیوگرافی قبل از جراحی', $this->catheterization()),
-                self::line('یافته های اکو کاردیوگرافی', $this->cabgEcho()),
+                self::line(__('Final diagnosis'), $this->text('final_diagnosis_codes')),
+                self::line($this->raw('final_diagnosis_codes') !== null ? __('Final diagnosis notes') : __('Final diagnosis'), $this->text('finalDiagnosis')),
+                self::line(__('Other notes on the illness'), $this->heartFailure()),
+                self::line(__('Reperfusion'), $this->reperfusion()),
+                self::line(__('Angiography findings before surgery'), $this->catheterization()),
+                self::line(__('Echocardiography findings'), $this->cabgEcho()),
             ]),
-            self::section('اقدامات درمانی و اعمال جراحی', [
+            self::section(__('Treatments and surgical procedures'), [
                 ...$this->treatments(),
-                self::line('عمل جراحی CABG', $this->cabgOperation()),
-                self::line('جراحی دریچه', $this->valveSurgery()),
-                self::line('سایر اقدامات انجام شده', $this->text('other_treatmentPrpcedure')),
-                self::line('سیر بیماری', $this->text('comment')),
+                self::line(__('CABG surgery'), $this->cabgOperation()),
+                self::line(__('Valve surgery'), $this->valveSurgery()),
+                self::line(__('Other procedures performed'), $this->text('other_treatmentPrpcedure')),
+                self::line(__('Course of illness'), $this->text('comment')),
             ]),
-            self::section('سوابق و یافته های پاراکلینیک', [
-                self::line('ریسک فاکتورها و سایر بیماری های قلبی و عروقی', $this->riskFactors()),
-                self::line('سابقه پروسیجرهای قبلی', $this->join([...$this->yesCaptions(['HxPCI', 'icd', 'crt', 'pace', 'cabg']), $this->text('other_procedures')]) ?: null),
-                self::line('Lab Data', $this->labs()),
-                self::line('نتایج الکتروکاردیوگرام', $this->ecg()),
-                self::line('اکو کاردیوگرافی', $this->join([
+            self::section(__('History and paraclinical findings'), [
+                self::line(__('Risk factors and other cardiovascular diseases'), $this->riskFactors()),
+                self::line(__('Previous procedures'), $this->join([...$this->yesCaptions(['HxPCI', 'icd', 'crt', 'pace', 'cabg']), $this->text('other_procedures')]) ?: null),
+                self::line(__('Lab data'), $this->labs()),
+                self::line(__('Electrocardiogram results'), $this->ecg()),
+                self::line(__('Echocardiography'), $this->join([
                     ($ef = $this->text('ef')) !== null ? "LVEF = {$ef}%" : null,
                     $this->text('important_result_summary'),
                 ]) ?: null),
-                self::line('سایر تست های تشخیصی غیرتهاجمی', $this->nonInvasive()),
+                self::line(__('Other non-invasive diagnostic tests'), $this->nonInvasive()),
             ]),
-            self::section('ترخیص', [
-                self::line('بروز عوارض در حین بستری', $this->admissionComplications()),
-                self::line('عوارض حین بستری', $this->surgicalComplications()),
-                self::line('وضعیت بیمار در هنگام ترخیص', $this->discharge()),
-                self::line('توصیه های پس از ترخیص', $died ? null : $this->recommendations()),
-                self::line('داروهای موقع ترخیص', $died ? null : $this->text('drugDischarge')),
+            self::section(__('Discharge'), [
+                self::line(__('Complications during admission'), $this->admissionComplications()),
+                self::line(__('Surgical complications during admission'), $this->surgicalComplications()),
+                self::line(__('Condition at discharge'), $this->discharge()),
+                self::line(__('Recommendations after discharge'), $died ? null : $this->recommendations()),
+                self::line(__('Discharge medications'), $died ? null : $this->text('drugDischarge')),
             ]),
         ];
     }
@@ -283,7 +284,7 @@ final class DischargeReport extends ProcedureReport
     private function treatments(): array
     {
         $items = [
-            'medication_treatment' => ['medication_treatmentFor', 'داروهای زیر در زمان بستری تجویز شد'],
+            'medication_treatment' => ['medication_treatmentFor', __('The following medications were given during admission')],
             'angiography_coroners' => ['angiography_coronersFor', null],
             'angioplasty_coroners' => ['angioplasty_coronersFor', null],
             'heart_katetrism' => ['heart_katetrismFor', null],
@@ -298,7 +299,7 @@ final class DischargeReport extends ProcedureReport
             if (! $this->yes($done) && $text === null) {
                 continue;
             }
-            $lines[] = self::line(++$n.' - '.($label ?? $this->caption($done)), $text ?? 'انجام شد.');
+            $lines[] = self::line(++$n.' - '.($label ?? $this->caption($done)), $text ?? __('Done.'));
         }
 
         return $lines;
@@ -350,7 +351,7 @@ final class DischargeReport extends ProcedureReport
             $valves[] = ucfirst($valve).($detail ? " ({$detail})" : '');
         }
 
-        return $this->join($valves) ?: 'انجام شد.';
+        return $this->join($valves) ?: __('Done.');
     }
 
     private function riskFactors(): ?string
@@ -451,7 +452,7 @@ final class DischargeReport extends ProcedureReport
     private function admissionComplications(): ?string
     {
         if ($this->is('diseasestatus', '0')) {
-            return 'ندارد';
+            return __('None');
         }
 
         $parts = [$this->text('diseasestatus_other')];

@@ -12,34 +12,26 @@ final class InterventionReport extends ProcedureReport
 
     protected const SUMMARY = ['Final result'];
 
-    public function titles(): array
+    public function title(): string
     {
-        return ['گزارش مداخله قلبی', 'Cardiac Intervention Report'];
-    }
-
-    public function signatureBoxes(): array
-    {
-        return [
-            ['title' => 'Assistant physician', 'name' => null],
-            ['title' => 'Attending physician', 'name' => null],
-        ];
+        return __('Cardiac Intervention Report');
     }
 
     protected function build(): array
     {
         return [
-            self::section('Technical details', [], [
-                ['Date', 'Time', 'Access', 'Type of procedure', 'Catheter and resort'],
+            self::section(__('Technical details'), [], [
+                [__('Date'), __('Time'), __('Access'), __('Type of procedure'), 'Catheter and resort'],
                 array_map(fn (string $name) => $this->text($name) ?? '', ['DateOf_date_intervention', 'time_intervention', 'Access', 'Type_Procedure', 'Catheter_resort']),
             ]),
-            self::section('Procedure', [
-                self::line('Indication for procedure', $this->text('Indication_procedure')),
-                self::line('Description of procedure', $this->text('Description_procedure')),
-                self::line('Final result', $this->text('Final_result')),
-                self::line('Complications', $this->text('Complications')),
-                self::line('Others', $this->text('Others')),
-                self::line('Entrance time', $this->dateTime('DateOf_entrance_date', 'entrance_time')),
-                self::line('Exit time', $this->dateTime('DateOf_exit_date', 'exit_time')),
+            self::section(__('Procedure'), [
+                self::line(__('Indication for procedure'), $this->text('Indication_procedure')),
+                self::line(__('Description of procedure'), $this->text('Description_procedure')),
+                self::line(__('Final result'), $this->text('Final_result')),
+                self::line(__('Complications'), $this->text('Complications')),
+                self::line(__('Others'), $this->text('Others')),
+                self::line(__('Entrance time'), $this->dateTime('DateOf_entrance_date', 'entrance_time')),
+                self::line(__('Exit time'), $this->dateTime('DateOf_exit_date', 'exit_time')),
             ]),
         ];
     }

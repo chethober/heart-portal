@@ -46,7 +46,9 @@ doctors sign the report, and every step is audited.
   database trigger.
 - **Multilingual interface** — English, Persian, Arabic, Turkish, Spanish, French and German,
   with right-to-left layout for Persian and Arabic. The language follows the browser and can be
-  changed from any page. The echo form and printed report stay in their clinical language.
+  changed from any page. Procedure reports (cath lab and discharge) print their template, headings
+  and labels in the interface language; the sentences written from the form stay in the form's
+  clinical language. The echo form and printed report stay in their clinical language.
 
 ## Roles
 
@@ -173,7 +175,9 @@ php artisan his:import-admissions --hospital=<slug or id> [--since=1405/01/01] [
   `echo_study_versions`.
 - **Procedures** — each heart form is a `ProcedureStudy` model listed in `app/Support/Procedures.php`,
   with its fields in `config/procedures/<key>.php` and, where it has one, a narrative report in
-  `app/Reports`. Signed snapshots live in `procedure_study_versions`.
+  `app/Reports`. Every procedure report prints in one shared template,
+  `resources/views/procedures/report/document.blade.php` (hospital header, patient line, signature
+  boxes), with the report's own body after it. Signed snapshots live in `procedure_study_versions`.
 - **E-prescription** — `routes/prescriptions.php`, `Prescription` / `PrescriptionPolicy` (drafted by
   clinical staff, signed or cancelled by doctors; signed prescriptions are immutable) and
   `app/Support/Prescribing.php`.

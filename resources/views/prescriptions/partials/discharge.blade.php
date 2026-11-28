@@ -12,20 +12,20 @@
 @endphp
 
 @unless ($deceased)
-    <section class="mb-4 break-inside-avoid" dir="ltr" lang="en">
+    <section class="mb-4 break-inside-avoid">
         <h2 class="mb-1 flex flex-wrap items-center gap-3 border-b border-gray-100 font-semibold">
-            Discharge medications
+            {{ __('Discharge medications') }}
             @if ($dischargePrescription)
-                <a href="{{ route('prescriptions.show', $dischargePrescription) }}" class="text-sm font-medium text-indigo-600 underline print:hidden">Open prescription</a>
+                <a href="{{ route('prescriptions.show', $dischargePrescription) }}" class="text-sm font-medium text-indigo-600 underline print:hidden">{{ __('Open prescription') }}</a>
             @else
                 @can('prescriptions.create')
-                    <a href="{{ route('prescriptions.create', ['discharge' => $study->id]) }}" class="text-sm font-medium text-indigo-600 underline print:hidden">Write discharge prescription</a>
+                    <a href="{{ route('prescriptions.create', ['discharge' => $study->id]) }}" class="text-sm font-medium text-indigo-600 underline print:hidden">{{ __('Write discharge prescription') }}</a>
                 @endcan
             @endif
         </h2>
         @if ($dischargePrescription && $dischargePrescription->items->isNotEmpty())
             @if ($dischargePrescription->isDraft())
-                <p class="text-sm font-semibold text-red-700">Prescription not signed yet.</p>
+                <p class="text-sm font-semibold text-red-700">{{ __('Prescription not signed yet.') }}</p>
             @endif
             <ol class="list-decimal space-y-0.5 ps-6 text-sm">
                 @foreach ($dischargePrescription->items as $item)
@@ -38,7 +38,7 @@
                 @endforeach
             </ol>
         @else
-            <p class="text-sm text-gray-500">No discharge prescription.</p>
+            <p class="text-sm text-gray-500">{{ __('No discharge prescription.') }}</p>
         @endif
     </section>
 @endunless
