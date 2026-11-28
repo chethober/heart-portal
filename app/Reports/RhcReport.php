@@ -29,22 +29,9 @@ final class RhcReport extends ProcedureReport
         'AORTA' => ['aorta_o2', 'aorta_mean', 'aorta_systolic', 'aorta_diastolic'],
     ];
 
-    public function headerItems(): array
+    public function title(): string
     {
-        return array_filter(['Registry code' => $this->text('qID')]);
-    }
-
-    public function titles(): array
-    {
-        return ['گزارش کاتتریسم قلبی', 'Heart Catheterization Report'];
-    }
-
-    public function signatureBoxes(): array
-    {
-        return [
-            ['title' => 'Assistant physician', 'name' => null],
-            ['title' => 'Attending physician', 'name' => null],
-        ];
+        return __('Heart Catheterization Report');
     }
 
     protected function build(): array
@@ -54,7 +41,7 @@ final class RhcReport extends ProcedureReport
             ($catheter = $this->text('catheter')) ? "with {$catheter} catheter" : null,
         ], ' and ');
 
-        $table = [['Site', 'O2 saturation %', 'Mean pressure (mmHg)', 'Systolic pressure (mmHg)', 'Diastolic pressure (mmHg)']];
+        $table = [[__('Site'), __('O2 saturation %'), __('Mean pressure (mmHg)'), __('Systolic pressure (mmHg)'), __('Diastolic pressure (mmHg)')]];
         foreach (self::SITES as $site => $fields) {
             $row = array_map(fn (?string $name) => $name ? ($this->value($name) ?? '') : '', $fields);
             if (implode('', $row) !== '') {
@@ -63,23 +50,23 @@ final class RhcReport extends ProcedureReport
         }
 
         return [
-            self::section('Right heart catheterization', [
-                self::line('Indication', $this->choiceOrOther('indication', 'indication_other')),
+            self::section(__('Right heart catheterization'), [
+                self::line(__('Indication'), $this->choiceOrOther('indication', 'indication_other')),
                 self::line(null, self::sentence('Right heart catheterization was done'.($via !== '' ? " {$via}" : '').' and the following results were obtained')),
             ], $table),
-            self::section('Haemodynamics', [
+            self::section(__('Haemodynamics'), [
                 self::line('BSA', $this->value('bsa')),
                 self::line('HB', $this->value('hb')),
-                self::line('Cardiac output', $this->unit('cardiac_output', 'L/min')),
-                self::line('Cardiac index', $this->unit('cardiac_index', 'L/min/m²')),
-                self::line('Pulmonary vascular resistance', $this->pvr()),
-                self::line('Systemic vascular resistance', $this->unit('svr', 'Wood units')),
+                self::line(__('Cardiac output'), $this->unit('cardiac_output', 'L/min')),
+                self::line(__('Cardiac index'), $this->unit('cardiac_index', 'L/min/m²')),
+                self::line(__('Pulmonary vascular resistance'), $this->pvr()),
+                self::line(__('Systemic vascular resistance'), $this->unit('svr', 'Wood units')),
             ]),
             self::section(null, [
-                self::line('Result', ($result = $this->text('right_heart_result')) ? self::sentence($result) : null),
-                self::line('Recommendation', ($advice = $this->text('right_heart_recommendation')) ? self::sentence($advice) : null),
-                self::line('Entrance time', $this->dateTime('DateOf_entrance_date', 'entrance_time')),
-                self::line('Exit time', $this->dateTime('DateOf_exit_date', 'exit_time')),
+                self::line(__('Result'), ($result = $this->text('right_heart_result')) ? self::sentence($result) : null),
+                self::line(__('Recommendation'), ($advice = $this->text('right_heart_recommendation')) ? self::sentence($advice) : null),
+                self::line(__('Entrance time'), $this->dateTime('DateOf_entrance_date', 'entrance_time')),
+                self::line(__('Exit time'), $this->dateTime('DateOf_exit_date', 'exit_time')),
             ]),
         ];
     }

@@ -16,16 +16,16 @@ final class AngioplastyReport extends ProcedureReport
 
     private const TERRITORIES = ['t1', 't2', 't3'];
 
-    public function titles(): array
+    public function title(): string
     {
-        return ['گزارش آنژیوپلاستی', 'Percutaneous Coronary Intervention (PCI) Report'];
+        return __('Percutaneous Coronary Intervention (PCI) Report');
     }
 
     public function signatureBoxes(): array
     {
         return [
-            ['title' => 'Assistant physician', 'name' => null],
-            ['title' => 'Attending physician', 'name' => $this->text('Physician_name')],
+            ['title' => __('Assistant physician'), 'name' => null],
+            ['title' => __('Attending physician'), 'name' => $this->text('Physician_name')],
         ];
     }
 
@@ -34,34 +34,34 @@ final class AngioplastyReport extends ProcedureReport
         $sections = [
             self::section(null, [
                 self::line(null, $this->introduction()),
-                self::line('Coronary vessels planned for PCI', $this->join(array_map(fn (string $t) => $this->territory($t), self::TERRITORIES)) ?: null),
-                self::line('Technique', $this->technique()),
-                self::line('Medications before and during the procedure', $this->medications()),
+                self::line(__('Coronary vessels planned for PCI'), $this->join(array_map(fn (string $t) => $this->territory($t), self::TERRITORIES)) ?: null),
+                self::line(__('Technique'), $this->technique()),
+                self::line(__('Medications before and during the procedure'), $this->medications()),
             ]),
         ];
 
         foreach (self::TERRITORIES as $t) {
             if ($territory = $this->territory($t)) {
-                $sections[] = self::section("PCI on {$territory}", $this->intervention($t));
+                $sections[] = self::section(__('PCI on :territory', ['territory' => $territory]), $this->intervention($t));
             }
         }
 
         $sections[] = self::section(null, [
-            self::line('Description of PCI', $this->text('pci_Description_PCI')),
-            self::line('Final result', $this->finalResult()),
-            self::line('PCI induced complication', $this->complications()),
-            self::line('Second day labs', $this->join([
+            self::line(__('Description of PCI'), $this->text('pci_Description_PCI')),
+            self::line(__('Final result'), $this->finalResult()),
+            self::line(__('PCI induced complication'), $this->complications()),
+            self::line(__('Second day labs'), $this->join([
                 ($cr = $this->text('pci_CREATININE')) !== null ? "Cr = {$cr} mg/dl" : null,
                 ($hb = $this->text('pci_HB')) !== null ? "Hb = {$hb} g/dl" : null,
             ]) ?: null),
-            self::line('Death during procedure', $this->yes('Death_During_procedure')
-                ? ($this->join([$this->text('Cause_death'), $this->dateTime('DateOf_Date_death', 'time_death')]) ?: 'Yes')
+            self::line(__('Death during procedure'), $this->yes('Death_During_procedure')
+                ? ($this->join([$this->text('Cause_death'), $this->dateTime('DateOf_Date_death', 'time_death')]) ?: __('Yes'))
                 : null),
-            self::line('Recommendation', $this->text('recommendation')),
-            self::line('Other explanations', $this->text('other_explanations')),
-            self::line('Nurse', $this->text('Nurse_name')),
-            self::line('Entrance', $this->dateTime('DateOf_entrance_date', 'entrance_time')),
-            self::line('Exit', $this->dateTime('DateOf_exit_date', 'exit_time')),
+            self::line(__('Recommendation'), $this->text('recommendation')),
+            self::line(__('Other explanations'), $this->text('other_explanations')),
+            self::line(__('Nurse'), $this->text('Nurse_name')),
+            self::line(__('Entrance'), $this->dateTime('DateOf_entrance_date', 'entrance_time')),
+            self::line(__('Exit'), $this->dateTime('DateOf_exit_date', 'exit_time')),
         ]);
 
         return $sections;
@@ -145,21 +145,21 @@ final class AngioplastyReport extends ProcedureReport
         ];
 
         $lines = [
-            self::line('Equipment', $tools !== '' ? ucfirst($tools).'.' : null),
-            self::line('Lesion', $this->join($lesion) ?: null),
-            self::line('Aspiration thrombectomy', $this->yes("{$t}_aspiration_thrombectomy") ? self::sentence(($this->text("{$t}_name_of_device") ?? 'Done').'') : null),
-            self::line('Predilation', $this->balloon($t, "{$t}_predilatation", 'pre')),
-            self::line('Balloon only angioplasty (POBA)', $this->yes("{$t}_balloon_angioplasty")
+            self::line(__('Equipment'), $tools !== '' ? ucfirst($tools).'.' : null),
+            self::line(__('Lesion'), $this->join($lesion) ?: null),
+            self::line(__('Aspiration thrombectomy'), $this->yes("{$t}_aspiration_thrombectomy") ? self::sentence($this->text("{$t}_name_of_device") ?? __('Done')) : null),
+            self::line(__('Predilation'), $this->balloon($t, "{$t}_predilatation", 'pre')),
+            self::line(__('Balloon only angioplasty (POBA)'), $this->yes("{$t}_balloon_angioplasty")
                 ? 'Done with balloon ('.$this->balloonSpec("{$t}_angioplasty_BalloonName", "{$t}_angioplasty_BalloonSize", "{$t}_angioplasty_BalloonPressure").').'
                 : null),
             ...$this->bifurcation($t),
             ...$this->stents($t),
-            self::line('Postdilation', $this->balloon($t, "{$t}_postdilatation", 'post')),
-            self::line('TIMI flow', $this->timi($t)),
-            self::line('Result', $this->territoryResult($t)),
-            self::line('Vessel complication', $this->vesselComplication($t)),
-            self::line('Management of complication', $this->text("{$t}_VesselComplicationAction")),
-            self::line('Result of management', $this->text("{$t}_VesselComplicationResult")),
+            self::line(__('Postdilation'), $this->balloon($t, "{$t}_postdilatation", 'post')),
+            self::line(__('TIMI flow'), $this->timi($t)),
+            self::line(__('Result'), $this->territoryResult($t)),
+            self::line(__('Vessel complication'), $this->vesselComplication($t)),
+            self::line(__('Management of complication'), $this->text("{$t}_VesselComplicationAction")),
+            self::line(__('Result of management'), $this->text("{$t}_VesselComplicationResult")),
         ];
 
         return $lines;
@@ -168,7 +168,7 @@ final class AngioplastyReport extends ProcedureReport
     private function balloon(string $t, string $done, string $kind): ?string
     {
         if ($this->is($done, '0')) {
-            return 'Not done.';
+            return __('Not done.');
         }
         if (! $this->yes($done)) {
             return null;
@@ -198,7 +198,7 @@ final class AngioplastyReport extends ProcedureReport
         // Provisional technique (t1 only on heart's form): stent in the main vessel, balloon in the branch.
         if ($this->has("{$t}_Bifurcatinglesion") && $this->yes("{$t}_Bifurcatinglesion")) {
             $site = $this->choiceOrOther("{$t}_Bifurcation_Stenting_Site", "{$t}_other_Bifurcation");
-            $lines[] = self::line('Bifurcating lesion', self::sentence($this->join([
+            $lines[] = self::line(__('Bifurcating lesion'), self::sentence($this->join([
                 $site ? "{$site} intervention" : 'Intervention',
                 'stent ('.$this->join([$this->text("{$t}_Name_Stent_Main_Vessel"), $this->text("{$t}_stent_main_size")]).') in the main vessel',
                 'balloon angioplasty ('.$this->join([$this->text("{$t}_name_balloon_branch"), $this->text("{$t}_size_balloon_branch")]).') in the branch',
@@ -211,7 +211,7 @@ final class AngioplastyReport extends ProcedureReport
             $site = $this->choiceOrOther("{$t}_BifurcationStentingSite", "{$t}_otherBifurcation");
             $technique = $this->choiceOrOther("{$t}_nameTechnique", "{$t}_othertechnique");
 
-            $lines[] = self::line('Bifurcation stenting', self::sentence($this->join([
+            $lines[] = self::line(__('Bifurcation stenting'), self::sentence($this->join([
                 $site ? "{$site} intervention" : 'Intervention',
                 'stent ('.$this->join([$this->text($mainName), $this->text("{$t}_stentmainsize")]).') in the main vessel',
                 'stent ('.$this->join([$this->text($branchName), $this->text("{$t}_stentbranchsize")]).') in the branch',
@@ -229,7 +229,7 @@ final class AngioplastyReport extends ProcedureReport
     private function stents(string $t): array
     {
         $lines = [];
-        $names = [1 => ['First stent', ''], 2 => ['Second stent', '2'], 3 => ['Third stent', '3']];
+        $names = [1 => [__('First stent'), ''], 2 => [__('Second stent'), '2'], 3 => [__('Third stent'), '3']];
 
         foreach ($names as $n => [$label, $suffix]) {
             if ($this->raw("{$t}_stentType{$n}") === null || $this->is("{$t}_stentType{$n}", '0')) {
@@ -295,7 +295,7 @@ final class AngioplastyReport extends ProcedureReport
 
         $answered = array_filter($names, fn (string $name) => $this->is($name, '0'));
 
-        return $answered ? 'No complication.' : null;
+        return $answered ? __('No complication.') : null;
     }
 
     /**
@@ -330,7 +330,7 @@ final class AngioplastyReport extends ProcedureReport
 
         // Heart wrote "no complication" only when every complication was answered "No" (code 2).
         if ($parts === [] && count(array_filter($names, fn (string $name) => $this->is($name, '2'))) === count($names)) {
-            $parts[] = 'No complication';
+            $parts[] = __('No complication');
         }
         $parts[] = $this->text('pci_management_complication');
 

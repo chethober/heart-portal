@@ -6,6 +6,7 @@ use App\Support\Diagnoses;
 use App\Support\JalaliDate;
 use App\Support\Procedures;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Traits\Localizable;
 use LogicException;
 
 /**
@@ -17,9 +18,16 @@ use LogicException;
  * table above them (e.g. right heart pressures). Text is plain and
  * escaped by the view. Filled fields the narrative does not mention are listed in appendix(), so
  * nothing recorded on the form is silently left out of the printed report.
+ *
+ * Every report prints inside the same template (procedures/report/document.blade.php). The title,
+ * section titles, line labels, table headers and signature boxes are written with __() in the
+ * interface language; the sentences built from the form and its field captions and choices stay
+ * in the form's clinical language (language()).
  */
 abstract class ProcedureReport
 {
+    use Localizable;
+
     /**
      * Key in Procedures::MODELS.
      */
@@ -97,14 +105,13 @@ abstract class ProcedureReport
     }
 
     /**
-     * The report title in the clinical language(s), as heart printed it under the hospital name.
-     *
-     * @return list<string>
+     * The report title, printed under the hospital name.
      */
-    abstract public function titles(): array;
+    abstract public function title(): string;
 
     /**
-     * 'en' (left to right) or 'fa' (right to left).
+     * The clinical language of the narrative's sentences and field captions: 'en' (left to right)
+     * or 'fa' (right to left).
      */
     public function language(): string
     {
@@ -114,20 +121,28 @@ abstract class ProcedureReport
     /**
      * Who signs the printed report, as heart's signature table listed them; the last box is the
      * signing doctor. A name is filled in when the form recorded it; a box with a "step" shows who
-     * signed that sign-off step (ProcedureStudy::SIGNOFFS).
+     * signed that sign-off step (ProcedureStudy::SIGNOFFS). Cath lab reports are signed by the
+     * assistant and the attending physician.
      *
      * @return list<array{title: string, name: string|null, step?: string}>
      */
-    abstract public function signatureBoxes(): array;
+    public function signatureBoxes(): array
+    {
+        return [
+            ['title' => __('Assistant physician'), 'name' => null],
+            ['title' => __('Attending physician'), 'name' => null],
+        ];
+    }
 
     /**
-     * Extra identification lines for the patient header (label => value).
+     * Extra identification lines for the patient header (label => value): the registry code, on
+     * forms that have one.
      *
      * @return array<string, string>
      */
     public function headerItems(): array
     {
-        return [];
+        return $this->has('qID') ? array_filter([__('Registry code') => $this->text('qID')]) : [];
     }
 
     /**
@@ -148,11 +163,12 @@ abstract class ProcedureReport
 
     /**
      * The narrative's key findings as plain text, for pasting into another report (the discharge
-     * summary's procedure results). Empty when none of them is filled in.
+     * summary's procedure results). Empty when none of them is filled in. It is saved into that
+     * form, so it is written in the clinical language whoever extracts it.
      */
     final public function summaryText(): string
     {
-        return trim($this->buildSummary());
+        return $this->withLocale($this->language(), fn () => trim((new static($this->data))->buildSummary()));
     }
 
     /**
@@ -163,11 +179,12 @@ abstract class ProcedureReport
     {
         $lines = [];
         $labelled = count(static::SUMMARY) > 1;
+        $summary = array_map(fn (string $label) => __($label), static::SUMMARY);
 
         foreach ($this->sections() as $section) {
-            $whole = $section['title'] !== null && in_array($section['title'], static::SUMMARY, true);
+            $whole = $section['title'] !== null && in_array($section['title'], $summary, true);
             foreach ($section['lines'] as $line) {
-                if ($whole || ($line['label'] !== null && in_array($line['label'], static::SUMMARY, true))) {
+                if ($whole || ($line['label'] !== null && in_array($line['label'], $summary, true))) {
                     $lines[] = $line['label'] !== null && ($labelled || $whole) ? $line['label'].': '.$line['text'] : $line['text'];
                 }
             }
@@ -327,7 +344,7 @@ abstract class ProcedureReport
         }
 
         return match ($field['type']) {
-            'boolean' => $value ? 'Yes' : null,
+            'boolean' => $value ? __('Yes') : null,
             'choice' => $field['options'][$this->code($value)] ?? (string) $value,
             'number' => self::number($value),
             'diagnoses' => is_array($value) ? implode('; ', Diagnoses::labels($value)) : (string) $value,

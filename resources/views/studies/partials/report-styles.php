@@ -1,7 +1,7 @@
 <?php
 /*
  * Styles for the report documents (echo: partials/report-document.php; procedures:
- * procedures/partials/report-document.blade.php), scoped to .echo-report so they never leak into
+ * procedures/report/document.blade.php), scoped to .echo-report so they never leak into
  * the dashboard around them.
  */
 ?>

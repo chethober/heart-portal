@@ -52,44 +52,31 @@ final class AngiographyReport extends ProcedureReport
         ], ' ');
     }
 
-    public function titles(): array
+    public function title(): string
     {
-        return ['گزارش آنژیوگرافی', 'Coronary Angiography Report'];
-    }
-
-    public function signatureBoxes(): array
-    {
-        return [
-            ['title' => 'Assistant physician', 'name' => null],
-            ['title' => 'Attending physician', 'name' => null],
-        ];
-    }
-
-    public function headerItems(): array
-    {
-        return array_filter(['Registry code' => $this->text('qID')]);
+        return __('Coronary Angiography Report');
     }
 
     protected function build(): array
     {
         return [
             self::section(null, [self::line(null, $this->introduction()), self::line(null, $this->technique())]),
-            self::section('Findings', $this->vessels()),
-            self::section(null, [self::line('Additional findings', $this->text('etc_Additional_Findings'))]),
+            self::section(__('Findings'), $this->vessels()),
+            self::section(null, [self::line(__('Additional findings'), $this->text('etc_Additional_Findings'))]),
             self::section(null, [
-                self::line('LV angiography', $this->lvAngiography()),
-                self::line('Other results', $this->text('lvent_anotherResult')),
-                self::line('Aortography', $this->aortography()),
-                self::line('Hemodynamic data', $this->hemodynamics()),
+                self::line(__('LV angiography'), $this->lvAngiography()),
+                self::line(__('Other results'), $this->text('lvent_anotherResult')),
+                self::line(__('Aortography'), $this->aortography()),
+                self::line(__('Hemodynamic data'), $this->hemodynamics()),
             ]),
             self::section(null, [
-                self::line('Result', $this->result()),
-                self::line('Procedure related complication', $this->complication()),
-                self::line('Death', $this->is('Death', '2') ? ($this->text('DeathCause') ?? 'Yes') : null),
-                self::line('Recommendation', $this->recommendations()),
-                self::line('Other explanations', $this->text('other_explanations')),
-                self::line('Entrance', $this->dateTime('DateOf_entrance_date', 'entrance_time')),
-                self::line('Exit', $this->dateTime('DateOf_exit_date', 'exit_time')),
+                self::line(__('Result'), $this->result()),
+                self::line(__('Procedure related complication'), $this->complication()),
+                self::line(__('Death'), $this->is('Death', '2') ? ($this->text('DeathCause') ?? __('Yes')) : null),
+                self::line(__('Recommendation'), $this->recommendations()),
+                self::line(__('Other explanations'), $this->text('other_explanations')),
+                self::line(__('Entrance'), $this->dateTime('DateOf_entrance_date', 'entrance_time')),
+                self::line(__('Exit'), $this->dateTime('DateOf_exit_date', 'exit_time')),
             ]),
         ];
     }
@@ -338,10 +325,10 @@ final class AngiographyReport extends ProcedureReport
     private function complication(): ?string
     {
         if ($this->is('prc', '0')) {
-            return 'No complication.';
+            return __('No complication.');
         }
         if ($this->yes('prc')) {
-            return $this->text('Managementcomplication') ?? 'Yes';
+            return $this->text('Managementcomplication') ?? __('Yes');
         }
 
         return null;

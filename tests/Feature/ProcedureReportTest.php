@@ -46,7 +46,7 @@ test('a narrative is built from every field and every option', function (string 
         $signed = ProcedureReport::for($procedure, $snapshot);
 
         expect($live->sections())->not->toBeEmpty()
-            ->and($live->titles())->not->toBeEmpty()
+            ->and($live->title())->not->toBe('')
             ->and($live->signatureBoxes())->not->toBeEmpty()
             ->and($signed->sections())->toEqual($live->sections())
             ->and($signed->appendix())->toEqual($live->appendix());
@@ -112,18 +112,31 @@ test('fields the narrative leaves out are listed, not dropped', function () {
         ->toContain('Severe stenosis(70-89%) at proximal part segment');
 });
 
-test('the discharge summary prints right to left in Persian', function () {
+test('the discharge summary prints right to left in Persian for a Persian reader', function () {
     $hospital = Hospital::factory()->create();
     $nurse = User::factory()->for($hospital)->role(Role::Nurse)->create();
     $date = config('procedures.discharge.date_field');
 
-    $this->actingAs($nurse)->post('/dashboard/procedures/discharge', ['nationalID' => '0012345678', 'first_name' => 'Ali', 'last_name' => 'Rezaei', $date => '1405/07/09'])->assertRedirect();
+    $this->actingAs($nurse)->post('/dashboard/procedures/discharge', ['nationalID' => '0012345678', 'first_name' => 'Ali', 'last_name' => 'Rezaei', $date => '1405/07/09', 'history_mode' => 'auto', 'clinicalcomplaint_syncope' => '1'])->assertRedirect();
     $study = Procedures::model('discharge')::withoutGlobalScope(HospitalScope::class)->sole();
 
-    $this->actingAs($nurse)->get("/dashboard/procedures/discharge/{$study->id}")
+    $this->actingAs($nurse)->withCookie('locale', 'fa')->get("/dashboard/procedures/discharge/{$study->id}")
         ->assertOk()
         ->assertSee('<div class="report-container" dir="rtl" lang="fa"', false)
-        ->assertSee('پیش نویس — امضا نشده');
+        ->assertSee('پیش نویس — امضا نشده')
+        ->assertSee('برگ خلاصه پرونده')
+        ->assertSee('شکایت اصلی بیمار و تشخیص اولیه')
+        ->assertSee('مهر و امضای کارورز');
+
+    // In English the template and headings are English; heart's Persian sentences are kept.
+    $this->actingAs($nurse)->withCookie('locale', 'en')->get("/dashboard/procedures/discharge/{$study->id}")
+        ->assertOk()
+        ->assertSee('<div class="report-container" dir="ltr" lang="en"', false)
+        ->assertSee('DRAFT — NOT SIGNED')
+        ->assertSee('Chief complaint and initial diagnosis')
+        ->assertSee('Stamp and signature of the intern')
+        ->assertSee('به دلیل سنکوب')
+        ->assertDontSee('شکایت اصلی بیمار و تشخیص اولیه');
 });
 
 test('a signed procedure report shows the signature it was signed with, only to its hospital', function () {

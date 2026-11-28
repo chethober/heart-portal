@@ -10,6 +10,12 @@ All notable changes to this project are documented here. The format follows
   and still printed), a new Indication tab offers a dropdown (evaluation before heart transplant,
   for cause of pulmonary hypertension, before valve surgery, or other, which reveals a text field
   beside it), and Result and Recommendation each have their own tab.
+- Procedure reports (coronary angiography, angioplasty, right heart catheterization, peripheral
+  angiography, cardiac intervention and discharge summary) follow the interface language: the
+  report page, the draft banner, patient line, title, section headings, labels, table headers and
+  signature boxes are translated into every interface language, right to left for Persian and
+  Arabic. The sentences written from the form, and the summary the discharge summary extracts,
+  stay in the form's clinical language. All of them print in one shared report template.
 
 ### Added
 - Multi-hospital platform: hospital self-registration with platform-admin approval, staff

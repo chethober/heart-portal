@@ -11,11 +11,11 @@
      */
 @endphp
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), config('app.rtl_locales'), true) ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ App\Support\Procedures::label($procedure) }} Report — {{ $hospital?->name }}</title>
+    <title>{{ __(':procedure Report', ['procedure' => __(App\Support\Procedures::label($procedure))]) }} — {{ $hospital?->name }}</title>
     <x-favicons />
     @include('studies.partials.report-styles')
     <style>
@@ -26,7 +26,7 @@
 </head>
 <body>
     <div class="echo-report">
-        @include('procedures.partials.report-document', ['study' => null, 'version' => null])
+        @include('procedures.report.document', ['study' => null, 'version' => null])
     </div>
 </body>
 </html>
